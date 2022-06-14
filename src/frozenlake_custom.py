@@ -11,16 +11,20 @@ from gym.envs.toy_text.frozen_lake import generate_random_map
 
 from timeColouredPlots import doColourVaryingPlot2d
 
+
+
 # %%
 # parameters for sarsa(lambda)
 episodes = 20000
 STEPS = 300
 gamma = 0.9
 alpha = 0.05
-epsilon_start = 0.2
-epsilon_end = 0.001
-epsilon_annealing_stop = int(episodes/2)
+# epsilon_start = 0.2
+# epsilon_end = 0.001
+# epsilon_annealing_stop = int(episodes/2)
 eligibility_decay = 0.3
+tau = 1 #softmax temperature
+rng = np.random.default_rng(5) # random number generator
 
 # %%
 def getGoalCoordinates(index, observation_space_size):
@@ -106,11 +110,11 @@ size = 19 # size of grid square
 mid_point = int(np.floor(size /2))
 left_point = mid_point - int(np.floor(mid_point /2))
 right_point = mid_point + int(np.floor(mid_point /2))
-goalIndices = [2*size+mid_point, 
+goalIndices = [4*size+mid_point, 
             6*size+left_point, 6*size+right_point,
-            10*size+left_point, 10*size+right_point,
-            14*size+left_point, 14*size+right_point,
-            18*size+mid_point, 
+            9*size+left_point, 9*size+right_point,
+            12*size+left_point, 12*size+right_point,
+            14*size+mid_point, 
             ]
 
 # size = 19 # size of grid square
@@ -165,13 +169,37 @@ env.render()
 #           optimalPolicy[idx+2], optimalPolicy[idx+3])
 
 # %%
-def action_epsilon_greedy(q, s, epsilon=0.05):
-    if np.random.rand() > epsilon:
-        return np.argmax(q[s])
-    return np.random.randint(4)
+# def action_epsilon_greedy(q, s, epsilon=0.05):
+#     if np.random.rand() > epsilon:
+#         return np.argmax(q[s])
+#     return np.random.randint(4)
 
-def get_action_epsilon_greedy(epsilon):
-    return lambda q,s: action_epsilon_greedy(q, s, epsilon=epsilon)
+# def get_action_epsilon_greedy(epsilon):
+#     return lambda q,s: action_epsilon_greedy(q, s, epsilon=epsilon)
+
+# %%
+def action_softmax(q, s, tau=1):
+
+    # Softmax temperature
+    
+    beta = 1 / tau
+    probs = np.exp(q[s]*beta) / np.sum(np.exp(q[s]*beta))
+    probs =  probs/ np.sum(probs) # Ensure probs is normalised to 1 (to avoid rounding errors)
+    randchoice = rng.random()
+    flag = 1; k = 1
+    while flag:
+
+        if randchoice<np.sum(probs[0:k]):
+            action = k-1 # adjust for zero based action index
+            flag = 0
+        
+        k = k + 1
+        
+    return action
+    
+
+def get_action_softmax(tau):
+    return lambda q,s: action_softmax(q, s, tau=tau)
 
 # %%
 def greedy_policy(q, s):
@@ -320,13 +348,15 @@ def plotAgentPath(fig1, ax3, ax4, xs_target, ys_target):
 
 for episode in range(episodes):
 
-    inew = min(episode,epsilon_annealing_stop)
-    epsilon = (epsilon_start * (epsilon_annealing_stop - inew) + epsilon_end * inew) / epsilon_annealing_stop
+    # inew = min(episode,epsilon_annealing_stop)
+    # epsilon = (epsilon_start * (epsilon_annealing_stop - inew) + epsilon_end * inew) / epsilon_annealing_stop
     
     E = np.zeros((env.observation_space.n, env.action_space.n))
     
     state = env.reset()
-    action = action_epsilon_greedy(q, state, epsilon)
+    # action = action_epsilon_greedy(q, state, epsilon)
+    action = action_softmax(q, state, tau)
+    
 
     while True:
 
@@ -335,7 +365,8 @@ for episode in range(episodes):
         
         new_state, reward, done, info = env.step(action)
         
-        new_action = action_epsilon_greedy(q, new_state, epsilon)
+        # new_action = action_epsilon_greedy(q, new_state, epsilon)
+        new_action = action_softmax(q, new_state, tau)
 
         delta = reward + gamma * q[new_state, new_action] - q[state, action]
         q = q + alpha * delta * E 
@@ -350,7 +381,8 @@ for episode in range(episodes):
 
     # only for plotting the performance, not part of the algorithm 
     if episode%STEPS == 0 or episode == episodes-1:
-        performance[episode//STEPS] = average_performance(get_action_epsilon_greedy(epsilon), q=q)
+        # performance[episode//STEPS] = average_performance(get_action_epsilon_greedy(epsilon), q=q)
+        performance[episode//STEPS] = average_performance(get_action_softmax(tau), q=q)
     
     if episode%STEPS == 0 or episode == episodes-1:
         fig1.suptitle("Episode {}".format(episode))
