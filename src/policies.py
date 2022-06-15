@@ -5,8 +5,7 @@ class Policy(object):
     def __init__(self, env) -> None:
         self.env = env
 
-    @staticmethod
-    def average_performance(env, policy_fct, q):
+    def average_performance(self, env, policy_fct, q):
     
         acc_returns = 0.
         n = 500
@@ -29,7 +28,7 @@ class GreedyPolicy(Policy):
         return np.argmax(q[s])
 
     def average_performance(self, q):
-        avgPerf = Policy.average_performance(self.env, self.action, q=q)
+        avgPerf = super().average_performance(self.env, self.action, q=q)
         return avgPerf
 
 
@@ -59,7 +58,7 @@ class SoftmaxPolicy(Policy):
         return lambda q,s: self.action(q, s, tau=tau)
 
     def average_performance(self, func, q):
-        avgPerf = Policy.average_performance(self.env, func, q=q)
+        avgPerf = super().average_performance(self.env, func, q=q)
         return avgPerf
 
     

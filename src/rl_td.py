@@ -22,9 +22,6 @@ def train(env, episodes, steps, eligibility_decay, alpha, gamma, tau, q):
     performance = np.ndarray(episodes//steps) # initialise array to track algorithm's performance
 
     for episode in range(episodes):
-
-        # inew = min(episode,epsilon_annealing_stop)
-        # epsilon = (epsilon_start * (epsilon_annealing_stop - inew) + epsilon_end * inew) / epsilon_annealing_stop
         
         E = np.zeros((env.observation_space.n, env.action_space.n))
         
