@@ -10,7 +10,6 @@ from rl_td import train
 from q_function import initialise_q, print_q, print_optimal_q_policy
 from policies import GreedyPolicy
 
-# %%
 # parameters for sarsa(lambda)
 episodes = 10000
 STEPS = 200
@@ -21,9 +20,8 @@ tau = 1 #softmax temperature
 
 env = initialise_gym(STEPS)
 
-do_in_epsisode_plots=False
+do_in_epsisode_plots=True
 
-# %%
 print("Action space = ", env.action_space)
 print("Observation space = ", env.observation_space)
 

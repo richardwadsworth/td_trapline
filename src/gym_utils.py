@@ -28,8 +28,8 @@ def initialise_gym(max_episode_steps=100):
 
     size = 8
     mid_point = int(np.floor(size /2))
-    goal_indices = [4*size+mid_point-2, 
-                    7*size+mid_point+2,     
+    goal_indices = [6*size+mid_point-2, 
+                    2*size+mid_point+2,     
                     ]
     # # curved line
     # goal_indices = [3*size+left_point, 
@@ -52,6 +52,11 @@ def initialise_gym(max_episode_steps=100):
     env = gym.make('FrozenLake-v1', is_slippery=False, max_episode_steps=max_episode_steps, desc=desc)
 
     wrapped_env = AgentReward(env, size, goal_indices, max_episode_steps+1, -1/(max_episode_steps+(max_episode_steps*0.1)))
+
+    # rewards = [(42,0.1), (22,50.0)]
+    # rewards = [(50,50.0), (22,0.01)]
+    rewards = [(50,20.0), (22,1.0)]
+    wrapped_env.update_probability_matrix(rewards)
     
     return wrapped_env
 

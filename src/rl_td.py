@@ -47,19 +47,17 @@ def train(env, episodes, steps, eligibility_decay, alpha, gamma, tau, q, plot_da
         
         
         if episode > 0 and episode%steps == 0 or episode == episodes-1:
+            print("Episode {}".format(episode))    
+            shortest_trap_line_count = len([x for x in env.targets_found_order_by_episode if x == env.goal_indices]) #check each trap line to see if it is optimal    
+            if shortest_trap_line_count > 0:
+                print("Total # trap lines: {2}\tOptimal: {0}\tAs % of total episodes ({1}%)\tAs % of total trap lines ({3}%)".format(shortest_trap_line_count, np.round(shortest_trap_line_count/episode*100,2), len(env.targets_found_order_by_episode), np.round(shortest_trap_line_count/len(env.targets_found_order_by_episode)*100,2)))
+            
             if do_plot:
                 fig1.suptitle("Episode {}".format(episode))
                 plotAgentPath(env, fig1, ax3, ax4, xs_target,ys_target)
                 plotActionStateQuiver(env, q, fig1, ax1, ax2, xs_target,ys_target)
                 # set the spacing between subplots
                 # fig1.tight_layout()
-            else:
-                print("Episode {}".format(episode))
-                
-                
-                shortest_trap_line_count = len([x for x in env.targets_found_order_by_episode if x == env.goal_indices]) #check each trap line to see if it is optimal    
-                if shortest_trap_line_count > 0:
-                    print("Total # trap lines: {2}\tOptimal: {0}\tAs % of total episodes ({1}%)".format(shortest_trap_line_count, np.round(shortest_trap_line_count/episode*100,2), len(env.targets_found_order_by_episode)))
                 
 
     plotAgentPath(env, fig1, ax3, ax4, xs_target,ys_target)
