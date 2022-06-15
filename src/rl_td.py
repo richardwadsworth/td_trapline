@@ -26,7 +26,7 @@ def train(env, episodes, steps, eligibility_decay, alpha, gamma, tau, q, plot_da
             E = eligibility_decay * gamma * E
             E[state, action] += 1
             
-            new_state, reward, done, info = env.step(action)
+            new_state, reward, done, info = env.step(action, True)
             
             new_action = policy.action(q, new_state)
 
@@ -46,7 +46,7 @@ def train(env, episodes, steps, eligibility_decay, alpha, gamma, tau, q, plot_da
             performance[episode//steps] = policy.average_performance(q=q)
         
         
-        if episode%steps == 0 or episode == episodes-1:
+        if episode > 0 and episode%steps == 0 or episode == episodes-1:
             if do_plot:
                 fig1.suptitle("Episode {}".format(episode))
                 plotAgentPath(env, fig1, ax3, ax4, xs_target,ys_target)
@@ -55,7 +55,12 @@ def train(env, episodes, steps, eligibility_decay, alpha, gamma, tau, q, plot_da
                 # fig1.tight_layout()
             else:
                 print("Episode {}".format(episode))
-
+                
+                
+                shortest_trap_line_count = len([x for x in env.targets_found_order_by_episode if x == env.goal_indices]) #check each trap line to see if it is optimal    
+                if shortest_trap_line_count > 0:
+                    print("Total # trap lines: {2}\tOptimal: {0}\tAs % of total episodes ({1}%)".format(shortest_trap_line_count, np.round(shortest_trap_line_count/episode*100,2), len(env.targets_found_order_by_episode)))
+                
 
     plotAgentPath(env, fig1, ax3, ax4, xs_target,ys_target)
     plotActionStateQuiver(env, q, fig1, ax1, ax2,xs_target,ys_target)
