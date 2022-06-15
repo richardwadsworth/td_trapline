@@ -9,6 +9,7 @@ def initialise_gym(max_episode_steps=100):
     mid_point = int(np.floor(size /2))
     left_point = mid_point - int(np.floor(mid_point /2))
     right_point = mid_point + int(np.floor(mid_point /2))
+    
     goal_indices = [4*size+mid_point, 
                 6*size+left_point, 6*size+right_point,
                 9*size+left_point, 9*size+right_point,
@@ -24,8 +25,8 @@ def initialise_gym(max_episode_steps=100):
     #             ]
 
 
-    size=4
-    goal_indices = [15]
+    # size=4
+    # goal_indices = [15]
 
     desc = generate_random_map_extended(goal_indices, size=size, p=1.0)
 
@@ -35,7 +36,7 @@ def initialise_gym(max_episode_steps=100):
     
     return wrapped_env
 
-def getGoalCoordinates(index, observation_space_size):
+def get_goal_coordinates(index, observation_space_size):
     side = int(np.sqrt(observation_space_size))
     x= index%side
     y= int(np.floor(index/side))
@@ -61,7 +62,7 @@ def generate_random_map_extended(goal_indices: list = None, size: int = 8, p: fl
         
         #overwrite the default goal position if goal indices given
         for index in goal_indices:
-            x, y = getGoalCoordinates(index, np.square(size))
+            x, y = get_goal_coordinates(index, np.square(size))
             desc = update_cell(desc, x, y, "G") # set the cell to be a goal
             
     return desc

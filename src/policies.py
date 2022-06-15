@@ -5,16 +5,22 @@ class Policy(object):
     def __init__(self, env) -> None:
         self.env = env
 
-    def average_performance(self, env, policy_fct, q):
+    def action(self, q, s):
+        """
+        implement this function in the sub class
+        """
+        raise NotImplementedError()
+
+    def average_performance(self, q):
     
         acc_returns = 0.
         n = 500
         for i in range(n):
             done = False
-            s = env.reset()
+            s = self.env.reset()
             while not done:
-                a = policy_fct(q, s)
-                s, reward, done, info = env.step(a)
+                a = self.action(q, s)
+                s, reward, done, info = self.env.step(a)
                 acc_returns += reward
 
         return acc_returns/n
@@ -27,19 +33,15 @@ class GreedyPolicy(Policy):
     def action(self, q, s):
         return np.argmax(q[s])
 
-    def average_performance(self, q):
-        avgPerf = super().average_performance(self.env, self.action, q=q)
-        return avgPerf
-
-
 class SoftmaxPolicy(Policy):
-    def __init__(self, env, rng):
+    def __init__(self, env, tau, rng):
         super().__init__(env)
+        self.tau = tau
         self.rng = rng
 
-    def action(self, q, s, tau=1):
+    def action(self, q, s):
 
-        beta = 1 / tau
+        beta = 1 / self.tau
         probs = np.exp(q[s]*beta) / np.sum(np.exp(q[s]*beta))
         probs =  probs/ np.sum(probs) # Ensure probs is normalised to 1 (to avoid rounding errors)
         randchoice = self.rng.random()
@@ -53,12 +55,5 @@ class SoftmaxPolicy(Policy):
             k = k + 1
 
         return action
-
-    def get_action(self, tau):
-        return lambda q,s: self.action(q, s, tau=tau)
-
-    def average_performance(self, func, q):
-        avgPerf = super().average_performance(self.env, func, q=q)
-        return avgPerf
 
     
