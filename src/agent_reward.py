@@ -32,9 +32,7 @@ class AgentReward(gym.RewardWrapper):
                     done = True 
                 else:
                     done = False # override done.  Keep going
-            else:
-                1==1
-
+            
         reward = reward + self.respiration_reward
 
         self.observations.append(obs)

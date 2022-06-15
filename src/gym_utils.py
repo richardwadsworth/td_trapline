@@ -24,8 +24,8 @@ def initialise_gym(max_episode_steps=100):
     #             ]
 
 
-    # size=19
-    # goal_indices = [30, 80, 260]
+    size=4
+    goal_indices = [15]
 
     desc = generate_random_map_extended(goal_indices, size=size, p=1.0)
 
@@ -33,7 +33,7 @@ def initialise_gym(max_episode_steps=100):
 
     wrapped_env = AgentReward(env, size, goal_indices, max_episode_steps+1, -0.03)
     
-    return wrapped_env, goal_indices
+    return wrapped_env
 
 def getGoalCoordinates(index, observation_space_size):
     side = int(np.sqrt(observation_space_size))

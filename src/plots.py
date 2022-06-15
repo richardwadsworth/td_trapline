@@ -105,3 +105,11 @@ def plotAgentPath(env, fig1, ax3, ax4, xs_target, ys_target):
     clear_output(wait = True)
     # ax.clear()
     plt.pause(0.001)
+
+
+def plot_performance(episodes, steps, performance):
+    plt.plot(steps*np.arange(episodes//steps), performance)
+    plt.xlabel("Epochs")
+    plt.title("Learning progress for SARSA")
+    plt.ylabel("Average reward of an epoch")
+    plt.grid()
