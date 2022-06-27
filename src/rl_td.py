@@ -1,12 +1,13 @@
+from pickle import FALSE
 import numpy as np
 from plots import plotAgentPath, plotActionStateQuiver
 from policies import SoftmaxPolicy
 
 rng = np.random.default_rng(5) # random number generator
 
-def train(env, episodes, steps, eligibility_decay, alpha, gamma, tau, q, plot_data, do_plot=False):
+def train(env, episodes, steps, eligibility_decay, alpha, gamma, T, q, plot_data, do_plot=False):
 
-    policy = SoftmaxPolicy(env, tau, rng)
+    policy = SoftmaxPolicy(env, T, rng)
 
     #unpack plot objects
     fig1, ax1, ax2, ax3, ax4, xs_target, ys_target = plot_data
@@ -28,6 +29,11 @@ def train(env, episodes, steps, eligibility_decay, alpha, gamma, tau, q, plot_da
             
             new_state, reward, done, info = env.step(action, True)
             
+            if "Target.found" in info:
+                #reset Tau to encourage exploration
+                #TODO
+                pass
+
             new_action = policy.action(q, new_state)
 
             delta = reward + gamma * q[new_state, new_action] - q[state, action]

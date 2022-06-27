@@ -3,13 +3,15 @@ import gym
 from gym.envs.toy_text.frozen_lake import generate_random_map
 from agent_reward import AgentReward
 
-def initialise_gym(max_episode_steps=100):
+def initialise_gym(size, MDP, max_episode_steps=100):
 
-    size = 19 # size of grid square
-    mid_point = int(np.floor(size /2))
-    left_point = mid_point - int(np.floor(mid_point /2))
-    right_point = mid_point + int(np.floor(mid_point /2))
+    # size = 19 # size of grid square
+    # mid_point = int(np.floor(size /2))
+    # left_point = mid_point - int(np.floor(mid_point /2))
+    # right_point = mid_point + int(np.floor(mid_point /2))
     
+    
+
     # goal_indices = [4*size+mid_point, 
     #             6*size+left_point, 6*size+right_point,
     #             9*size+left_point, 9*size+right_point,
@@ -26,11 +28,9 @@ def initialise_gym(max_episode_steps=100):
     #             ]
 
 
-    size = 8
-    mid_point = int(np.floor(size /2))
-    goal_indices = [6*size+mid_point-2, 
-                    2*size+mid_point+2,     
-                    ]
+    # size = 8
+    # goal_indices = int(np.floor(size /2))
+                    
     # # curved line
     # goal_indices = [3*size+left_point, 
     #             5*size+mid_point+1, 
@@ -46,6 +46,8 @@ def initialise_gym(max_episode_steps=100):
     # size=4
     # goal_indices = [15]
 
+    goal_indices = [int(x) for x in MDP[:,0]]
+
     ## note the order of the goal indices is important!! it is used to indicate the shortest route
     desc = generate_random_map_extended(goal_indices, size=size, p=1.0)
 
@@ -53,10 +55,7 @@ def initialise_gym(max_episode_steps=100):
 
     wrapped_env = AgentReward(env, size, goal_indices, max_episode_steps+1, -1/(max_episode_steps+(max_episode_steps*0.1)))
 
-    # rewards = [(42,0.1), (22,50.0)]
-    # rewards = [(50,50.0), (22,0.01)]
-    rewards = [(50,20.0), (22,1.0)]
-    wrapped_env.update_probability_matrix(rewards)
+    wrapped_env.update_probability_matrix(MDP)
     
     return wrapped_env
 

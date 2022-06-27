@@ -34,15 +34,14 @@ class GreedyPolicy(Policy):
         return np.argmax(q[s])
 
 class SoftmaxPolicy(Policy):
-    def __init__(self, env, tau, rng):
+    def __init__(self, env, T, rng):
         super().__init__(env)
-        self.tau = tau
+        self.T = T #softmax temperature
         self.rng = rng
 
     def action(self, q, s):
 
-        beta = 1 / self.tau
-        probs = np.exp(q[s]*beta) / np.sum(np.exp(q[s]*beta))
+        probs = np.exp(q[s]/self.T) / np.sum(np.exp(q[s]/self.T))
         probs =  probs/ np.sum(probs) # Ensure probs is normalised to 1 (to avoid rounding errors)
         randchoice = self.rng.random()
         flag = 1; k = 1

@@ -10,6 +10,8 @@ class AgentReward(gym.Wrapper):
         self.respiration_reward = respiration_reward
         self.observations = []
 
+        self.target_found = False
+
         self.targets_found_order = [] # used to record which order the targets are found in an episode
         self.targets_found_order_by_episode = [] # used to record the order for each episode
         self.all_targets_found_total_steps = [] # used to record the total number of steps taken to find all targets
@@ -39,15 +41,23 @@ class AgentReward(gym.Wrapper):
         """
         obs, reward, done, info = self.env.step(action)
         if obs in self.goal_indices: # the agent has found a goal and done will be True
+            
             if "TimeLimit.truncated" not in info: # not timed out
+
+            
                 # reward = self.goal_rewards[obs]['reward']
                 if self.goal_rewards[obs]['step_count']  == -1: # active target found
                     self.targets_found_order.append(obs) # record the id of the target
                     self.goal_rewards[obs]['step_count'] = self.env._elapsed_steps #record when this goal was found
+
+                    info["Target.found"] = True # update info to show an active target was found
+
                 elif self.env._elapsed_steps - self.goal_rewards[obs]['step_count'] > self.reward_delay:
                     self.goal_rewards[obs]['step_count'] = -1 #stop tracking the reward
+                    reward = 0
                 else:
                     reward = 0
+                    
 
                 
                 if any(item for item in self.goal_rewards.items() if item[1]['step_count'] == -1):    
