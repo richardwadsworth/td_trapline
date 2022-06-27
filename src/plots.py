@@ -41,7 +41,7 @@ def plotActionStateQuiver(env, q, fig1, ax1, ax2, xs_target, ys_target):
     # %%
     def resolveActionState(actionState):
 
-        #L, D, R, U
+        #W, S, E, N
         vertical = actionState[3] - actionState[1] 
         horizontal = actionState[2] - actionState[0] 
 

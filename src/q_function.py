@@ -5,18 +5,18 @@ from gym.envs.toy_text.foraging_agent import Movement
 
 # %%
 actionsDict = {}
-actionsDict[Movement.LEFT.value] = " L "
-actionsDict[Movement.DOWN.value] = " D "
-actionsDict[Movement.RIGHT.value] = " R "
-actionsDict[Movement.UP.value] = " U "
-actionsDict[Movement.NONE.value] = " N "
+actionsDict[Movement.WEST.value] = " W "
+actionsDict[Movement.SOUTH.value] = " S "
+actionsDict[Movement.EAST.value] = " E "
+actionsDict[Movement.NORTH.value] = " N "
+actionsDict[Movement.NONE.value] = " - "
 
 actionsDictInv = {}
-actionsDictInv["L"] = Movement.LEFT.value
-actionsDictInv["D"] = Movement.DOWN.value
-actionsDictInv["R"] = Movement.RIGHT.value
-actionsDictInv["U"] = Movement.UP.value
-actionsDictInv["N"] = Movement.NONE.value
+actionsDictInv["W"] = Movement.WEST.value
+actionsDictInv["S"] = Movement.SOUTH.value
+actionsDictInv["E"] = Movement.EAST.value
+actionsDictInv["N"] = Movement.NORTH.value
+actionsDictInv["-"] = Movement.NONE.value
 
 def initialise_q(env):
     q = np.ones((env.observation_space.n, env.action_space.n))

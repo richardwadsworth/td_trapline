@@ -58,7 +58,7 @@ def train(env, episodes, steps, eligibility_decay, alpha, gamma, epsilon_start, 
             performance[episode//steps] = policy.average_performance(policy.get_action(epsilon), q=q)
 
         if episode > 0 and episode%steps == 0 or episode == episodes-1:
-            print("Episode {}".format(episode))    
+            print("Episode {}. Epsilon {}.".format(episode, epsilon))    
             shortest_trap_line_count = len([x for x in env.targets_found_order_by_episode if x == env.goal_indices]) #check each trap line to see if it is optimal    
             if shortest_trap_line_count > 0:
                 print("Total # trap lines: {2}\tOptimal: {0}\tAs % of total episodes ({1}%)\tAs % of total trap lines ({3}%)".format(shortest_trap_line_count, np.round(shortest_trap_line_count/episode*100,2), len(env.targets_found_order_by_episode), np.round(shortest_trap_line_count/len(env.targets_found_order_by_episode)*100,2)))

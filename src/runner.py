@@ -14,7 +14,7 @@ from policies import GreedyPolicy
 
 
 # parameters for sarsa(lambda)
-episodes = 3000
+episodes = 2000
 STEPS = 50
 gamma = 0.9
 alpha = 0.05
@@ -23,7 +23,7 @@ eligibility_decay = 0.3
 #softmax temperature annealing
 epsilon_start = 1
 epsilon_end = 0.2
-epsilon_annealing_stop = int(episodes/2)
+epsilon_annealing_stop = int(episodes/4)
 
 
 # oppostite corner 9

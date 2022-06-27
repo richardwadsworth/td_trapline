@@ -13,10 +13,10 @@ from gym.utils.renderer import Renderer
 from enum import Enum
 
 class Movement(Enum):
-    LEFT = 0
-    DOWN = 1
-    RIGHT = 2
-    UP = 3
+    WEST = 0
+    SOUTH = 1
+    EAST = 2
+    NORTH = 3
     NONE = 4
 
 MAPS = {
@@ -86,10 +86,10 @@ class ForagingAgentEnv(Env):
     The agent takes a 1-element vector for actions.
     The action space is `(dir)`, where `dir` decides direction to move in which can be:
 
-    - 0: LEFT
-    - 1: DOWN
-    - 2: RIGHT
-    - 3: UP
+    - 0: WEST
+    - 1: SOUTH
+    - 2: EAST
+    - 3: NORTH
     - 4: NONE
 
     ### Observation Space
@@ -148,10 +148,10 @@ class ForagingAgentEnv(Env):
     probability of 1/3 else will move in either perpendicular direction with
     equal probability of 1/3 in both directions.
 
-        For example, if action is left and is_slippery is True, then:
-        - P(move left)=1/3
-        - P(move up)=1/3
-        - P(move down)=1/3
+        For example, if action is East and is_slippery is True, then:
+        - P(move East)=1/3
+        - P(move North)=1/3
+        - P(move South)=1/3
 
     ### Version History
     * v1: Bug fixes to rewards
@@ -190,13 +190,13 @@ class ForagingAgentEnv(Env):
             return row * ncol + col
 
         def inc(row, col, a):
-            if a == Movement.LEFT.value:
+            if a == Movement.WEST.value:
                 col = max(col - 1, 0)
-            elif a == Movement.DOWN.value:
+            elif a == Movement.SOUTH.value:
                 row = min(row + 1, nrow - 1)
-            elif a == Movement.RIGHT.value:
+            elif a == Movement.EAST.value:
                 col = min(col + 1, ncol - 1)
-            elif a == Movement.UP.value:
+            elif a == Movement.NORTH.value:
                 row = max(row - 1, 0)
             elif a == Movement.NONE.value:
                 #do nothing
@@ -417,7 +417,7 @@ class ForagingAgentEnv(Env):
         desc = [[c.decode("utf-8") for c in line] for line in desc]
         desc[row][col] = utils.colorize(desc[row][col], "red", highlight=True)
         if self.lastaction is not None:
-            outfile.write(f"  ({['Left', 'Down', 'Right', 'Up'][self.lastaction]})\n")
+            outfile.write(f"  ({['West', 'South', 'East', 'North'][self.lastaction]})\n")
         else:
             outfile.write("\n")
         outfile.write("\n".join("".join(line) for line in desc) + "\n")
