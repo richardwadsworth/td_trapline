@@ -10,10 +10,14 @@ from gym.envs.toy_text.utils import categorical_sample
 from gym.error import DependencyNotInstalled
 from gym.utils.renderer import Renderer
 
-LEFT = 0
-DOWN = 1
-RIGHT = 2
-UP = 3
+from enum import Enum
+
+class Movement(Enum):
+    LEFT = 0
+    DOWN = 1
+    RIGHT = 2
+    UP = 3
+    NONE = 4
 
 MAPS = {
     "4x4": ["SFFF", "FHFH", "FFFH", "HFFG"],
@@ -86,6 +90,7 @@ class ForagingAgentEnv(Env):
     - 1: DOWN
     - 2: RIGHT
     - 3: UP
+    - 4: NONE
 
     ### Observation Space
     The observation is a value representing the agent's current position as
@@ -173,7 +178,7 @@ class ForagingAgentEnv(Env):
         self.nrow, self.ncol = nrow, ncol = desc.shape
         self.reward_range = (0, 1)
 
-        nA = 4
+        nA = 5
         nS = nrow * ncol
 
         self.initial_state_distrib = np.array(desc == b"S").astype("float64").ravel()
@@ -185,14 +190,17 @@ class ForagingAgentEnv(Env):
             return row * ncol + col
 
         def inc(row, col, a):
-            if a == LEFT:
+            if a == Movement.LEFT.value:
                 col = max(col - 1, 0)
-            elif a == DOWN:
+            elif a == Movement.DOWN.value:
                 row = min(row + 1, nrow - 1)
-            elif a == RIGHT:
+            elif a == Movement.RIGHT.value:
                 col = min(col + 1, ncol - 1)
-            elif a == UP:
+            elif a == Movement.UP.value:
                 row = max(row - 1, 0)
+            elif a == Movement.NONE.value:
+                #do nothing
+                pass
             return (row, col)
 
         def update_probability_matrix(row, col, action):
@@ -207,7 +215,7 @@ class ForagingAgentEnv(Env):
         for row in range(nrow):
             for col in range(ncol):
                 s = to_s(row, col)
-                for a in range(4):
+                for a in range(nA):
                     li = self.P[s][a]
                     letter = desc[row, col]
                     if letter in b"H":

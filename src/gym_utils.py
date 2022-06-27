@@ -1,5 +1,4 @@
 import numpy as np
-from agent_reward import AgentReward
 
 def register_gym():
 
@@ -20,7 +19,7 @@ def register_gym():
      id='ForagingAgent-v1',
      entry_point='gym.envs.toy_text:ForagingAgentEnv')
 
-def initialise_gym(size, MDP, max_episode_steps=100):
+def initialise_gym(size, MDP, respiration_reward, inactive_reward, max_episode_steps=100):
 
     # size = 19 # size of grid square
     # mid_point = int(np.floor(size /2))
@@ -66,13 +65,14 @@ def initialise_gym(size, MDP, max_episode_steps=100):
     goal_indices = [int(x) for x in MDP[:,0]]
 
     import gym
+    from agent_reward import AgentReward
 
     ## note the order of the goal indices is important!! it is used to indicate the shortest route
     desc = generate_random_map_extended(goal_indices, size=size, p=1.0)
 
     env = gym.make('ForagingAgent-v1', is_slippery=False, max_episode_steps=max_episode_steps, desc=desc)
 
-    wrapped_env = AgentReward(env, size, goal_indices, max_episode_steps+1, -1/(max_episode_steps+(max_episode_steps*0.1)))
+    wrapped_env = AgentReward(env, size, goal_indices, max_episode_steps+1, respiration_reward, inactive_reward)
 
     wrapped_env.update_probability_matrix(MDP)
     

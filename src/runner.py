@@ -1,11 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
 import sys
 sys.path.insert(1, '/Users/richard/Documents/projects/py_learning/sussex/Dissertation/gym')
 
-from plots import plot_performance, initialise_plots
 from gym_utils import register_gym, initialise_gym
+register_gym()
+
+from plots import plot_performance, initialise_plots
 
 from rl_td import train
 from q_function import initialise_q, print_q, print_optimal_q_policy
@@ -14,15 +15,23 @@ from policies import GreedyPolicy
 
 # parameters for sarsa(lambda)
 episodes = 3000
-STEPS = 150
+STEPS = 50
 gamma = 0.9
 alpha = 0.05
 eligibility_decay = 0.3
 T = 0.1 #softmax temperature
 
-# #equalateral triangle
-size = 19
-MDP = np.array([(300,1.0)]) #markov decision chain including rewards for each target
+# oppostite corner 9
+size = 9
+MDP = np.array([(80,1.0)]) #markov decision chain including rewards for each target
+
+respiration_reward = -1/(STEPS+(STEPS*0.1)) # reward for moving 1 step in an episode
+inactive_reward = -0.001 # reward for action resulting in no movement
+
+
+# # oppostite corner 19
+# size = 19
+# MDP = np.array([(300,1.0)]) #markov decision chain including rewards for each target
 
 
 # # #equalateral triangle
@@ -33,8 +42,8 @@ MDP = np.array([(300,1.0)]) #markov decision chain including rewards for each ta
 # size = 19
 # MDP = np.array([(62,1.0), (181,1.0), (300, 1.0)]) #markov decision chain including rewards for each target
 
-register_gym()
-env = initialise_gym(size, MDP, STEPS)
+
+env = initialise_gym(size, MDP, respiration_reward, inactive_reward, STEPS)
 
 do_in_epsisode_plots=True
 

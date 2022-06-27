@@ -1,13 +1,15 @@
 import gym
 import numpy as np
+from gym.envs.toy_text.foraging_agent import Movement
 
 class AgentReward(gym.Wrapper):
-    def __init__(self, env, size, goal_indices, reward_delay=50, respiration_reward=0):
+    def __init__(self, env, size, goal_indices, reward_delay=50, respiration_reward=0, inactive_reward=0):
         super().__init__(env)
         self.size = size
         self.goal_indices = goal_indices
         self.reward_delay = reward_delay
         self.respiration_reward = respiration_reward
+        self.inactive_reward = inactive_reward
         self.observations = []
 
         self.target_found = False
@@ -75,6 +77,10 @@ class AgentReward(gym.Wrapper):
 
                     done = True # all targets have been found so stop
            
+        
+        if action == Movement.NONE.value:
+            reward = reward + self.inactive_reward
+
         reward = reward + self.respiration_reward
 
         self.observations.append(obs)

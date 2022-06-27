@@ -1,19 +1,22 @@
 import numpy as np
 
 from policies import GreedyPolicy
+from gym.envs.toy_text.foraging_agent import Movement
 
 # %%
 actionsDict = {}
-actionsDict[0] = " L "
-actionsDict[1] = " D "
-actionsDict[2] = " R "
-actionsDict[3] = " U "
+actionsDict[Movement.LEFT.value] = " L "
+actionsDict[Movement.DOWN.value] = " D "
+actionsDict[Movement.RIGHT.value] = " R "
+actionsDict[Movement.UP.value] = " U "
+actionsDict[Movement.NONE.value] = " N "
 
 actionsDictInv = {}
-actionsDictInv["L"] = 0
-actionsDictInv["D"] = 1
-actionsDictInv["R"] = 2
-actionsDictInv["U"] = 3
+actionsDictInv["L"] = Movement.LEFT.value
+actionsDictInv["D"] = Movement.DOWN.value
+actionsDictInv["R"] = Movement.RIGHT.value
+actionsDictInv["U"] = Movement.UP.value
+actionsDictInv["N"] = Movement.NONE.value
 
 def initialise_q(env):
     q = np.ones((env.observation_space.n, env.action_space.n))
