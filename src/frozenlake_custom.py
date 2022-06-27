@@ -5,30 +5,35 @@ import sys
 sys.path.insert(1, '/Users/richard/Documents/projects/py_learning/sussex/Dissertation/gym')
 
 from plots import plot_performance, initialise_plots
-from gym_utils import initialise_gym
+from gym_utils import register_gym, initialise_gym
 
 from rl_td import train
 from q_function import initialise_q, print_q, print_optimal_q_policy
 from policies import GreedyPolicy
 
 
-
 # parameters for sarsa(lambda)
 episodes = 3000
-STEPS = 50
+STEPS = 150
 gamma = 0.9
 alpha = 0.05
 eligibility_decay = 0.3
 T = 0.1 #softmax temperature
 
 # #equalateral triangle
-size = 8
-MDP = np.array([(50,2.0), (22,1.0)]) #markov decision chain including rewards for each target
+size = 19
+MDP = np.array([(300,1.0)]) #markov decision chain including rewards for each target
+
+
+# # #equalateral triangle
+# size = 8
+# MDP = np.array([(50,1.0), (22,1.0)]) #markov decision chain including rewards for each target
 
 #straightish line
 # size = 19
 # MDP = np.array([(62,1.0), (181,1.0), (300, 1.0)]) #markov decision chain including rewards for each target
 
+register_gym()
 env = initialise_gym(size, MDP, STEPS)
 
 do_in_epsisode_plots=True

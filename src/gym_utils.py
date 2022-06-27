@@ -1,7 +1,24 @@
 import numpy as np
-import gym
-from gym.envs.toy_text.frozen_lake import generate_random_map
 from agent_reward import AgentReward
+
+def register_gym():
+
+    from os.path import exists
+    import os
+    import shutil
+
+    source = "sussex/Dissertation/src/foraging_agent.py"
+    destination = "sussex/Dissertation/gym/gym/envs/toy_text/foraging_agent.py"
+    if exists(destination):
+        os.remove(destination)
+    shutil.copyfile(source, destination)
+
+    import gym
+    
+
+    gym.envs.register(
+     id='ForagingAgent-v1',
+     entry_point='gym.envs.toy_text:ForagingAgentEnv')
 
 def initialise_gym(size, MDP, max_episode_steps=100):
 
@@ -48,10 +65,12 @@ def initialise_gym(size, MDP, max_episode_steps=100):
 
     goal_indices = [int(x) for x in MDP[:,0]]
 
+    import gym
+
     ## note the order of the goal indices is important!! it is used to indicate the shortest route
     desc = generate_random_map_extended(goal_indices, size=size, p=1.0)
 
-    env = gym.make('FrozenLake-v1', is_slippery=False, max_episode_steps=max_episode_steps, desc=desc)
+    env = gym.make('ForagingAgent-v1', is_slippery=False, max_episode_steps=max_episode_steps, desc=desc)
 
     wrapped_env = AgentReward(env, size, goal_indices, max_episode_steps+1, -1/(max_episode_steps+(max_episode_steps*0.1)))
 
@@ -68,6 +87,8 @@ def get_goal_coordinates(index, observation_space_size):
     
 def generate_random_map_extended(goal_indices: list = None, size: int = 8, p: float = 1.0):
     
+    from gym.envs.toy_text.foraging_agent import generate_random_map
+
     def update_cell(desc, x, y , new_value):
         row = desc[y]
         row_as_list = [row[i] for i in range(len(row))]

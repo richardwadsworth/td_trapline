@@ -35,7 +35,7 @@ def generate_random_map(size: int = 8, p: float = 0.8) -> List[str]:
 
     Args:
         size: size of each side of the grid
-        p: probability that a tile is frozen
+        p: probability that a tile is not toxic
 
     Returns:
         A random valid map
@@ -71,11 +71,11 @@ def generate_random_map(size: int = 8, p: float = 0.8) -> List[str]:
     return ["".join(x) for x in res]
 
 
-class FrozenLakeEnv(Env):
+class ForagingAgentEnv(Env):
     """
-    Frozen lake involves crossing a frozen lake from Start(S) to Goal(G) without falling into any Holes(H)
-    by walking over the Frozen(F) lake.
-    The agent may not always move in the intended direction due to the slippery nature of the frozen lake.
+    Foraging Agent involves a foraging bout from Nest(S) to Target(G) without discovering into any toxic areas(H)
+    by moving around the environment Arena (F).
+    The agent may not always move in the intended direction due to the stochastic nature decision making.
 
 
     ### Action Space
@@ -98,25 +98,25 @@ class FrozenLakeEnv(Env):
 
     Reward schedule:
     - Reach goal(G): +1
-    - Reach hole(H): 0
-    - Reach frozen(F): 0
+    - Reach toxic(H): 0
+    - Reach arena(F): 0
 
     ### Arguments
 
     ```
-    gym.make('FrozenLake-v1', desc=None, map_name="4x4", is_slippery=True)
+    gym.make('ForagingAgent-v1', desc=None, map_name="4x4", is_slippery=True)
     ```
 
-    `desc`: Used to specify custom map for frozen lake. For example,
+    `desc`: Used to specify custom map for foraging agent lake. For example,
 
         desc=["SFFF", "FHFH", "FFFH", "HFFG"].
 
         A random generated map can be specified by calling the function `generate_random_map`. For example,
 
         ```
-        from gym.envs.toy_text.frozen_lake import generate_random_map
+        from gym.envs.toy_text.foraging_agent import generate_random_map
 
-        gym.make('FrozenLake-v1', desc=generate_random_map(size=8))
+        gym.make('ForagingAgent-v1', desc=generate_random_map(size=8))
         ```
 
     `map_name`: ID to use any of the preloaded maps.
@@ -293,7 +293,7 @@ class FrozenLakeEnv(Env):
         if self.window_surface is None:
             pygame.init()
             pygame.display.init()
-            pygame.display.set_caption("Frozen Lake")
+            pygame.display.set_caption("Foraging Agent")
             if mode == "human":
                 self.window_surface = pygame.display.set_mode(self.window_size)
             elif mode in {"rgb_array", "single_rgb_array"}:
