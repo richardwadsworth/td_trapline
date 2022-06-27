@@ -19,7 +19,12 @@ STEPS = 50
 gamma = 0.9
 alpha = 0.05
 eligibility_decay = 0.3
-T = 0.1 #softmax temperature
+
+#softmax temperature annealing
+epsilon_start = 1
+epsilon_end = 0.2
+epsilon_annealing_stop = int(episodes/2)
+
 
 # oppostite corner 9
 size = 9
@@ -59,13 +64,14 @@ q = initialise_q(env)
 plot_data = initialise_plots(env)
 
 # train the algorithm
-q, performance, ax = train(env, episodes, STEPS, eligibility_decay, alpha, gamma, T, q, plot_data, do_in_epsisode_plots)
+q, performance, ax = train(env, episodes, STEPS, eligibility_decay, alpha, gamma, epsilon_start, epsilon_end, epsilon_annealing_stop, q, plot_data, do_in_epsisode_plots)
 
 # visual the algorithm's performance
 plot_performance(episodes, STEPS, performance, plot_data)
 
 # get the final performance value of the algorithm using a greedy policy
-greedyPolicyAvgPerf = GreedyPolicy(env).average_performance(q)
+policy = GreedyPolicy(env)
+greedyPolicyAvgPerf =policy.average_performance(policy.action, q)
 print("Greedy policy SARSA performance =", greedyPolicyAvgPerf) 
 
 # print the final action state values

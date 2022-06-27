@@ -5,9 +5,10 @@ from policies import SoftmaxPolicy
 
 rng = np.random.default_rng(5) # random number generator
 
-def train(env, episodes, steps, eligibility_decay, alpha, gamma, T, q, plot_data, do_plot=False):
 
-    policy = SoftmaxPolicy(env, T, rng)
+def train(env, episodes, steps, eligibility_decay, alpha, gamma, epsilon_start, epsilon_end, epsilon_annealing_stop, q, plot_data, do_plot=False):
+
+    policy = SoftmaxPolicy(env, rng)
 
     #unpack plot objects
     fig1, ax1, ax2, ax3, ax4, xs_target, ys_target = plot_data
@@ -16,11 +17,16 @@ def train(env, episodes, steps, eligibility_decay, alpha, gamma, T, q, plot_data
 
     for episode in range(episodes):
 
+        inew = min(episode,epsilon_annealing_stop)
+        epsilon = (epsilon_start * (epsilon_annealing_stop - inew) \
+               + epsilon_end * inew) / epsilon_annealing_stop
+
+
         E = np.zeros((env.observation_space.n, env.action_space.n))
         
         state = env.reset()
 
-        action = policy.action(q, state)
+        action = policy.action(q, state, epsilon)
         
         while True:
 
@@ -34,7 +40,7 @@ def train(env, episodes, steps, eligibility_decay, alpha, gamma, T, q, plot_data
                 #TODO
                 pass
 
-            new_action = policy.action(q, new_state)
+            new_action = policy.action(q, new_state, epsilon)
 
             delta = reward + gamma * q[new_state, new_action] - q[state, action]
             q = q + alpha * delta * E 
@@ -49,9 +55,8 @@ def train(env, episodes, steps, eligibility_decay, alpha, gamma, T, q, plot_data
 
         # only for plotting the performance, not part of the algorithm 
         if episode%steps == 0 or episode == episodes-1:
-            performance[episode//steps] = policy.average_performance(q=q)
-        
-        
+            performance[episode//steps] = policy.average_performance(policy.get_action(epsilon), q=q)
+
         if episode > 0 and episode%steps == 0 or episode == episodes-1:
             print("Episode {}".format(episode))    
             shortest_trap_line_count = len([x for x in env.targets_found_order_by_episode if x == env.goal_indices]) #check each trap line to see if it is optimal    

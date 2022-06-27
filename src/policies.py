@@ -11,7 +11,7 @@ class Policy(object):
         """
         raise NotImplementedError()
 
-    def average_performance(self, q):
+    def average_performance(self, policy_fct, q):
     
         acc_returns = 0.
         n = 500
@@ -19,7 +19,7 @@ class Policy(object):
             done = False
             s = self.env.reset()
             while not done:
-                a = self.action(q, s)
+                a = policy_fct(q, s)
                 s, reward, done, info = self.env.step(a)
                 acc_returns += reward
 
@@ -34,14 +34,13 @@ class GreedyPolicy(Policy):
         return np.argmax(q[s])
 
 class SoftmaxPolicy(Policy):
-    def __init__(self, env, T, rng):
+    def __init__(self, env, rng):
         super().__init__(env)
-        self.T = T #softmax temperature
         self.rng = rng
 
-    def action(self, q, s):
+    def action(self, q, s, T):
 
-        probs = np.exp(q[s]/self.T) / np.sum(np.exp(q[s]/self.T))
+        probs = np.exp(q[s]/T) / np.sum(np.exp(q[s]/T))
         probs =  probs/ np.sum(probs) # Ensure probs is normalised to 1 (to avoid rounding errors)
         randchoice = self.rng.random()
         flag = 1; k = 1
@@ -55,4 +54,5 @@ class SoftmaxPolicy(Policy):
 
         return action
 
-    
+    def get_action(self, T):     
+        return lambda q,s: self.action(q, s, T=T)
