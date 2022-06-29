@@ -4,7 +4,7 @@ from policies import SoftmaxDirectionalPolicy, SoftmaxFlattenedPolicy
 
 def train(env, episodes, steps, eligibility_decay, alpha, gamma, epsilon_start, epsilon_end, epsilon_annealing_stop, q, plot_data, do_plot=False, rng = np.random.default_rng()):
 
-    policy = SoftmaxDirectionalPolicy(env, rng)
+    policy = SoftmaxFlattenedPolicy(env, rng)
 
     #unpack plot objects
     fig1, ax1, ax2, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target = plot_data
