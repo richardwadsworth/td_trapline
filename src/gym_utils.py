@@ -19,7 +19,7 @@ def register_gym():
      id='ForagingAgent-v1',
      entry_point='gym.envs.toy_text:ForagingAgentEnv')
 
-def initialise_gym(size, MDP, respiration_reward, inactive_reward, max_episode_steps=100):
+def initialise_gym(size, MDP, respiration_reward, inactive_reward, orientation_reward_reduction_ratio, max_episode_steps=100):
 
     # size = 19 # size of grid square
     # mid_point = int(np.floor(size /2))
@@ -72,7 +72,7 @@ def initialise_gym(size, MDP, respiration_reward, inactive_reward, max_episode_s
 
     env = gym.make('ForagingAgent-v1', is_slippery=False, max_episode_steps=max_episode_steps, desc=desc)
 
-    wrapped_env = AgentReward(env, size, goal_indices, max_episode_steps+1, respiration_reward, inactive_reward)
+    wrapped_env = AgentReward(env, size, goal_indices, max_episode_steps+1, respiration_reward=respiration_reward, inactive_reward=inactive_reward, orientation_reward_reduction_ratio=orientation_reward_reduction_ratio)
 
     wrapped_env.update_probability_matrix(MDP)
     

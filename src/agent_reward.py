@@ -1,15 +1,29 @@
 import gym
 import numpy as np
-from gym.envs.toy_text.foraging_agent import Movement
+from gym.envs.toy_text.foraging_agent import ActionType
 
 class AgentReward(gym.Wrapper):
-    def __init__(self, env, size, goal_indices, reward_delay=50, respiration_reward=0, inactive_reward=0):
+    def __init__(self, env, size, goal_indices, reward_delay=50, respiration_reward=0, inactive_reward=0, orientation_reward_reduction_ratio=0.75):
+        """
+
+        PARAMS
+        ------
+        env: OpenAI gym environment
+        size: Arena size (width of square arena)
+        goal_indices (the indices of the targets within the arena)
+        reward_delay: the number of episodes steps to wait until a visited target's reward is reinstated
+        respiration_reward: the reward per time step (normally negative)
+        inactive_reward: the reward for not moving in a time step (normally negative)
+        orientation_reward_reduction_ratio: if the agent does not change direction during a step we assume this is more rewarding.  Reduce the 
+            respiration_reward by a ratio of this parameter's value
+        """
         super().__init__(env)
         self.size = size
         self.goal_indices = goal_indices
         self.reward_delay = reward_delay
         self.respiration_reward = respiration_reward
         self.inactive_reward = inactive_reward
+        self.orientation_reward_reduction_ratio = orientation_reward_reduction_ratio
         self.observations = []
 
         self.target_found = False
@@ -25,12 +39,12 @@ class AgentReward(gym.Wrapper):
         update the rewards
         """
         for R in rewards:
-            state, reward = R
-            for i in range(self.env.observation_space.n):
+            index, reward = R
+            for i in range(self.env.observation_space[0].n):
                 for j in range(self.env.action_space.n):
             
                     sar = self.env.P[i][j][0]
-                    if sar[1] == state:
+                    if sar[1][0] == index: # compare position in state variable
                         self.env.P[i][j] = [(sar[0], sar[1], reward, sar[3])]
                         
         
@@ -42,20 +56,21 @@ class AgentReward(gym.Wrapper):
         stats:  whether to record stats about the current episode
         """
         obs, reward, done, info = self.env.step(action)
-        if obs in self.goal_indices: # the agent has found a goal and done will be True
+        index = obs[0]
+        if index in self.goal_indices: # the agent has found a goal and done will be True
             
             if "TimeLimit.truncated" not in info: # not timed out
 
             
-                # reward = self.goal_rewards[obs]['reward']
-                if self.goal_rewards[obs]['step_count']  == -1: # active target found
-                    self.targets_found_order.append(obs) # record the id of the target
-                    self.goal_rewards[obs]['step_count'] = self.env._elapsed_steps #record when this goal was found
+                # reward = self.goal_rewards[index]['reward']
+                if self.goal_rewards[index]['step_count']  == -1: # active target found
+                    self.targets_found_order.append(index) # record the id of the target
+                    self.goal_rewards[index]['step_count'] = self.env._elapsed_steps #record when this goal was found
 
                     info["Target.found"] = True # update info to show an active target was found
 
-                elif self.env._elapsed_steps - self.goal_rewards[obs]['step_count'] > self.reward_delay:
-                    self.goal_rewards[obs]['step_count'] = -1 #stop tracking the reward
+                elif self.env._elapsed_steps - self.goal_rewards[index]['step_count'] > self.reward_delay:
+                    self.goal_rewards[index]['step_count'] = -1 #stop tracking the reward
                     reward = 0
                 else:
                     reward = 0
@@ -78,10 +93,13 @@ class AgentReward(gym.Wrapper):
                     done = True # all targets have been found so stop
            
         
-        if action == Movement.NONE.value:
+        if self.env.last_state[0] == obs[0]: #agent has not moved
             reward = reward + self.inactive_reward
-
-        reward = reward + self.respiration_reward
+        
+        if self.env.last_state[1] == obs[1]: #agent is moving is the same orientation. Assume this requires less energy so adjust the respiration reward
+            reward = reward + self.respiration_reward - (self.respiration_reward * self.orientation_reward_reduction_ratio)
+        else:
+            reward = reward + self.respiration_reward
 
         self.observations.append(obs)
             

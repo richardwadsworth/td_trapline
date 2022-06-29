@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from IPython.display import display, clear_output
 from timeColouredPlots import doColourVaryingPlot2d
 from gym_utils import get_goal_coordinates
+from gym.envs.toy_text.foraging_agent import ActionType
 
 
 def initialise_plots(env):
@@ -28,7 +29,7 @@ def initialise_plots(env):
 
     xs_target, ys_target = [],[]
     for index in env.goal_indices:
-        x, y = get_goal_coordinates(index, env.observation_space.n)
+        x, y = get_goal_coordinates(index, env.observation_space[0].n)
         xs_target.append(x)
         ys_target.append(y)
     
@@ -42,14 +43,18 @@ def plotActionStateQuiver(env, q, fig1, ax1, ax2, xs_target, ys_target):
     def resolveActionState(actionState):
 
         #W, S, E, N
-        vertical = actionState[3] - actionState[1] 
-        horizontal = actionState[2] - actionState[0] 
+        vertical = actionState[ActionType.NORTH.value] - actionState[ActionType.SOUTH.value] 
+        horizontal = actionState[ActionType.EAST.value] - actionState[ActionType.WEST.value] 
 
         return horizontal, vertical
 
-    size=int(np.sqrt(env.observation_space.n))    
+    size=int(np.sqrt(env.observation_space[0].n))    
     
-    policyFound = [resolveActionState(q[x,:]) for x in range(env.observation_space.n)]
+    #get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
+    q_mean = np.mean(q, axis=(0))
+
+
+    policyFound = [resolveActionState(q_mean[x,:]) for x in range(env.observation_space[0].n)]
     
     
     i = np.arange(0,size) #rows
@@ -109,8 +114,8 @@ def plotAgentPath(env, fig1, ax3, ax4, xs_target, ys_target):
     ax3.set_title("Agent path")
 
     xs, ys = [], []
-    for i in env.observations:
-        x, y = get_goal_coordinates(i, env.observation_space.n)
+    for index, orientation in env.observations:
+        x, y = get_goal_coordinates(index, env.observation_space[0].n)
         xs.append(x)
         ys.append(y)
 
@@ -120,14 +125,14 @@ def plotAgentPath(env, fig1, ax3, ax4, xs_target, ys_target):
     
     # fix plot axis proportions to equal
     ax3.set_aspect('equal')
-    ax3.set_xlim([-1, int(np.sqrt(env.observation_space.n))])
-    ax3.set_ylim([0-1, int(np.sqrt(env.observation_space.n))])
+    ax3.set_xlim([-1, int(np.sqrt(env.observation_space[0].n))])
+    ax3.set_ylim([0-1, int(np.sqrt(env.observation_space[0].n))])
     ax3.invert_yaxis()
 
     # doColourVaryingPlot2d(xs, ys, ts, fig1, ax4, map='plasma', showBar=showbar)  # only draw colorbar once
     # ax4.set_aspect('equal')
-    # ax4.set_xlim([-1, int(np.sqrt(env.observation_space.n))+1])
-    # ax4.set_ylim([0-1, int(np.sqrt(env.observation_space.n))+1])
+    # ax4.set_xlim([-1, int(np.sqrt(env.observation_space[0].n))+1])
+    # ax4.set_ylim([0-1, int(np.sqrt(env.observation_space[0].n))+1])
     # ax4.invert_yaxis()
 
     display(fig1)    

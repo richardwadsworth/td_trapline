@@ -12,12 +12,20 @@ from gym.utils.renderer import Renderer
 
 from enum import Enum
 
-class Movement(Enum):
+class ActionType(Enum):
     WEST = 0
     SOUTH = 1
     EAST = 2
     NORTH = 3
     NONE = 4
+
+class Orientation(Enum):
+    WEST = 0
+    SOUTH = 1
+    EAST = 2
+    NORTH = 3
+    NONE = 4
+
 
 MAPS = {
     "4x4": ["SFFF", "FHFH", "FFFH", "HFFG"],
@@ -170,6 +178,7 @@ class ForagingAgentEnv(Env):
         map_name="4x4",
         is_slippery=True,
     ):
+
         if desc is None and map_name is None:
             desc = generate_random_map()
         elif desc is None:
@@ -178,7 +187,8 @@ class ForagingAgentEnv(Env):
         self.nrow, self.ncol = nrow, ncol = desc.shape
         self.reward_range = (0, 1)
 
-        nA = 5
+        nO = 5 # number of legal orientations
+        nA = 5 # number of legal actions
         nS = nrow * ncol
 
         self.initial_state_distrib = np.array(desc == b"S").astype("float64").ravel()
@@ -187,25 +197,29 @@ class ForagingAgentEnv(Env):
         self.P = {s: {a: [] for a in range(nA)} for s in range(nS)}
 
         def to_s(row, col):
-            return row * ncol + col
+            return (row * ncol + col)
 
         def inc(row, col, a):
-            if a == Movement.WEST.value:
+            """
+                Given an action, calculate the new row and column.
+                After an action the agent should be orientated (theta) in the direction of the action.
+            """
+            if a == ActionType.WEST.value:
                 col = max(col - 1, 0)
-            elif a == Movement.SOUTH.value:
+            elif a == ActionType.SOUTH.value:
                 row = min(row + 1, nrow - 1)
-            elif a == Movement.EAST.value:
+            elif a == ActionType.EAST.value:
                 col = min(col + 1, ncol - 1)
-            elif a == Movement.NORTH.value:
+            elif a == ActionType.NORTH.value:
                 row = max(row - 1, 0)
-            elif a == Movement.NONE.value:
-                #do nothing
-                pass
-            return (row, col)
+            
+            theta = a # record new orientation.  TODO: thanks about orientation when movement is NONE
+
+            return (row, col, theta)
 
         def update_probability_matrix(row, col, action):
-            newrow, newcol = inc(row, col, action)
-            newstate = to_s(newrow, newcol)
+            newrow, newcol, newtheta = inc(row, col, action)
+            newstate = (to_s(newrow, newcol), newtheta) # state comprises position and orientation (theta)
             newletter = desc[newrow, newcol]
             done = bytes(newletter) in b"GH"
             reward = float(newletter == b"G")
@@ -229,7 +243,7 @@ class ForagingAgentEnv(Env):
                         else:
                             li.append((1.0, *update_probability_matrix(row, col, a)))
 
-        self.observation_space = spaces.Discrete(nS)
+        self.observation_space = spaces.Tuple((spaces.Discrete(nS), spaces.Discrete(nO)))
         self.action_space = spaces.Discrete(nA)
 
         assert render_mode is None or render_mode in self.metadata["render_modes"]
@@ -248,15 +262,24 @@ class ForagingAgentEnv(Env):
         self.start_img = None
 
     def step(self, a):
-        transitions = self.P[self.s][a]
+        transitions = self.P[self.s[0]][a]
         i = categorical_sample([t[0] for t in transitions], self.np_random)
         p, s, r, d = transitions[i]
-        self.s = s
+        
+        self.last_state = self.s
+
+        if a == ActionType.NONE.value and s[1] == Orientation.NONE.value:
+            #the agent didn't go anywhere so retain the previous orientation
+            self.s = (s[0], self.s[1])
+        else:
+            self.s = s
+        
         self.lastaction = a
+
 
         self.renderer.render_step()
 
-        return (int(s), r, d, {"prob": p})
+        return (s, r, d, {"prob": p})
 
     def reset(
         self,
@@ -266,16 +289,18 @@ class ForagingAgentEnv(Env):
         options: Optional[dict] = None,
     ):
         super().reset(seed=seed)
-        self.s = categorical_sample(self.initial_state_distrib, self.np_random)
+        theta = categorical_sample([1,1,1,1], self.np_random) # randomise the directionality
+        self.s = (int(categorical_sample(self.initial_state_distrib, self.np_random)), int(theta)) # state includes theta
+        self.last_state = None
         self.lastaction = None
 
         self.renderer.reset()
         self.renderer.render_step()
 
         if not return_info:
-            return int(self.s)
+            return self.s
         else:
-            return int(self.s), {"prob": 1}
+            return self.s, {"prob": 1}
 
     def render(self, mode="human"):
         if self.render_mode is not None:
@@ -378,7 +403,7 @@ class ForagingAgentEnv(Env):
                 pygame.draw.rect(self.window_surface, (180, 200, 230), rect, 1)
 
         # paint the elf
-        bot_row, bot_col = self.s // self.ncol, self.s % self.ncol
+        bot_row, bot_col = self.s[0] // self.ncol, self.s[0] % self.ncol
         cell_rect = (
             bot_col * cell_width,
             bot_row * cell_height,
@@ -413,7 +438,7 @@ class ForagingAgentEnv(Env):
         desc = self.desc.tolist()
         outfile = StringIO()
 
-        row, col = self.s // self.ncol, self.s % self.ncol
+        row, col = self.s[0] // self.ncol, self.s[0] % self.ncol
         desc = [[c.decode("utf-8") for c in line] for line in desc]
         desc[row][col] = utils.colorize(desc[row][col], "red", highlight=True)
         if self.lastaction is not None:

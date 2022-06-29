@@ -5,7 +5,7 @@ class Policy(object):
     def __init__(self, env) -> None:
         self.env = env
 
-    def action(self, q, s):
+    def action(self, q, index):
         """
         implement this function in the sub class
         """
@@ -25,7 +25,16 @@ class Policy(object):
 
         return acc_returns/n
         
-class GreedyPolicy(Policy):
+class GreedyDirectionalPolicy(Policy):
+
+    def __init__(self, env):
+        super().__init__(env)
+
+    def action(self, q, s):
+        return np.argmax(q[s[1], s[0]])
+
+
+class GreedyFlattenedPolicy(Policy):
 
     def __init__(self, env):
         super().__init__(env)
@@ -33,14 +42,15 @@ class GreedyPolicy(Policy):
     def action(self, q, s):
         return np.argmax(q[s])
 
-class SoftmaxPolicy(Policy):
+class SoftmaxDirectionalPolicy(Policy):
+    
     def __init__(self, env, rng):
         super().__init__(env)
         self.rng = rng
 
-    def action(self, q, s, T):
 
-        probs = np.exp(q[s]/T) / np.sum(np.exp(q[s]/T))
+    def action(self, q, s, T):
+        probs = np.exp(q[s[1]][s[0]]/T) / np.sum(np.exp(q[s[1]][s[0]]/T))
         probs =  probs/ np.sum(probs) # Ensure probs is normalised to 1 (to avoid rounding errors)
         randchoice = self.rng.random()
         flag = 1; k = 1
@@ -56,3 +66,4 @@ class SoftmaxPolicy(Policy):
 
     def get_action(self, T):     
         return lambda q,s: self.action(q, s, T=T)
+
