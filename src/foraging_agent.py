@@ -23,7 +23,7 @@ class Orientation(Enum):
     WEST = 0
     SOUTH = 1
     EAST = 2
-    NORTH = 3
+    NORTH = 3    
     NONE = 4
 
 
@@ -187,7 +187,7 @@ class ForagingAgentEnv(Env):
         self.nrow, self.ncol = nrow, ncol = desc.shape
         self.reward_range = (0, 1)
 
-        nO = 5 # number of legal orientations
+        nO = 4 # number of legal orientations
         nA = 5 # number of legal actions
         nS = nrow * ncol
 
@@ -243,7 +243,7 @@ class ForagingAgentEnv(Env):
                         else:
                             li.append((1.0, *update_probability_matrix(row, col, a)))
 
-        self.observation_space = spaces.Tuple((spaces.Discrete(nS), spaces.Discrete(nO)))
+        self.observation_space = spaces.Tuple((spaces.Discrete(nS), spaces.Discrete(nO))) # State Space and Orientation Space
         self.action_space = spaces.Discrete(nA)
 
         assert render_mode is None or render_mode in self.metadata["render_modes"]
@@ -268,8 +268,10 @@ class ForagingAgentEnv(Env):
         
         self.last_state = self.s
 
-        if a == ActionType.NONE.value and s[1] == Orientation.NONE.value:
-            #the agent didn't go anywhere so retain the previous orientation
+        if s[1] == Orientation.NONE.value:
+            # the agent's orientation has not changed so retain the orientation of the last step. 
+            # note that is the agent bounces off the side of the arena, the orientation will change to the 
+            # direction it was attempting to move.
             self.s = (s[0], self.s[1])
         else:
             self.s = s
@@ -279,7 +281,7 @@ class ForagingAgentEnv(Env):
 
         self.renderer.render_step()
 
-        return (s, r, d, {"prob": p})
+        return (self.s, r, d, {"prob": p})
 
     def reset(
         self,
