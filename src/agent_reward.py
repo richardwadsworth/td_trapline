@@ -1,7 +1,4 @@
 import gym
-import numpy as np
-from gym.envs.toy_text.foraging_agent import ActionType
-
 class AgentReward(gym.Wrapper):
     def __init__(self, env, size, goal_indices, reward_delay=50, respiration_reward=0, inactive_reward=0, orientation_reward_reduction_ratio=0.75):
         """
@@ -61,37 +58,41 @@ class AgentReward(gym.Wrapper):
             
             if "TimeLimit.truncated" not in info: # not timed out
 
-            
                 # reward = self.goal_rewards[index]['reward']
-                if self.goal_rewards[index]['step_count']  == -1: # active target found
+                if self.goal_rewards[index]['step_count']  == -1: 
+                    # active target found
+
                     self.targets_found_order.append(index) # record the id of the target
                     self.goal_rewards[index]['step_count'] = self.env._elapsed_steps #record when this goal was found
 
                     info["Target.found"] = True # update info to show an active target was found
 
+                    # check to see if all targets have been found.  i.e. if there are not any undiscovered active targets
+                    done = True 
+                    for target in reversed(self.goal_rewards.items()): # as an optimisation, check the "last" target first
+                        if target[1]['step_count'] == -1:
+                            done = False
+                            break
+
+                    if done and stats:
+                        self.targets_found_order_by_episode.append(self.targets_found_order) # record which order the targets were found
+                        # self.all_targets_found_total_steps.append(self.env._elapsed_steps)
+
+                        # if self.goal_indices == self.targets_found_order:
+                        #     shortest_route = ""
+                        # else:
+                        #     shortest_route = "!!NOT SHORTEST ROUTE!!"
+                        # print("All targets found in average {} steps. {}".format(int(np.mean(self.all_targets_found_total_steps)),shortest_route))
+
                 elif self.env._elapsed_steps - self.goal_rewards[index]['step_count'] > self.reward_delay:
                     self.goal_rewards[index]['step_count'] = -1 #stop tracking the reward
                     reward = 0
+                    done = False # NOT done yet
+
                 else:
                     reward = 0
-                    
+                    done = False # NOT done yet, there are still undiscovered targets
 
-                
-                if any(item for item in self.goal_rewards.items() if item[1]['step_count'] == -1):    
-                    done = False # override done.  Keep going
-                else:
-                    if stats:
-                        self.targets_found_order_by_episode.append(self.targets_found_order) # record which order the targets were found
-                        self.all_targets_found_total_steps.append(self.env._elapsed_steps)
-
-                    # if self.goal_indices == self.targets_found_order:
-                    #     shortest_route = ""
-                    # else:
-                    #     shortest_route = "!!NOT SHORTEST ROUTE!!"
-                    # print("All targets found in average {} steps. {}".format(int(np.mean(self.all_targets_found_total_steps)),shortest_route))
-
-                    done = True # all targets have been found so stop
-           
         
         if self.env.last_state[0] == obs[0]: #agent has not moved
             reward = reward + self.inactive_reward
@@ -103,7 +104,6 @@ class AgentReward(gym.Wrapper):
 
         self.observations.append(obs)
             
-        
         return obs, reward, done, info
 
     def reset(self,*,seed = None):
