@@ -15,31 +15,39 @@ from rl_td import train
 from q_function import initialise_q, print_q, print_optimal_q_policy
 from policies import GreedyDirectionalPolicy
 
-
 # parameters for sarsa(lambda)
+
+# # opposite corner 4
+# size = 4
+# MDP = np.array([(np.square(size)-1,1.0)]) #markov decision chain including rewards for each target
 
 # # opposite corner 9
 # size = 9
-# MDP = np.array([(80,1.0)]) #markov decision chain including rewards for each target
+# MDP = np.array([(np.square(size)-1,1.0)]) #markov decision chain including rewards for each target
+
+# # opposite corner 13
+# size = 13
+# MDP = np.array([(np.square(size)-1,1.0)]) #markov decision chain including rewards for each target
 
 # # opposite corner 19
 # size = 19
-# MDP = np.array([(300,1.0)]) #markov decision chain including rewards for each target
+# MDP = np.array([(np.square(size)-1,1.0)]) #markov decision chain including rewards for each target
 
 # # equilateral triangle
 # size = 8
 # MDP = np.array([(50,1.0), (22,1.0)]) #markov decision chain including rewards for each target
 
-# # straightish line
-# size = 19
-# MDP = np.array([(62,1.0), (181,1.0), (300, 1.0)]) #markov decision chain including rewards for each target
-
-# curved line
+# straight-ish line
 size = 19
-MDP = np.array([(62,1.0), (198,1.0), (300, 1.0)]) #markov decision chain including rewards for each target
+MDP = np.array([(62,1.0), (181,1.0), (300, 1.0)]) #markov decision chain including rewards for each target
 
+# # curved line
+# size = 19
+# MDP = np.array([(62,1.0), (198,1.0), (300, 1.0)]) #markov decision chain including rewards for each target
 
-episodes = 4500
+rng = np.random.default_rng() # random number generator
+
+episodes = 2000
 STEPS = 200
 gamma = 0.9 # discount factor
 alpha = 0.05 # learning rate
@@ -47,14 +55,14 @@ eligibility_decay = 0.3 # eligibility trace decay
 
 #softmax temperature annealing
 epsilon_start = 1
-epsilon_end = 0.2
-epsilon_annealing_stop = int(episodes*0.8)
+epsilon_end = 0.25
+epsilon_annealing_stop = int(episodes*0.6)
 
-respiration_reward =  -7/(STEPS+(STEPS*0.1)) # reward for moving 1 step in an episode
-inactive_reward = -0.01 # reward for action resulting in no movement
-orientation_reward_reduction_ratio = 0.9
+respiration_reward =  -1/(STEPS+(STEPS*0.1)) # negative reward for moving 1 step in an episode
+movement_reward = respiration_reward*2 # positive reward for moving, to discourage not moving
+change_in_orientation_reward = -movement_reward*0.5 #negative reward if orientation changes
 
-env = initialise_gym(size, MDP, respiration_reward, inactive_reward, orientation_reward_reduction_ratio, STEPS)
+env = initialise_gym(size, MDP, respiration_reward, movement_reward, change_in_orientation_reward, STEPS)
 
 do_in_epsisode_plots=True
 
@@ -70,7 +78,19 @@ q = initialise_q(env)
 plot_data = initialise_plots(env)
 
 # train the algorithm
-q, performance, ax = train(env, episodes, STEPS, eligibility_decay, alpha, gamma, epsilon_start, epsilon_end, epsilon_annealing_stop, q, plot_data, do_in_epsisode_plots)
+q, performance, ax = train(env, 
+    episodes, 
+    STEPS, 
+    eligibility_decay, 
+    alpha, 
+    gamma, 
+    epsilon_start, 
+    epsilon_end, 
+    epsilon_annealing_stop, 
+    q, 
+    plot_data, 
+    do_in_epsisode_plots, 
+    rng)
 
 # visual the algorithm's performance
 plot_performance(episodes, STEPS, performance, plot_data)

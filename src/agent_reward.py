@@ -1,6 +1,6 @@
 import gym
 class AgentReward(gym.Wrapper):
-    def __init__(self, env, size, goal_indices, reward_delay=50, respiration_reward=0, inactive_reward=0, orientation_reward_reduction_ratio=0.75):
+    def __init__(self, env, size, goal_indices, reward_delay=50, respiration_reward=0, movement_reward=0, change_in_orientation_reward=0):
         """
 
         PARAMS
@@ -10,17 +10,16 @@ class AgentReward(gym.Wrapper):
         goal_indices (the indices of the targets within the arena)
         reward_delay: the number of episodes steps to wait until a visited target's reward is reinstated
         respiration_reward: the reward per time step (normally negative)
-        inactive_reward: the reward for not moving in a time step (normally negative)
-        orientation_reward_reduction_ratio: if the agent does not change direction during a step we assume this is more rewarding.  Reduce the 
-            respiration_reward by a ratio of this parameter's value
+        movement_reward: the reward for moving in a time step (normally positive)
+        change_in_orientation_reward: a reward for changing direction (normally negative)
         """
         super().__init__(env)
         self.size = size
         self.goal_indices = goal_indices
         self.reward_delay = reward_delay
         self.respiration_reward = respiration_reward
-        self.inactive_reward = inactive_reward
-        self.orientation_reward_reduction_ratio = orientation_reward_reduction_ratio
+        self.movement_reward = movement_reward
+        self.change_in_orientation_reward = change_in_orientation_reward
         self.observations = []
 
         self.target_found = False
@@ -94,14 +93,20 @@ class AgentReward(gym.Wrapper):
                     done = False # NOT done yet, there are still undiscovered targets
 
         
-        if self.env.last_state[0] == obs[0]: #agent has not moved
-            reward = reward + self.inactive_reward
-        
-        if self.env.last_state[1] == obs[1]: #agent is moving is the same orientation. Assume this requires less energy so adjust the respiration reward
-            reward = reward + self.respiration_reward - (self.respiration_reward * self.orientation_reward_reduction_ratio)
-        else:
-            reward = reward + self.respiration_reward
+        ## other rewards
 
+        # respiration reward.  a negative reward for every time step
+        reward = reward + self.respiration_reward
+
+        # movement reward.  a positive reward if agent moves, to encourage exploration
+        if self.env.last_state[0] != obs[0]: #agent has moved
+            reward = reward + self.movement_reward
+        
+        # orientation reward.  a negative reward if orientation changes
+        if self.env.last_state[1] != obs[1]: #agent is changed direction
+            reward = reward + self.change_in_orientation_reward
+
+        
         self.observations.append(obs)
             
         return obs, reward, done, info

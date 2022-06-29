@@ -1,12 +1,8 @@
-from pickle import FALSE
 import numpy as np
 from plots import plotAgentPath, plotActionStateQuiver
-from policies import SoftmaxDirectionalPolicy
+from policies import SoftmaxDirectionalPolicy, SoftmaxFlattenedPolicy
 
-rng = np.random.default_rng(5) # random number generator
-
-
-def train(env, episodes, steps, eligibility_decay, alpha, gamma, epsilon_start, epsilon_end, epsilon_annealing_stop, q, plot_data, do_plot=False):
+def train(env, episodes, steps, eligibility_decay, alpha, gamma, epsilon_start, epsilon_end, epsilon_annealing_stop, q, plot_data, do_plot=False, rng = np.random.default_rng()):
 
     policy = SoftmaxDirectionalPolicy(env, rng)
 
@@ -26,29 +22,29 @@ def train(env, episodes, steps, eligibility_decay, alpha, gamma, epsilon_start, 
         E = np.zeros((env.observation_space[1].n, env.observation_space[0].n, env.action_space.n))
         
         # reset the environment
-        state = env.reset()
+        observation = env.reset()
 
         # get the first action using the annealed softmax policy
-        action = policy.action(q, state, epsilon)
+        action = policy.action(q, observation, epsilon)
         
         while True:
 
             # update the eligibility traces.  Assign a weight of 1 to the last visited state
             E = eligibility_decay * gamma * E
-            E[state[1], state[0], action] += 1
+            E[observation[1], observation[0], action] += 1
             
             # step through the environment
-            new_state, reward, done, info = env.step(action, True)
+            new_observation, reward, done, info = env.step(action, True)
             
             # get the next action using the annealed softmax policy
-            new_action = policy.action(q, new_state, epsilon)
+            new_action = policy.action(q, new_observation, epsilon)
 
             # Calculate the delta update and update the Q-table using the SARSA TD(lambda) rule:
-            delta = reward + gamma * q[new_state[1], new_state[0], new_action] - q[state[1], state[0], action]
+            delta = reward + gamma * q[new_observation[1], new_observation[0], new_action] - q[observation[1], observation[0], action]
             q = q + alpha * delta * E 
 
             # update the state and action values
-            state, action = new_state, new_action
+            observation, action = new_observation, new_action
 
             # if reward > 0:
             #     plotAgentPath(env, fig1, ax3, ax4, xs_target,ys_target)
