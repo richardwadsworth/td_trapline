@@ -60,10 +60,10 @@ def print_optimal_q_policy(env, q_mean):
     policyFound = [resolveActionDict(q_mean, s) for s in range(env.observation_space[0].n)]
 
     print("Greedy policy found:")
-    idxs = np.arange(0, env.observation_space[0].n, int(np.sqrt(env.observation_space[0].n)))
+    idxs = np.arange(0, env.observation_space[0].n, env.size)
     for idx in idxs:
         row = []
-        for i in range(int(np.sqrt(env.observation_space[0].n))):
+        for i in range(env.size):
             row.append(policyFound[idx+i])
         print(','. join(row))
             

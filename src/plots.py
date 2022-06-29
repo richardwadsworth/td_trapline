@@ -27,13 +27,19 @@ def initialise_plots(env):
     remove_axis_ticks(ax2)
     remove_axis_ticks(ax3)
 
+    # create coordinate lookup table
+    xs_coordinate_map, ys_coordinate_map = [], []
+    for index in range(env.observation_space[0].n):
+        x, y = get_goal_coordinates(index, env.observation_space[0].n)
+        xs_coordinate_map.append(x)
+        ys_coordinate_map.append(y)
+
     xs_target, ys_target = [],[]
     for index in env.goal_indices:
-        x, y = get_goal_coordinates(index, env.observation_space[0].n)
-        xs_target.append(x)
-        ys_target.append(y)
+        xs_target.append(xs_coordinate_map[index])
+        ys_target.append(ys_coordinate_map[index])
     
-    return (fig1, ax1, ax2, ax3, ax4, xs_target, ys_target)
+    return (fig1, ax1, ax2, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target)
 
 
 # %%
@@ -48,25 +54,21 @@ def plotActionStateQuiver(env, q, fig1, ax1, ax2, xs_target, ys_target):
 
         return horizontal, vertical
 
-    size=int(np.sqrt(env.observation_space[0].n))    
-    
     #get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
     q_mean = np.mean(q, axis=(0))
 
-
     policyFound = [resolveActionState(q_mean[x,:]) for x in range(env.observation_space[0].n)]
-    
-    
-    i = np.arange(0,size) #rows
-    j = np.arange(0,size) #colums
+        
+    i = np.arange(0, env.size) #rows
+    j = np.arange(0, env.size) #colums
 
     ii, jj = np.meshgrid(i,j)#, indexing='ij')
 
     # print("row indices:\n{}\n".format(ii))
     # print("column indices:\n{}".format(jj))
 
-    U = np.reshape([i[0] for i in policyFound], (size, size))
-    V = np.reshape([i[1] for i in policyFound], (size, size))
+    U = np.reshape([i[0] for i in policyFound], (env.size, env.size))
+    V = np.reshape([i[1] for i in policyFound], (env.size, env.size))
 
     # Normalize the arrows:
     U_norm = U/np.max(np.abs(U))
@@ -97,7 +99,7 @@ def plotActionStateQuiver(env, q, fig1, ax1, ax2, xs_target, ys_target):
     plt.pause(0.0000000001)
 
 # %%
-def plotAgentPath(env, fig1, ax3, ax4, xs_target, ys_target):
+def plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target):
     
     #set up plot
     if ax3.get_title() == "":
@@ -115,9 +117,8 @@ def plotAgentPath(env, fig1, ax3, ax4, xs_target, ys_target):
 
     xs, ys = [], []
     for index, orientation in env.observations:
-        x, y = get_goal_coordinates(index, env.observation_space[0].n)
-        xs.append(x)
-        ys.append(y)
+        xs.append(xs_coordinate_map[index])
+        ys.append(ys_coordinate_map[index])
 
     ts = np.arange(0, len(xs))
 
@@ -125,15 +126,9 @@ def plotAgentPath(env, fig1, ax3, ax4, xs_target, ys_target):
     
     # fix plot axis proportions to equal
     ax3.set_aspect('equal')
-    ax3.set_xlim([-1, int(np.sqrt(env.observation_space[0].n))])
-    ax3.set_ylim([0-1, int(np.sqrt(env.observation_space[0].n))])
+    ax3.set_xlim([-1, env.size])
+    ax3.set_ylim([0-1, env.size])
     ax3.invert_yaxis()
-
-    # doColourVaryingPlot2d(xs, ys, ts, fig1, ax4, map='plasma', showBar=showbar)  # only draw colorbar once
-    # ax4.set_aspect('equal')
-    # ax4.set_xlim([-1, int(np.sqrt(env.observation_space[0].n))+1])
-    # ax4.set_ylim([0-1, int(np.sqrt(env.observation_space[0].n))+1])
-    # ax4.invert_yaxis()
 
     display(fig1)    
     clear_output(wait = True)
@@ -143,7 +138,7 @@ def plotAgentPath(env, fig1, ax3, ax4, xs_target, ys_target):
 def plot_performance(episodes, steps, performance, plot_data):
 
     #unpack plot objects
-    fig1, _, _, _, ax4, _, _ = plot_data
+    fig1, _, _, _, ax4, _, _, _, _= plot_data
     
 
     ax4.plot(steps*np.arange(episodes//steps), performance)

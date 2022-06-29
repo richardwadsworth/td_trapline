@@ -11,7 +11,7 @@ def train(env, episodes, steps, eligibility_decay, alpha, gamma, epsilon_start, 
     policy = SoftmaxDirectionalPolicy(env, rng)
 
     #unpack plot objects
-    fig1, ax1, ax2, ax3, ax4, xs_target, ys_target = plot_data
+    fig1, ax1, ax2, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target = plot_data
         
     performance = np.ndarray(episodes//steps) # initialise array to track algorithm's performance
 
@@ -70,14 +70,14 @@ def train(env, episodes, steps, eligibility_decay, alpha, gamma, epsilon_start, 
             
             if do_plot:
                 fig1.suptitle("Episode {}".format(episode))
-                plotAgentPath(env, fig1, ax3, ax4, xs_target,ys_target)
+                plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target,ys_target)
                 plotActionStateQuiver(env, q, fig1, ax1, ax2, xs_target,ys_target)
                 # set the spacing between subplots
                 # fig1.tight_layout()
                 
 
     
-    plotAgentPath(env, fig1, ax3, ax4, xs_target,ys_target) # plot the path of the agent's last episode
+    plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target,ys_target) # plot the path of the agent's last episode
     plotActionStateQuiver(env, q, fig1, ax1, ax2,xs_target,ys_target) # plot the quiver graph of the agent's last episode
     fig1.tight_layout()
 
