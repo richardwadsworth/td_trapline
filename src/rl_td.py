@@ -22,7 +22,6 @@ def train(env, episodes, steps, eligibility_decay, alpha, gamma, epsilon_start, 
         epsilon = (epsilon_start * (epsilon_annealing_stop - inew) \
                + epsilon_end * inew) / epsilon_annealing_stop
 
-
         # initialise eligibility traces matrix to zero
         E = np.zeros((env.observation_space[1].n, env.observation_space[0].n, env.action_space.n))
         

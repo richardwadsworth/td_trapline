@@ -39,7 +39,7 @@ size = 19
 MDP = np.array([(62,1.0), (198,1.0), (300, 1.0)]) #markov decision chain including rewards for each target
 
 
-episodes = 5000
+episodes = 4500
 STEPS = 200
 gamma = 0.9 # discount factor
 alpha = 0.05 # learning rate
@@ -48,13 +48,11 @@ eligibility_decay = 0.3 # eligibility trace decay
 #softmax temperature annealing
 epsilon_start = 1
 epsilon_end = 0.2
-epsilon_annealing_stop = int(episodes/3)
+epsilon_annealing_stop = int(episodes*0.8)
 
 respiration_reward =  -7/(STEPS+(STEPS*0.1)) # reward for moving 1 step in an episode
 inactive_reward = -0.01 # reward for action resulting in no movement
 orientation_reward_reduction_ratio = 0.9
-
-
 
 env = initialise_gym(size, MDP, respiration_reward, inactive_reward, orientation_reward_reduction_ratio, STEPS)
 
