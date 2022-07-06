@@ -114,6 +114,7 @@ def plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_
     ax3.scatter([0],[0], c='g', s=100, marker='^') #origin
     ax3.scatter(xs_target,ys_target, c='brown', s=100, marker='o') #goal
     ax3.set_title("Agent path")
+    ax3.grid()
 
     xs, ys = [], []
     for index, orientation in env.observations:

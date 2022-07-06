@@ -21,10 +21,7 @@ from policies import GreedyDirectionalPolicy
 # size = 4
 # MDP = np.array([(np.square(size)-1,1.0)]) #markov decision chain including rewards for each target
 
-# # opposite corner 9
-# size = 9
-# MDP = np.array([(np.square(size)-1,1.0)]) #markov decision chain including rewards for each target
-
+# 
 # # opposite corner 13
 # size = 13
 # MDP = np.array([(np.square(size)-1,1.0)]) #markov decision chain including rewards for each target
@@ -37,9 +34,28 @@ from policies import GreedyDirectionalPolicy
 # size = 8
 # MDP = np.array([(50,1.0), (22,1.0)]) #markov decision chain including rewards for each target
 
+def map_coord_to_index(size, x, y):
+    return (x*size)+y
+
+# hexagon
+# size = 12
+# MDP = np.array([(map_coord_to_index(size, 3, 3),1.0), 
+#                 (map_coord_to_index(size, 2, 6),1.0),
+#                 (map_coord_to_index(size, 6, 2),1.0),
+#                 (map_coord_to_index(size, 5, 9),1.0),
+#                 (map_coord_to_index(size, 9, 5),1.0),
+#                 (map_coord_to_index(size, 8, 8),1.0)
+#                 ])
+
+# opposite corner 9
+# size = 9
+# MDP = np.array([(np.square(size)-1,1.0)]) #markov decision chain including rewards for each target
+
 # straight-ish line
 size = 19
-MDP = np.array([(62,1.0), (181,1.0), (300, 1.0)]) #markov decision chain including rewards for each target
+MDP = np.array([(64,1.0), 
+    (180,1.0), 
+    (300, 1.0)]) #markov decision chain including rewards for each target
 
 # # curved line
 # size = 19
@@ -47,18 +63,19 @@ MDP = np.array([(62,1.0), (181,1.0), (300, 1.0)]) #markov decision chain includi
 
 rng = np.random.default_rng() # random number generator
 
-episodes = 2000
-STEPS = 200
+
+STEPS = 250 #np.round(np.square(size),-2) #200
+episodes = 2000 #STEPS * 10
 gamma = 0.9 # discount factor
 alpha = 0.05 # learning rate
 eligibility_decay = 0.3 # eligibility trace decay
 
 #softmax temperature annealing
 epsilon_start = 1
-epsilon_end = 0.25
-epsilon_annealing_stop = int(episodes*0.6)
+epsilon_end = 0.2
+epsilon_annealing_stop = int(episodes*0.5)
 
-respiration_reward =  -1/(STEPS+(STEPS*0.1)) # negative reward for moving 1 step in an episode
+respiration_reward = -1/np.square(size) # -1/(STEPS+(STEPS*0.1)) # negative reward for moving 1 step in an episode
 movement_reward = respiration_reward*2 # positive reward for moving, to discourage not moving
 change_in_orientation_reward = -movement_reward*0.5 #negative reward if orientation changes
 
@@ -70,7 +87,7 @@ print("Action space = ", env.action_space)
 print("Observation space = ", env.observation_space)
 
 env.reset()
-env.render()
+# env.render()
 
 # initialise the action state values
 q = initialise_q(env)

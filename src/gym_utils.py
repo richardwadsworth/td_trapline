@@ -21,46 +21,6 @@ def register_gym():
 
 def initialise_gym(size, MDP, respiration_reward, movement_reward, change_in_orientation_reward, max_episode_steps=100):
 
-    # size = 19 # size of grid square
-    # mid_point = int(np.floor(size /2))
-    # left_point = mid_point - int(np.floor(mid_point /2))
-    # right_point = mid_point + int(np.floor(mid_point /2))
-    
-    
-
-    # goal_indices = [4*size+mid_point, 
-    #             6*size+left_point, 6*size+right_point,
-    #             9*size+left_point, 9*size+right_point,
-    #             12*size+left_point, 12*size+right_point,
-    #             14*size+mid_point, 
-    #             ]
-
-    
-    # straightish line
-    # goal_indices = [3*size+left_point, 
-    #             9*size+mid_point+1, 
-    #             15*size+right_point+2,
-                 
-    #             ]
-
-
-    # size = 8
-    # goal_indices = int(np.floor(size /2))
-                    
-    # # curved line
-    # goal_indices = [3*size+left_point, 
-    #             5*size+mid_point+1, 
-    #             7*size+right_point,
-    #             # 9*size+right_point+1, 
-    #             11*size+right_point+1, 
-    #             # 13*size+right_point, 
-    #             15*size+right_point-1, 
-    #             18*size+right_point-4 
-    #             ]
-
-
-    # size=4
-    # goal_indices = [15]
 
     goal_indices = [int(x) for x in MDP[:,0]]
 
@@ -70,7 +30,7 @@ def initialise_gym(size, MDP, respiration_reward, movement_reward, change_in_ori
     ## note the order of the goal indices is important!! it is used to indicate the shortest route
     desc = generate_random_map_extended(goal_indices, size=size, p=1.0)
 
-    env = gym.make('ForagingAgent-v1', is_slippery=False, max_episode_steps=max_episode_steps, desc=desc)
+    env = gym.make('ForagingAgent-v1', is_slippery=True, max_episode_steps=max_episode_steps, desc=desc)
 
     wrapped_env = AgentReward(env, size, goal_indices, max_episode_steps+1, respiration_reward=respiration_reward, movement_reward=movement_reward, change_in_orientation_reward=change_in_orientation_reward)
 
