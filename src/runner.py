@@ -53,9 +53,10 @@ def map_coord_to_index(size, x, y):
 
 # straight-ish line
 size = 19
-MDP = np.array([(64,1.0), 
-    (180,1.0), 
-    (300, 1.0)]) #markov decision chain including rewards for each target
+MDP = np.array([(map_coord_to_index(size, 6, 6),1.0), 
+                (map_coord_to_index(size, 10, 10),1.0),
+                (map_coord_to_index(size, 14, 14),1.0)
+                ])
 
 # # curved line
 # size = 19
@@ -63,6 +64,7 @@ MDP = np.array([(64,1.0),
 
 rng = np.random.default_rng() # random number generator
 
+is_stochastic = False
 
 STEPS = 250 #np.round(np.square(size),-2) #200
 episodes = 2000 #STEPS * 10
@@ -75,11 +77,11 @@ epsilon_start = 1
 epsilon_end = 0.2
 epsilon_annealing_stop = int(episodes*0.5)
 
-respiration_reward = -1/np.square(size) # -1/(STEPS+(STEPS*0.1)) # negative reward for moving 1 step in an episode
+respiration_reward =  -1/np.square(size) # -1/(STEPS+(STEPS*0.1)) # negative reward for moving 1 step in an episode
 movement_reward = respiration_reward*2 # positive reward for moving, to discourage not moving
-change_in_orientation_reward = -movement_reward*0.5 #negative reward if orientation changes
+change_in_orientation_reward = 0#-movement_reward*0.5 #negative reward if orientation changes
 
-env = initialise_gym(size, MDP, respiration_reward, movement_reward, change_in_orientation_reward, STEPS)
+env = initialise_gym(size, MDP, is_stochastic, respiration_reward, movement_reward, change_in_orientation_reward, STEPS)
 
 do_in_epsisode_plots=True
 

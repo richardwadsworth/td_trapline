@@ -36,8 +36,6 @@ def train(env, episodes, steps, eligibility_decay, alpha, gamma, epsilon_start, 
             # step through the environment
             new_observation, reward, done, info = env.step(action, True)
             
-            reward = max(0.0, reward)
-
             # get the next action using the annealed softmax policy
             new_action = policy.action(q, new_observation, epsilon)
 
