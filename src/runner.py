@@ -75,12 +75,12 @@ rng = np.random.default_rng() # random number generator
 
 is_stochastic = False
 
-episodes = 500
+episodes = 100
 STEPS = 20 
 plot_rate = 5 # rate at which to plot predictions
 gamma = 0.9 # discount factor
-alpha_actor = 0.1 # actor learning rate
-alpha_critic = 0.1 # critic learning rate
+alpha_actor = alpha_critic = 0.3 # actor learning rate, critic learning rate
+# alpha_critic = 0.3 # 
 eligibility_decay = 0.3 # eligibility trace decay
 
 #softmax temperature annealing
@@ -89,8 +89,8 @@ epsilon_end = 0.2
 epsilon_annealing_stop = int(episodes*0.75)
 
 respiration_reward = -0.01 # -1/np.square(size) # -1/(STEPS+(STEPS*0.1)) # negative reward for moving 1 step in an episode
-stationary_reward = -0.001 # respiration_reward*2 # positive reward for moving, to discourage not moving
-revisit_inactive_target_reward = -0.2 # negative reward for revisiting an inactive target (i.e. one that has already been visited)
+stationary_reward = -0.01 # respiration_reward*2 # positive reward for moving, to discourage not moving
+revisit_inactive_target_reward = -0.1 # negative reward for revisiting an inactive target (i.e. one that has already been visited)
 change_in_orientation_reward = 0#-stationary_reward*0.5 #negative reward if orientation changes
 
 env = initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, STEPS)
@@ -132,6 +132,9 @@ actor, performance, ax = train(env,
     do_in_epsisode_plots, 
     rng)
 
+print("Training performance mean: {}".format(np.mean(performance)))
+print("Training performance stdev: {}".format(np.std(performance)))
+
 # visual the algorithm's performance
 plot_performance(episodes, STEPS, performance, plot_rate, plot_data)
 
@@ -141,11 +144,11 @@ greedyPolicyAvgPerf =policy_predict.average_performance(policy_predict.action, q
 #get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
 q_mean = np.mean(actor, axis=(0))
 
-# print the final action state values
-print_q(env, q_mean)
+# # print the final action state values
+# print_q(env, q_mean)
 
-# print the optimal policy in human readable form
-print_optimal_q_policy(env, q_mean)
+# # print the optimal policy in human readable form
+# print_optimal_q_policy(env, q_mean)
 
 print("Greedy policy SARSA performance =", greedyPolicyAvgPerf) 
 
