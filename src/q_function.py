@@ -6,10 +6,10 @@ from gym.envs.toy_text.foraging_agent import ActionType
 
 # %%
 actionsDict = {}
-actionsDict[ActionType.WEST.value] = " W "
-actionsDict[ActionType.SOUTH.value] = " S "
-actionsDict[ActionType.EAST.value] = " E "
-actionsDict[ActionType.NORTH.value] = " N "
+actionsDict[ActionType.WEST.value] = " w "
+actionsDict[ActionType.SOUTH.value] = " s "
+actionsDict[ActionType.EAST.value] = " e "
+actionsDict[ActionType.NORTH.value] = " n "
 actionsDict[ActionType.NONE.value] = " - "
 
 actionsDictInv = {}
@@ -50,13 +50,13 @@ def print_q(env, q_mean):
         print(q_mean[j:j+env.size,:])
 
 
-def print_optimal_q_policy(env, steps, q_mean):
+def print_optimal_q_policy(env, q_mean):
     
     policy = GreedyFlattenedPolicy(env)
 
     def resolveActionDict(q, s):
         if s in env.goal_indices:
-            return " ! "
+            return actionsDict[policy.action(q, s)].upper() #" ! "
         elif all(a == 0 for a in q[s]):
             return " - "
         else:

@@ -1,6 +1,6 @@
 import gym
 class AgentReward(gym.Wrapper):
-    def __init__(self, env, size, goal_indices, reward_delay=50, respiration_reward=0, stationary_reward=0, change_in_orientation_reward=0):
+    def __init__(self, env, size, goal_indices, reward_delay=50, respiration_reward=0, stationary_reward=0, revisit_inactive_target_reward = 0, change_in_orientation_reward=0):
         """
 
         PARAMS
@@ -11,6 +11,7 @@ class AgentReward(gym.Wrapper):
         reward_delay: the number of episodes steps to wait until a visited target's reward is reinstated
         respiration_reward: the reward per time step (normally negative)
         stationary_reward: the reward for remaining stationary in a given time step (normally negative)
+        revisit_inactive_target_reward: the reward to revisiting an inactive target (normally negative)
         change_in_orientation_reward: a reward for changing direction (normally negative)
         """
         super().__init__(env, new_step_api=True)
@@ -19,6 +20,7 @@ class AgentReward(gym.Wrapper):
         self.reward_delay = reward_delay
         self.respiration_reward = respiration_reward
         self.stationary_reward = stationary_reward
+        self.revisit_inactive_target_reward = revisit_inactive_target_reward
         self.change_in_orientation_reward = change_in_orientation_reward
         self.observations = []
 
@@ -89,7 +91,7 @@ class AgentReward(gym.Wrapper):
                     done = False # NOT done yet
 
                 else:
-                    reward = 0
+                    reward = self.revisit_inactive_target_reward # discourage agent from going back to this target
                     done = False # NOT done yet, there are still undiscovered targets
             
         ## other rewards

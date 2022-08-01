@@ -91,7 +91,7 @@ def train(env,
                 fig1.suptitle("Episode {}".format(episode))
                 plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target,ys_target)
                 plotActionStateQuiver(env, actor, fig1, ax1, ax2, xs_target,ys_target)
-                print("Greedy perf: {}".format(performance[episode//plot_rate]))
+                print("Training perf: {}".format(performance[episode//plot_rate]))
                 # set the spacing between subplots
                 # fig1.tight_layout()
                 

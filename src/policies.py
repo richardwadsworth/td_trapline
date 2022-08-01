@@ -2,7 +2,7 @@ import numpy as np
 
 class Policy(object):
 
-    def __init__(self, env, num_performance_trials=100) -> None:
+    def __init__(self, env, num_performance_trials=50) -> None:
         self.env = env
         self.num_performance_trials = num_performance_trials
 
