@@ -15,12 +15,13 @@ def train(env,
         critic, 
         policy_train,
         policy_predict,
+        plot_rate,
         plot_data, do_plot=False, rng = np.random.default_rng()):
 
     #unpack plot objects
     fig1, ax1, ax2, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target = plot_data
         
-    performance = np.ndarray(episodes//steps) # initialise array to track algorithm's performance
+    performance = np.ndarray(episodes//plot_rate) # initialise array to track algorithm's performance
 
     for episode in range(episodes):
 
@@ -49,7 +50,7 @@ def train(env,
             E_actor[observation[1], observation[0], action] = 1
             
             # step through the environment
-            new_observation, reward, done, truncated, _ = env.step(action, True)
+            new_observation, reward, done, truncated, info = env.step(action, True)
             
             # get the next action using the annealed softmax policy
             new_action = policy_train.action(actor, new_observation, epsilon)
@@ -71,25 +72,26 @@ def train(env,
                 break
 
         # evaluate the agent performance
-        if episode%steps == 0 or episode == episodes-1:
-            performance[episode//steps] = policy_predict.average_performance(policy_predict.action, q=actor)
+        if episode%plot_rate == 0 or episode == episodes-1:
+            performance[episode//plot_rate] = policy_train.average_performance(policy_train.get_action(epsilon), q=actor)
             
         # evaluate the agent performance and plot
-        if episode > 0 and episode%steps == 0 or episode == episodes-1:
-            print("Episode {}. Epsilon {}.".format(episode, epsilon))    
-            shortest_trap_line_count = len([x for x in env.targets_found_order_by_episode if x == env.goal_indices]) #check each trap line to see if it is optimal    
-            if shortest_trap_line_count > 0:
-                print("Total # trap lines: {2}\tOptimal TL:{0}\tOptimal TL as % of all TL ({3}%)\tOptimal TL as % of all episodes ({1}%)".format(\
-                shortest_trap_line_count, \
-                    np.round(shortest_trap_line_count/episode*100,2), \
-                        len(env.targets_found_order_by_episode), \
-                            np.round(shortest_trap_line_count/len(env.targets_found_order_by_episode)*100,2)) 
-                    ) 
+        if episode > 0 and episode%plot_rate == 0 or episode == episodes-1:
+            # print("Episode {}. Epsilon {}.".format(episode, epsilon))    
+            # shortest_trap_line_count = len([x for x in env.targets_found_order_by_episode if x == env.goal_indices]) #check each trap line to see if it is optimal    
+            # if shortest_trap_line_count > 0:
+            #     print("Total # trap lines: {2}\tOptimal TL:{0}\tOptimal TL as % of all TL ({3}%)\tOptimal TL as % of all episodes ({1}%)".format(\
+            #     shortest_trap_line_count, \
+            #         np.round(shortest_trap_line_count/episode*100,2), \
+            #             len(env.targets_found_order_by_episode), \
+            #                 np.round(shortest_trap_line_count/len(env.targets_found_order_by_episode)*100,2)) 
+            #         ) 
             
             if do_plot:
                 fig1.suptitle("Episode {}".format(episode))
                 plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target,ys_target)
                 plotActionStateQuiver(env, actor, fig1, ax1, ax2, xs_target,ys_target)
+                print("Greedy perf: {}".format(performance[episode//plot_rate]))
                 # set the spacing between subplots
                 # fig1.tight_layout()
                 

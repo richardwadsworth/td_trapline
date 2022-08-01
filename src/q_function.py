@@ -50,7 +50,7 @@ def print_q(env, q_mean):
         print(q_mean[j:j+env.size,:])
 
 
-def print_optimal_q_policy(env, q_mean):
+def print_optimal_q_policy(env, steps, q_mean):
     
     policy = GreedyFlattenedPolicy(env)
 

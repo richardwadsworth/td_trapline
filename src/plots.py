@@ -1,3 +1,4 @@
+import contextlib
 import numpy as np
 import matplotlib.pyplot as plt
 from IPython.display import display, clear_output
@@ -94,7 +95,8 @@ def plotActionStateQuiver(env, q, fig1, ax1, ax2, xs_target, ys_target):
     ax2.invert_yaxis()
     ax2.title.set_text('Raw')
     
-    display(fig1)    
+    with contextlib.redirect_stdout(None):
+        display(fig1)    
     clear_output(wait = True)
     plt.pause(0.0000000001)
 
@@ -131,23 +133,27 @@ def plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_
     ax3.set_ylim([0-1, env.size])
     ax3.invert_yaxis()
 
-    display(fig1)    
+    with contextlib.redirect_stdout(None):
+        display(fig1) 
+
     clear_output(wait = True)
     plt.pause(0.0000000001)
 
 
-def plot_performance(episodes, steps, performance, plot_data):
+def plot_performance(episodes, steps, performance, plot_rate, plot_data):
 
     #unpack plot objects
     fig1, _, _, _, ax4, _, _, _, _= plot_data
     
 
-    ax4.plot(steps*np.arange(episodes//steps), performance)
-    ax4.set_xlabel("Epochs")
+    ax4.plot(plot_rate*np.arange(episodes//plot_rate), performance)
+    ax4.set_xlabel("Episodes")
     ax4.set_title("Learning progress for SARSA")
-    ax4.set_ylabel("Average reward of an epoch")
+    ax4.set_ylabel("Average reward of an Episode")
     ax4.grid()
     fig1.tight_layout()
-    display(fig1)    
+
+    with contextlib.redirect_stdout(None):
+        display(fig1)    
     clear_output(wait = True)
     plt.pause(0.0000000001)

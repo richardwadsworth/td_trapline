@@ -2,8 +2,9 @@ import numpy as np
 
 class Policy(object):
 
-    def __init__(self, env) -> None:
+    def __init__(self, env, num_performance_trials=100) -> None:
         self.env = env
+        self.num_performance_trials = num_performance_trials
 
     def action(self, q, index):
         """
@@ -14,8 +15,8 @@ class Policy(object):
     def average_performance(self, policy_fct, q):
     
         acc_returns = 0.
-        n = 500
-        for i in range(n):
+        
+        for i in range(self.num_performance_trials):
             done, truncated = False, False
             s = self.env.reset()
             while not done and not truncated:
@@ -23,7 +24,7 @@ class Policy(object):
                 s, reward, done, truncated, _ = self.env.step(a)
                 acc_returns += reward
 
-        return acc_returns/n
+        return acc_returns/self.num_performance_trials
         
 class GreedyDirectionalPolicy(Policy):
 

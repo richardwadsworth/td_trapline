@@ -19,7 +19,7 @@ def register_gym():
      id='ForagingAgent-v1',
      entry_point='gym.envs.toy_text:ForagingAgentEnv')
 
-def initialise_gym(size, MDP, is_stochastic, respiration_reward, movement_reward, change_in_orientation_reward, max_episode_steps=100):
+def initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_reward, change_in_orientation_reward, max_episode_steps=100):
 
 
     goal_indices = [int(x) for x in MDP[:,0]]
@@ -32,7 +32,7 @@ def initialise_gym(size, MDP, is_stochastic, respiration_reward, movement_reward
 
     env = gym.make('ForagingAgent-v1', is_slippery=is_stochastic, max_episode_steps=max_episode_steps, desc=desc, new_step_api=True)
 
-    wrapped_env = AgentReward(env, size, goal_indices, max_episode_steps+1, respiration_reward=respiration_reward, movement_reward=movement_reward, change_in_orientation_reward=change_in_orientation_reward)
+    wrapped_env = AgentReward(env, size, goal_indices, max_episode_steps+1, respiration_reward=respiration_reward, stationary_reward=stationary_reward, change_in_orientation_reward=change_in_orientation_reward)
 
     wrapped_env.update_probability_matrix(MDP)
     

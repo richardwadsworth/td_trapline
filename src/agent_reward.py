@@ -1,6 +1,6 @@
 import gym
 class AgentReward(gym.Wrapper):
-    def __init__(self, env, size, goal_indices, reward_delay=50, respiration_reward=0, movement_reward=0, change_in_orientation_reward=0):
+    def __init__(self, env, size, goal_indices, reward_delay=50, respiration_reward=0, stationary_reward=0, change_in_orientation_reward=0):
         """
 
         PARAMS
@@ -10,7 +10,7 @@ class AgentReward(gym.Wrapper):
         goal_indices (the indices of the targets within the arena)
         reward_delay: the number of episodes steps to wait until a visited target's reward is reinstated
         respiration_reward: the reward per time step (normally negative)
-        movement_reward: the reward for moving in a time step (normally positive)
+        stationary_reward: the reward for remaining stationary in a given time step (normally negative)
         change_in_orientation_reward: a reward for changing direction (normally negative)
         """
         super().__init__(env, new_step_api=True)
@@ -18,7 +18,7 @@ class AgentReward(gym.Wrapper):
         self.goal_indices = goal_indices
         self.reward_delay = reward_delay
         self.respiration_reward = respiration_reward
-        self.movement_reward = movement_reward
+        self.stationary_reward = stationary_reward
         self.change_in_orientation_reward = change_in_orientation_reward
         self.observations = []
 
@@ -55,7 +55,7 @@ class AgentReward(gym.Wrapper):
         index = obs[0]
         if index in self.goal_indices: # the agent has found a goal and done will be True
             
-            if not truncated: # not timed out
+            if done: # target found before timed out
 
                 # reward = self.goal_rewards[index]['reward']
                 if self.goal_rewards[index]['step_count']  == -1: 
@@ -98,8 +98,8 @@ class AgentReward(gym.Wrapper):
         reward = reward + self.respiration_reward
 
         # movement reward.  a positive reward if agent moves, to encourage exploration
-        if self.env.last_state[0] != obs[0]: #agent has moved
-            reward = reward + self.movement_reward
+        if self.env.last_state[0] == obs[0]: #agent has not moved (i.e. is stationary in this time step)
+            reward = reward + self.stationary_reward
         
         # orientation reward.  a negative reward if orientation changes
         if self.env.last_state[1] != obs[1]: #agent is changed direction
