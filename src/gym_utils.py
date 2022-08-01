@@ -1,20 +1,41 @@
 import numpy as np
+import site
+import sys
 
-def register_gym():
+def register_gym(dev_mode=False):
 
     from os.path import exists
     import os
     import shutil
 
     source = "sussex/Dissertation/src/foraging_agent.py"
-    destination = "sussex/Dissertation/gym/gym/envs/toy_text/foraging_agent.py"
+    if dev_mode:
+        
+        root = "./sussex/Dissertation/gym/"    
+        sys.path.insert(1, root)
+    else:
+        root = site.getsitepackages()[0]
+    
+    
+
+    destination =os.path.join(root, "gym/envs/toy_text/foraging_agent.py")
+    
     if exists(destination):
         os.remove(destination)
     shutil.copyfile(source, destination)
 
+    #update the end init file
+    init_filepath = os.path.join(root, "gym/envs/toy_text/__init__.py")
+    reg_text = "from gym.envs.toy_text.foraging_agent import ForagingAgentEnv"
+    with open(init_filepath, "r+") as file:
+        for line in file:
+            if reg_text in line:
+                break
+        else: # not found, we are at the eof
+            file.write(reg_text) # append missing data
+
     import gym
     
-
     gym.envs.register(
      id='ForagingAgent-v1',
      entry_point='gym.envs.toy_text:ForagingAgentEnv')
