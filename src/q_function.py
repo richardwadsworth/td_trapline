@@ -20,6 +20,12 @@ actionsDictInv["N"] = ActionType.NORTH.value
 actionsDictInv["-"] = ActionType.NONE.value
 
 
+def initialise_actor(env):
+    return np.zeros((env.observation_space[1].n, env.observation_space[0].n, env.action_space.n))
+
+def initialise_critic(env, rng):
+    return rng.uniform(low=0.0, high=0.0000000009, size=(env.observation_space[1].n, env.observation_space[0].n, env.action_space.n))
+
 def initialise_q(env):
     q = np.ones((env.observation_space[1].n, env.observation_space[0].n, env.action_space.n))
 

@@ -16,11 +16,11 @@ class Policy(object):
         acc_returns = 0.
         n = 500
         for i in range(n):
-            done = False
+            done, truncated = False, False
             s = self.env.reset()
-            while not done:
+            while not done and not truncated:
                 a = policy_fct(q, s)
-                s, reward, done, info = self.env.step(a)
+                s, reward, done, truncated, _ = self.env.step(a)
                 acc_returns += reward
 
         return acc_returns/n

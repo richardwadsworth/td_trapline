@@ -3,7 +3,7 @@ import numpy as np
 import sys
 import timeit
 
-sys.path.insert(1, '/Users/richard/Documents/projects/py_learning/sussex/Dissertation/gym')
+sys.path.insert(1, './sussex/Dissertation/gym')
 
 from gym_utils import register_gym, initialise_gym
 
@@ -12,19 +12,20 @@ register_gym()
 from plots import plot_performance, initialise_plots
 
 from rl_td import train
-from q_function import initialise_q, print_q, print_optimal_q_policy
+from q_function import initialise_actor, initialise_critic, print_q, print_optimal_q_policy
 from policies import GreedyDirectionalPolicy
+from policies import SoftmaxDirectionalPolicy, SoftmaxFlattenedPolicy
 
 # parameters for sarsa(lambda)
 
-# # opposite corner 4
+# opposite corner 4
 # size = 4
 # MDP = np.array([(np.square(size)-1,1.0)]) #markov decision chain including rewards for each target
 
-# 
-# # opposite corner 13
-# size = 13
-# MDP = np.array([(np.square(size)-1,1.0)]) #markov decision chain including rewards for each target
+#
+# opposite corner 13
+size = 13
+MDP = np.array([(np.square(size)-1,1.0)]) #markov decision chain including rewards for each target
 
 # # opposite corner 19
 # size = 19
@@ -51,25 +52,26 @@ def map_coord_to_index(size, x, y):
 # size = 9
 # MDP = np.array([(np.square(size)-1,1.0)]) #markov decision chain including rewards for each target
 
-# straight-ish line
-size = 19
-MDP = np.array([(map_coord_to_index(size, 6, 6),1.0), 
-                (map_coord_to_index(size, 10, 10),1.0),
-                (map_coord_to_index(size, 14, 14),1.0)
-                ])
+# # straight-ish line
+# size = 19
+# MDP = np.array([(map_coord_to_index(size, 6, 6),1.0), 
+#                 (map_coord_to_index(size, 10, 10),1.0),
+#                 (map_coord_to_index(size, 14, 14),1.0)
+#                 ])
 
 # # curved line
 # size = 19
 # MDP = np.array([(62,1.0), (198,1.0), (300, 1.0)]) #markov decision chain including rewards for each target
 
-rng = np.random.default_rng() # random number generator
+rng = np.random.default_rng(23) # random number generator
 
 is_stochastic = False
 
 STEPS = 250 #np.round(np.square(size),-2) #200
-episodes = 2000 #STEPS * 10
+episodes = 20000 #STEPS * 10
 gamma = 0.9 # discount factor
-alpha = 0.05 # learning rate
+alpha_actor = 0.05 # actor learning rate
+alpha_critic = 0.05 # critic learning rate
 eligibility_decay = 0.3 # eligibility trace decay
 
 #softmax temperature annealing
@@ -77,8 +79,8 @@ epsilon_start = 1
 epsilon_end = 0.2
 epsilon_annealing_stop = int(episodes*0.5)
 
-respiration_reward =  -1/np.square(size) # -1/(STEPS+(STEPS*0.1)) # negative reward for moving 1 step in an episode
-movement_reward = respiration_reward*2 # positive reward for moving, to discourage not moving
+respiration_reward = 0.01 # -1/np.square(size) # -1/(STEPS+(STEPS*0.1)) # negative reward for moving 1 step in an episode
+movement_reward = 0.005 # respiration_reward*2 # positive reward for moving, to discourage not moving
 change_in_orientation_reward = 0#-movement_reward*0.5 #negative reward if orientation changes
 
 env = initialise_gym(size, MDP, is_stochastic, respiration_reward, movement_reward, change_in_orientation_reward, STEPS)
@@ -92,21 +94,29 @@ env.reset()
 # env.render()
 
 # initialise the action state values
-q = initialise_q(env)
+actor = initialise_actor(env)
+critic = initialise_critic(env, rng)
 
 plot_data = initialise_plots(env)
 
+policy_train = SoftmaxDirectionalPolicy(env, rng)
+policy_predict = GreedyDirectionalPolicy(env)
+
 # train the algorithm
-q, performance, ax = train(env, 
+actor, performance, ax = train(env, 
     episodes, 
     STEPS, 
     eligibility_decay, 
-    alpha, 
+    alpha_actor,
+    alpha_critic, 
     gamma, 
     epsilon_start, 
     epsilon_end, 
     epsilon_annealing_stop, 
-    q, 
+    actor,
+    critic, 
+    policy_train,
+    policy_predict,
     plot_data, 
     do_in_epsisode_plots, 
     rng)
@@ -115,12 +125,10 @@ q, performance, ax = train(env,
 plot_performance(episodes, STEPS, performance, plot_data)
 
 # get the final performance value of the algorithm using a greedy policy
-policy = GreedyDirectionalPolicy(env)
-
-greedyPolicyAvgPerf =policy.average_performance(policy.action, q)
+greedyPolicyAvgPerf =policy_predict.average_performance(policy_predict.action, q=actor)
 
 #get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
-q_mean = np.mean(q, axis=(0))
+q_mean = np.mean(actor, axis=(0))
 
 # print the final action state values
 print_q(env, q_mean)

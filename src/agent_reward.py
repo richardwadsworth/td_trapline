@@ -13,7 +13,7 @@ class AgentReward(gym.Wrapper):
         movement_reward: the reward for moving in a time step (normally positive)
         change_in_orientation_reward: a reward for changing direction (normally negative)
         """
-        super().__init__(env)
+        super().__init__(env, new_step_api=True)
         self.size = size
         self.goal_indices = goal_indices
         self.reward_delay = reward_delay
@@ -51,11 +51,11 @@ class AgentReward(gym.Wrapper):
         action: action to take
         stats:  whether to record stats about the current episode
         """
-        obs, reward, done, info = self.env.step(action)
+        obs, reward, done, truncated, info = self.env.step(action)
         index = obs[0]
         if index in self.goal_indices: # the agent has found a goal and done will be True
             
-            if "TimeLimit.truncated" not in info: # not timed out
+            if not truncated: # not timed out
 
                 # reward = self.goal_rewards[index]['reward']
                 if self.goal_rewards[index]['step_count']  == -1: 
@@ -91,8 +91,7 @@ class AgentReward(gym.Wrapper):
                 else:
                     reward = 0
                     done = False # NOT done yet, there are still undiscovered targets
-
-        
+            
         ## other rewards
 
         # respiration reward.  a negative reward for every time step
@@ -109,7 +108,7 @@ class AgentReward(gym.Wrapper):
         
         self.observations.append(obs)
             
-        return obs, reward, done, info
+        return obs, reward, done, truncated, info
 
     def reset(self,*,seed = None):
         val = super().reset(seed=seed)

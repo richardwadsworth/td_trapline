@@ -30,7 +30,7 @@ def initialise_gym(size, MDP, is_stochastic, respiration_reward, movement_reward
     ## note the order of the goal indices is important!! it is used to indicate the shortest route
     desc = generate_random_map_extended(goal_indices, size=size, p=1.0)
 
-    env = gym.make('ForagingAgent-v1', is_slippery=is_stochastic, max_episode_steps=max_episode_steps, desc=desc)
+    env = gym.make('ForagingAgent-v1', is_slippery=is_stochastic, max_episode_steps=max_episode_steps, desc=desc, new_step_api=True)
 
     wrapped_env = AgentReward(env, size, goal_indices, max_episode_steps+1, respiration_reward=respiration_reward, movement_reward=movement_reward, change_in_orientation_reward=change_in_orientation_reward)
 

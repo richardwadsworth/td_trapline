@@ -1,10 +1,21 @@
 import numpy as np
 from plots import plotAgentPath, plotActionStateQuiver
-from policies import SoftmaxDirectionalPolicy, SoftmaxFlattenedPolicy
 
-def train(env, episodes, steps, eligibility_decay, alpha, gamma, epsilon_start, epsilon_end, epsilon_annealing_stop, q, plot_data, do_plot=False, rng = np.random.default_rng()):
-
-    policy = SoftmaxDirectionalPolicy(env, rng)
+def train(env, 
+        episodes, 
+        steps, 
+        eligibility_decay, 
+        alpha_actor, 
+        alpha_critic, 
+        gamma, 
+        epsilon_start, 
+        epsilon_end, 
+        epsilon_annealing_stop, 
+        actor, 
+        critic, 
+        policy_train,
+        policy_predict,
+        plot_data, do_plot=False, rng = np.random.default_rng()):
 
     #unpack plot objects
     fig1, ax1, ax2, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target = plot_data
@@ -19,29 +30,36 @@ def train(env, episodes, steps, eligibility_decay, alpha, gamma, epsilon_start, 
                + epsilon_end * inew) / epsilon_annealing_stop
 
         # initialise eligibility traces matrix to zero
-        E = np.zeros((env.observation_space[1].n, env.observation_space[0].n, env.action_space.n))
+        E_critic = np.zeros((env.observation_space[1].n, env.observation_space[0].n, env.action_space.n))
+        E_actor = np.zeros((env.observation_space[1].n, env.observation_space[0].n, env.action_space.n))
         
         # reset the environment
         observation = env.reset()
 
         # get the first action using the annealed softmax policy
-        action = policy.action(q, observation, epsilon)
+        action = policy_train.action(actor, observation, epsilon)
         
         while True:
 
             # update the eligibility traces.  Assign a weight of 1 to the last visited state
-            E = eligibility_decay * gamma * E
-            E[observation[1], observation[0], action] += 1
+            E_critic = eligibility_decay * gamma * E_critic
+            E_actor = eligibility_decay * gamma * E_actor
+            
+            E_critic[observation[1], observation[0], action] = 1
+            E_actor[observation[1], observation[0], action] = 1
             
             # step through the environment
-            new_observation, reward, done, info = env.step(action, True)
+            new_observation, reward, done, truncated, _ = env.step(action, True)
             
             # get the next action using the annealed softmax policy
-            new_action = policy.action(q, new_observation, epsilon)
+            new_action = policy_train.action(actor, new_observation, epsilon)
 
             # Calculate the delta update and update the Q-table using the SARSA TD(lambda) rule:
-            delta = reward + gamma * q[new_observation[1], new_observation[0], new_action] - q[observation[1], observation[0], action]
-            q = q + alpha * delta * E 
+            td_error = reward + gamma * critic[new_observation[1], new_observation[0], new_action] - critic[observation[1], observation[0], action]
+             
+            critic = critic + alpha_critic * td_error * E_critic
+            
+            actor = actor + alpha_actor * td_error * E_actor 
 
             # update the state and action values
             observation, action = new_observation, new_action
@@ -49,13 +67,13 @@ def train(env, episodes, steps, eligibility_decay, alpha, gamma, epsilon_start, 
             # if reward > 0:
             #     plotAgentPath(env, fig1, ax3, ax4, xs_target,ys_target)
 
-            if done:
+            if done or truncated:
                 break
 
         # evaluate the agent performance
         if episode%steps == 0 or episode == episodes-1:
-            performance[episode//steps] = policy.average_performance(policy.get_action(epsilon), q=q)
-
+            performance[episode//steps] = policy_predict.average_performance(policy_predict.action, q=actor)
+            
         # evaluate the agent performance and plot
         if episode > 0 and episode%steps == 0 or episode == episodes-1:
             print("Episode {}. Epsilon {}.".format(episode, epsilon))    
@@ -71,14 +89,14 @@ def train(env, episodes, steps, eligibility_decay, alpha, gamma, epsilon_start, 
             if do_plot:
                 fig1.suptitle("Episode {}".format(episode))
                 plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target,ys_target)
-                plotActionStateQuiver(env, q, fig1, ax1, ax2, xs_target,ys_target)
+                plotActionStateQuiver(env, actor, fig1, ax1, ax2, xs_target,ys_target)
                 # set the spacing between subplots
                 # fig1.tight_layout()
                 
 
     
     plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target,ys_target) # plot the path of the agent's last episode
-    plotActionStateQuiver(env, q, fig1, ax1, ax2,xs_target,ys_target) # plot the quiver graph of the agent's last episode
+    plotActionStateQuiver(env, actor, fig1, ax1, ax2,xs_target,ys_target) # plot the quiver graph of the agent's last episode
     fig1.tight_layout()
 
-    return q, performance, ax4
+    return actor, performance, ax4

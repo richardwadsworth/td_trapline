@@ -263,8 +263,10 @@ class ForagingAgentEnv(Env):
 
     def step(self, a):
         transitions = self.P[self.s[0]][a]
+        
         i = categorical_sample([t[0] for t in transitions], self.np_random)
-        p, s, r, d = transitions[i]
+        
+        p, s, r, t = transitions[i]
         
         self.last_state = self.s
 
@@ -278,10 +280,9 @@ class ForagingAgentEnv(Env):
         
         self.lastaction = a
 
-
         self.renderer.render_step()
 
-        return (self.s, r, d, {"prob": p})
+        return (self.s, r, t, False, {"prob": p})
 
     def reset(
         self,
