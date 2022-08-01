@@ -10,18 +10,23 @@ def train(env,
         gamma, 
         epsilon_start, 
         epsilon_end, 
-        epsilon_annealing_stop, 
+        epsilon_annealing_stop_ratio, 
         actor, 
         critic, 
         policy_train,
         policy_predict,
         plot_rate,
-        plot_data, do_plot=False, rng = np.random.default_rng()):
+        plot_data, 
+        do_plot=False):
 
-    #unpack plot objects
-    fig1, ax1, ax2, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target = plot_data
+
+    if do_plot:
+        #unpack plot objects
+        fig1, ax1, ax2, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target = plot_data
         
     performance = np.ndarray(episodes//plot_rate) # initialise array to track algorithm's performance
+
+    epsilon_annealing_stop = epsilon_annealing_stop_ratio * episodes
 
     for episode in range(episodes):
 
@@ -96,9 +101,9 @@ def train(env,
                 # fig1.tight_layout()
                 
 
-    
-    plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target,ys_target) # plot the path of the agent's last episode
-    plotActionStateQuiver(env, actor, fig1, ax1, ax2,xs_target,ys_target) # plot the quiver graph of the agent's last episode
-    fig1.tight_layout()
+    if do_plot:
+        plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target,ys_target) # plot the path of the agent's last episode
+        plotActionStateQuiver(env, actor, fig1, ax1, ax2,xs_target,ys_target) # plot the quiver graph of the agent's last episode
+        fig1.tight_layout()
 
-    return actor, performance, ax4
+    return actor, performance

@@ -16,8 +16,6 @@ def register_gym(dev_mode=False):
     else:
         root = site.getsitepackages()[0]
     
-    
-
     destination =os.path.join(root, "gym/envs/toy_text/foraging_agent.py")
     
     if exists(destination):
@@ -34,18 +32,17 @@ def register_gym(dev_mode=False):
         else: # not found, we are at the eof
             file.write(reg_text) # append missing data
 
-    import gym
     
-    gym.envs.register(
-     id='ForagingAgent-v1',
-     entry_point='gym.envs.toy_text:ForagingAgentEnv')
-
 def initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, max_episode_steps=100):
-
 
     goal_indices = [int(x) for x in MDP[:,0]]
 
     import gym
+
+    gym.envs.register(
+     id='ForagingAgent-v1',
+     entry_point='gym.envs.toy_text:ForagingAgentEnv')
+
     from agent_reward import AgentReward
 
     ## note the order of the goal indices is important!! it is used to indicate the shortest route

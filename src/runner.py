@@ -1,13 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import sys
-import timeit
-
-sys.path.insert(1, './sussex/Dissertation/gym')
 
 from gym_utils import register_gym, initialise_gym
 
-register_gym()
+register_gym(True)
 
 from plots import plot_performance, initialise_plots
 
@@ -95,65 +91,69 @@ change_in_orientation_reward = 0#-stationary_reward*0.5 #negative reward if orie
 
 env = initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, STEPS)
 
-do_in_epsisode_plots=True
+do_in_episode_plots=False
+plot_data = None
 
 print("Action space = ", env.action_space)
 print("Observation space = ", env.observation_space)
 
-env.reset()
-# env.render()
+if __name__ == "__main__":
 
-# initialise the action state values
-actor = initialise_actor(env)
-critic = initialise_critic(env, rng)
+    env.reset()
+    # env.render()
 
-plot_data = initialise_plots(env)
+    # initialise the action state values
+    actor = initialise_actor(env)
+    critic = initialise_critic(env, rng)
 
-policy_train = SoftmaxDirectionalPolicy(env, rng)
-policy_predict = GreedyDirectionalPolicy(env)
+    if do_in_episode_plots:
+        plot_data = initialise_plots(env)
 
-# train the algorithm
-actor, performance, ax = train(env, 
-    episodes, 
-    STEPS, 
-    eligibility_decay, 
-    alpha_actor,
-    alpha_critic, 
-    gamma, 
-    epsilon_start, 
-    epsilon_end, 
-    epsilon_annealing_stop, 
-    actor,
-    critic, 
-    policy_train,
-    policy_predict,
-    plot_rate,
-    plot_data, 
-    do_in_epsisode_plots, 
-    rng)
+    policy_train = SoftmaxDirectionalPolicy(env, rng)
+    policy_predict = GreedyDirectionalPolicy(env)
 
-print("Training performance mean: {}".format(np.mean(performance)))
-print("Training performance stdev: {}".format(np.std(performance)))
+    # train the algorithm
+    actor, performance = train(env, 
+        episodes, 
+        STEPS, 
+        eligibility_decay, 
+        alpha_actor,
+        alpha_critic, 
+        gamma, 
+        epsilon_start, 
+        epsilon_end, 
+        epsilon_annealing_stop, 
+        actor,
+        critic, 
+        policy_train,
+        policy_predict,
+        plot_rate,
+        plot_data, 
+        do_in_episode_plots)
 
-# visual the algorithm's performance
-plot_performance(episodes, STEPS, performance, plot_rate, plot_data)
+    print("Training performance mean: {}".format(np.mean(performance)))
+    print("Training performance stdev: {}".format(np.std(performance)))
 
-# get the final performance value of the algorithm using a greedy policy
-greedyPolicyAvgPerf =policy_predict.average_performance(policy_predict.action, q=actor)
+    if do_in_episode_plots:
+        # visual the algorithm's performance
+        plot_performance(episodes, STEPS, performance, plot_rate, plot_data)
 
-#get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
-q_mean = np.mean(actor, axis=(0))
+    # get the final performance value of the algorithm using a greedy policy
+    greedyPolicyAvgPerf =policy_predict.average_performance(policy_predict.action, q=actor)
 
-# # print the final action state values
-# print_q(env, q_mean)
+    #get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
+    q_mean = np.mean(actor, axis=(0))
 
-# # print the optimal policy in human readable form
-# print_optimal_q_policy(env, q_mean)
+    # # print the final action state values
+    # print_q(env, q_mean)
 
-print("Greedy policy SARSA performance =", greedyPolicyAvgPerf) 
+    # # print the optimal policy in human readable form
+    # print_optimal_q_policy(env, q_mean)
 
-plt.show()
-env.close()
+    print("Greedy policy SARSA performance =", greedyPolicyAvgPerf) 
+
+    plt.show()
+    env.close()
 
 
 
