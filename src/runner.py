@@ -8,7 +8,7 @@ register_gym(True)
 from plots import plot_performance, initialise_plots
 
 from rl_td import train
-from q_function import initialise_actor, initialise_critic, print_q, print_optimal_q_policy
+from q_function import initialise_actor, initialise_critic, get_q_pretty_print, get_optimal_q_policy_pretty_print
 from policies import GreedyDirectionalPolicy
 from policies import SoftmaxDirectionalPolicy, SoftmaxFlattenedPolicy
 
@@ -34,15 +34,6 @@ from policies import SoftmaxDirectionalPolicy, SoftmaxFlattenedPolicy
 def map_coord_to_index(size, x, y):
     return (x*size)+y
 
-# hexagon
-# size = 12
-# MDP = np.array([(map_coord_to_index(size, 3, 3),1.0), 
-#                 (map_coord_to_index(size, 2, 6),1.0),
-#                 (map_coord_to_index(size, 6, 2),1.0),
-#                 (map_coord_to_index(size, 5, 9),1.0),
-#                 (map_coord_to_index(size, 9, 5),1.0),
-#                 (map_coord_to_index(size, 8, 8),1.0)
-#                 ])
 
 # opposite corner 9
 # size = 9
@@ -56,10 +47,25 @@ def map_coord_to_index(size, x, y):
 #                 ])
 
 
-# large straight-ish line
-size = 5
+# # large positive array
+# size = 11
+# MDP = np.array([(map_coord_to_index(size, 1, 1),1.0), 
+#                 (map_coord_to_index(size, 5, 0),1.0),
+#                 (map_coord_to_index(size, 0, 5),1.0),
+#                 (map_coord_to_index(size, 8, 3),1.0),
+#                 (map_coord_to_index(size, 3, 8),1.0),
+#                 (map_coord_to_index(size, 7, 7),1.0)
+#                 ])
+
+
+# small positive array
+size = 7
 MDP = np.array([(map_coord_to_index(size, 1, 1),1.0), 
-                (map_coord_to_index(size, 3, 3),1.0)
+                (map_coord_to_index(size, 3, 1),1.0),
+                (map_coord_to_index(size, 1, 3),1.0),
+                (map_coord_to_index(size, 5, 3),1.0),
+                (map_coord_to_index(size, 3, 5),1.0),
+                (map_coord_to_index(size, 5, 5),1.0)
                 ])
 
 
@@ -70,28 +76,28 @@ MDP = np.array([(map_coord_to_index(size, 1, 1),1.0),
 rng = np.random.default_rng() # random number generator
 
 is_stochastic = False
+plot_rate = 5 # rate at which to plot predictions
 
 episodes = 100
-STEPS = 20 
-plot_rate = 5 # rate at which to plot predictions
-gamma = 0.9 # discount factor
-alpha_actor = alpha_critic = 0.3 # actor learning rate, critic learning rate
-# alpha_critic = 0.3 # 
-eligibility_decay = 0.3 # eligibility trace decay
+steps = 150
+gamma = 0.85 # discount factor
+alpha_actor = 0.7 # actor learning rate, critic learning rate
+alpha_critic = 0.5 # 
+eligibility_decay = 0.1 # eligibility trace decay
 
 #softmax temperature annealing
 epsilon_start = 1
 epsilon_end = 0.2
-epsilon_annealing_stop = int(episodes*0.75)
+epsilon_annealing_stop_ratio = 0.7
 
-respiration_reward = -0.01 # -1/np.square(size) # -1/(STEPS+(STEPS*0.1)) # negative reward for moving 1 step in an episode
+respiration_reward = -0.01 # -1/np.square(size) # -1/(steps+(steps*0.1)) # negative reward for moving 1 step in an episode
 stationary_reward = -0.01 # respiration_reward*2 # positive reward for moving, to discourage not moving
 revisit_inactive_target_reward = -0.1 # negative reward for revisiting an inactive target (i.e. one that has already been visited)
 change_in_orientation_reward = 0#-stationary_reward*0.5 #negative reward if orientation changes
 
-env = initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, STEPS)
+env = initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, steps)
 
-do_in_episode_plots=False
+do_in_episode_plots=True
 plot_data = None
 
 print("Action space = ", env.action_space)
@@ -115,14 +121,14 @@ if __name__ == "__main__":
     # train the algorithm
     actor, performance = train(env, 
         episodes, 
-        STEPS, 
+        steps, 
         eligibility_decay, 
         alpha_actor,
         alpha_critic, 
         gamma, 
         epsilon_start, 
         epsilon_end, 
-        epsilon_annealing_stop, 
+        epsilon_annealing_stop_ratio, 
         actor,
         critic, 
         policy_train,
@@ -136,7 +142,7 @@ if __name__ == "__main__":
 
     if do_in_episode_plots:
         # visual the algorithm's performance
-        plot_performance(episodes, STEPS, performance, plot_rate, plot_data)
+        plot_performance(episodes, steps, performance, plot_rate, plot_data)
 
     # get the final performance value of the algorithm using a greedy policy
     greedyPolicyAvgPerf =policy_predict.average_performance(policy_predict.action, q=actor)
@@ -144,11 +150,11 @@ if __name__ == "__main__":
     #get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
     q_mean = np.mean(actor, axis=(0))
 
-    # # print the final action state values
-    # print_q(env, q_mean)
+    # print the final action state values
+    print(get_q_pretty_print(env, q_mean))
 
-    # # print the optimal policy in human readable form
-    # print_optimal_q_policy(env, q_mean)
+    # print the optimal policy in human readable form
+    print(get_optimal_q_policy_pretty_print(env, q_mean))
 
     print("Greedy policy SARSA performance =", greedyPolicyAvgPerf) 
 

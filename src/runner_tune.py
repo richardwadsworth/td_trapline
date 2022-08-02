@@ -4,21 +4,36 @@ from gym_utils import register_gym, initialise_gym
 register_gym()
 
 from rl_td import train
-from q_function import initialise_actor, initialise_critic
+from q_function import initialise_actor, initialise_critic, get_q_pretty_print, get_optimal_q_policy_pretty_print
 from policies import GreedyDirectionalPolicy, SoftmaxDirectionalPolicy
-
 from ray.tune.integration.mlflow import MLflowLoggerCallback
+from ray.tune.integration.mlflow import mlflow_mixin
 from ray import tune
+import mlflow
 
 # parameters for sarsa(lambda)
 
 def map_coord_to_index(size, x, y):
     return (x*size)+y
 
-# large straight-ish line
-size = 5
+# # large straight-ish line
+# size = 11
+# MDP = np.array([(map_coord_to_index(size, 1, 1),1.0), 
+#                 (map_coord_to_index(size, 3, 3),1.0),
+#                 (map_coord_to_index(size, 5, 5),1.0),
+#                 (map_coord_to_index(size, 7, 7),1.0),
+#                 (map_coord_to_index(size, 9, 9),1.0)
+#                 ])
+
+
+# small positive array
+size = 7
 MDP = np.array([(map_coord_to_index(size, 1, 1),1.0), 
-                (map_coord_to_index(size, 3, 3),1.0)
+                (map_coord_to_index(size, 3, 1),1.0),
+                (map_coord_to_index(size, 1, 3),1.0),
+                (map_coord_to_index(size, 5, 3),1.0),
+                (map_coord_to_index(size, 3, 5),1.0),
+                (map_coord_to_index(size, 5, 5),1.0)
                 ])
 
 is_stochastic = False
@@ -26,9 +41,9 @@ plot_rate = 5 # rate at which to plot predictions
 
 
 
-experiment_name = "2_targets_straight"
-episodes = [100]
-STEPS = [20]
+experiment_name = "6_small_positive_array"
+episodes = [50, 100]
+steps = [100, 150, 200]
 
 
 gamma = {"lower":0.6, "upper":0.9, "q":0.05} # discount factor
@@ -40,12 +55,13 @@ epsilon_start = 1
 epsilon_end = 0.2
 epsilon_annealing_stop_ratio = {"lower":0.7, "upper":0.9, "q":0.1}
 
-respiration_reward = -0.01 # -1/np.square(size) # -1/(STEPS+(STEPS*0.1)) # negative reward for moving 1 step in an episode
+respiration_reward = -0.01 # -1/np.square(size) # -1/(steps+(steps*0.1)) # negative reward for moving 1 step in an episode
 stationary_reward = -0.01 # respiration_reward*2 # positive reward for moving, to discourage not moving
 revisit_inactive_target_reward = -0.1 # negative reward for revisiting an inactive target (i.e. one that has already been visited)
 change_in_orientation_reward = 0#-stationary_reward*0.5 #negative reward if orientation changes
 
 do_in_episode_plots=False
+do_summary_print = True
 plot_data = None
 
 def train_x(config):
@@ -60,7 +76,7 @@ def train_x(config):
         stationary_reward, 
         revisit_inactive_target_reward, 
         change_in_orientation_reward, 
-        config["STEPS"])
+        config["steps"])
     
     # initialise the action state values
     actor = initialise_actor(env_local)
@@ -71,7 +87,7 @@ def train_x(config):
 
     actor, performance = train(env_local, 
         config["episodes"],
-        config["STEPS"],
+        config["steps"],
         config["eligibility_decay"],
         config["alpha_actor"],
         config["alpha_critic"],
@@ -83,20 +99,32 @@ def train_x(config):
         critic,
         policy_train,
         policy_predict,
-        config["plot_rate"],
-        config["plot_data"],
-        config["do_in_episode_plots"])
+        plot_rate,
+        plot_data,
+        do_in_episode_plots)
+
 
     # print("Training performance stdev: {}".format(np.std(performance)))
 
     # # get the final performance value of the algorithm using a greedy policy
-    # greedyPolicyAvgPerf =policy_predict.average_performance(policy_predict.action, q=actor)
+    greedyPolicyAvgPerf =policy_predict.average_performance(policy_predict.action, q=actor)
+    mean_pref = np.mean(performance)  
+
+    #get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
+    q_mean = np.mean(actor, axis=(0))
+    pretty_print_q = get_q_pretty_print(env_local, q_mean) if do_summary_print else "not printed"
+
+    # # print the optimal policy in human readable form
+    pretty_print_optimal_q = get_optimal_q_policy_pretty_print(env_local, q_mean) if do_summary_print else "not printed"
 
     env_local.close()
 
-    mean_pref = np.mean(performance)
+    yield {"score_softmax": mean_pref, 
+            "score_greedy": greedyPolicyAvgPerf, 
+            "pi_optimal__flattened": pretty_print_optimal_q,
+            "pi_flattened": pretty_print_q
+            }
     
-    yield {"score": mean_pref}
     
 # Create the MlFlow expriment.
 # mlflow.create_experiment("experiment1")
@@ -105,13 +133,12 @@ from ray.tune.suggest.bayesopt import BayesOptSearch
 
 analysis = tune.run(
     train_x,
-    metric="score",
     mode="max",
-    num_samples=20,
+    num_samples=1,
     config={
         # define search space here
         "episodes": tune.grid_search(episodes),
-        "STEPS": tune.grid_search(STEPS),
+        "steps": tune.grid_search(steps),
         "eligibility_decay": tune.quniform(**eligibility_decay),
         "alpha_actor": tune.grid_search(alpha_actor),
         "alpha_critic": tune.grid_search(alpha_critic),
@@ -119,9 +146,9 @@ analysis = tune.run(
         "epsilon_start": tune.choice([epsilon_start]),
         "epsilon_end": tune.choice([epsilon_end]),
         "epsilon_annealing_stop_ratio": tune.quniform(**epsilon_annealing_stop_ratio),
-        "plot_rate": tune.choice([plot_rate]),
-        "plot_data": tune.choice([plot_data]),
-        "do_in_episode_plots": tune.choice([do_in_episode_plots])
+        "mlflow": {
+            "experiment_name": experiment_name,
+            "tracking_uri": mlflow.get_tracking_uri()}
     },
     callbacks=[MLflowLoggerCallback(
         experiment_name=experiment_name,

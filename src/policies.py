@@ -2,7 +2,7 @@ import numpy as np
 
 class Policy(object):
 
-    def __init__(self, env, num_performance_trials=50) -> None:
+    def __init__(self, env, num_performance_trials) -> None:
         self.env = env
         self.num_performance_trials = num_performance_trials
 
@@ -28,8 +28,8 @@ class Policy(object):
         
 class GreedyDirectionalPolicy(Policy):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self, env, num_performance_trials=1):
+        super().__init__(env, num_performance_trials)
 
     def action(self, q, s):
         return np.argmax(q[s[1], s[0]])
@@ -37,16 +37,16 @@ class GreedyDirectionalPolicy(Policy):
 
 class GreedyFlattenedPolicy(Policy):
 
-    def __init__(self, env):
-        super().__init__(env)
+    def __init__(self, env, num_performance_trials=1):
+        super().__init__(env, num_performance_trials)
 
     def action(self, q, s):
         return np.argmax(q[s])
 
 class SoftmaxDirectionalPolicy(Policy):
     
-    def __init__(self, env, rng):
-        super().__init__(env)
+    def __init__(self, env, rng, num_performance_trials=50):
+        super().__init__(env, num_performance_trials)
         self.rng = rng
 
 
@@ -71,8 +71,8 @@ class SoftmaxDirectionalPolicy(Policy):
 
 class SoftmaxFlattenedPolicy(Policy):
     
-    def __init__(self, env, rng):
-        super().__init__(env)
+    def __init__(self, env, rng, num_performance_trials=50):
+        super().__init__(env, num_performance_trials)
         self.rng = rng
 
 

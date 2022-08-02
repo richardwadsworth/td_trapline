@@ -40,17 +40,20 @@ def initialise_q(env):
         
     return q
 
-def print_q(env, q_mean):
+def get_q_pretty_print(env, q_mean):
 
     q_mean = np.round(q_mean,3)
-    print("(A,S) Value function =", q_mean.shape)
+    multiline = ""
+    multiline += "(A,S) Value function =" + str(q_mean.shape) +"\n"
 
     for i, j in enumerate(np.arange(0, env.observation_space[0].n, env.size)):
-        print("Row {}".format(i))    
-        print(q_mean[j:j+env.size,:])
+        multiline += "Row {}".format(i) + "\n"  
+        multiline += str(q_mean[j:j+env.size,:]) + "\n" 
+
+    return multiline
 
 
-def print_optimal_q_policy(env, q_mean):
+def get_optimal_q_policy_pretty_print(env, q_mean):
     
     policy = GreedyFlattenedPolicy(env)
 
@@ -65,12 +68,13 @@ def print_optimal_q_policy(env, q_mean):
     # get the optimal policy
     policyFound = [resolveActionDict(q_mean, s) for s in range(env.observation_space[0].n)]
 
-    print("Greedy policy found:")
+    multiline = ""
+    multiline += "Greedy policy found:" + "\n"
     idxs = np.arange(0, env.observation_space[0].n, env.size)
     for idx in idxs:
         row = []
         for i in range(env.size):
             row.append(policyFound[idx+i])
-        print(','. join(row))
+        multiline += ','. join(row) + "\n"
             
-    print(" ")
+    return multiline
