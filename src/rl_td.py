@@ -1,5 +1,6 @@
 import numpy as np
 from plots import plotAgentPath, plotActionStateQuiver
+from statistics_utils import save_stats
 
 def train(env, 
         episodes, 
@@ -17,7 +18,9 @@ def train(env,
         policy_predict,
         plot_rate,
         plot_data, 
-        do_plot=False):
+        artifact_path,
+        do_plot=False,
+        record_stats=True):
 
 
     if do_plot:
@@ -55,7 +58,7 @@ def train(env,
             E_actor[observation[1], observation[0], action] = 1
             
             # step through the environment
-            new_observation, reward, done, truncated, info = env.step(action, True)
+            new_observation, reward, done, truncated, info = env.step(action, record_stats)
             
             # get the next action using the annealed softmax policy
             new_action = policy_train.action(actor, new_observation, epsilon)
@@ -74,6 +77,10 @@ def train(env,
             #     plotAgentPath(env, fig1, ax3, ax4, xs_target,ys_target)
 
             if done or truncated:
+
+                if record_stats:
+                    #record stats
+                    save_stats(artifact_path, env)
                 break
 
         # evaluate the agent performance

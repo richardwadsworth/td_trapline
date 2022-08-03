@@ -79,7 +79,7 @@ is_stochastic = False
 plot_rate = 5 # rate at which to plot predictions
 
 episodes = 100
-steps = 150
+steps = 200
 gamma = 0.85 # discount factor
 alpha_actor = 0.7 # actor learning rate, critic learning rate
 alpha_critic = 0.5 # 
@@ -97,69 +97,89 @@ change_in_orientation_reward = 0#-stationary_reward*0.5 #negative reward if orie
 
 env = initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, steps)
 
-do_in_episode_plots=True
+record_stats = True
+do_in_episode_plots=False
 plot_data = None
 
 print("Action space = ", env.action_space)
 print("Observation space = ", env.observation_space)
 
 if __name__ == "__main__":
+    while True:
 
-    env.reset()
-    # env.render()
+        env.reset()
+        # env.render()
 
-    # initialise the action state values
-    actor = initialise_actor(env)
-    critic = initialise_critic(env, rng)
+        # initialise the action state values
+        actor = initialise_actor(env)
+        critic = initialise_critic(env, rng)
 
-    if do_in_episode_plots:
-        plot_data = initialise_plots(env)
+        if do_in_episode_plots:
+            plot_data = initialise_plots(env)
 
-    policy_train = SoftmaxDirectionalPolicy(env, rng)
-    policy_predict = GreedyDirectionalPolicy(env)
+        policy_train = SoftmaxDirectionalPolicy(env, rng)
+        policy_predict = GreedyDirectionalPolicy(env)
 
-    # train the algorithm
-    actor, performance = train(env, 
-        episodes, 
-        steps, 
-        eligibility_decay, 
-        alpha_actor,
-        alpha_critic, 
-        gamma, 
-        epsilon_start, 
-        epsilon_end, 
-        epsilon_annealing_stop_ratio, 
-        actor,
-        critic, 
-        policy_train,
-        policy_predict,
-        plot_rate,
-        plot_data, 
-        do_in_episode_plots)
+        import tempfile
+        import os
+        from tempfile import gettempdir
+        artifact_dir = "./sussex/Dissertation/output"
+        artifact_filepath = os.path.join(artifact_dir, '{}.dat'.format(hash(os.times())))
+        if not os.path.exists(artifact_dir):
+            os.mkdir(artifact_dir) 
+        
+        # train the algorithm
+        actor, performance = train(env, 
+            episodes, 
+            steps, 
+            eligibility_decay, 
+            alpha_actor,
+            alpha_critic, 
+            gamma, 
+            epsilon_start, 
+            epsilon_end, 
+            epsilon_annealing_stop_ratio, 
+            actor,
+            critic, 
+            policy_train,
+            policy_predict,
+            plot_rate,
+            plot_data,
+            artifact_filepath,
+            do_in_episode_plots,
+            record_stats)
 
-    print("Training performance mean: {}".format(np.mean(performance)))
-    print("Training performance stdev: {}".format(np.std(performance)))
+        print("Training performance mean: {}".format(np.mean(performance)))
+        print("Training performance stdev: {}".format(np.std(performance)))
 
-    if do_in_episode_plots:
-        # visual the algorithm's performance
-        plot_performance(episodes, steps, performance, plot_rate, plot_data)
+        if do_in_episode_plots:
+            # visual the algorithm's performance
+            plot_performance(episodes, steps, performance, plot_rate, plot_data)
 
-    # get the final performance value of the algorithm using a greedy policy
-    greedyPolicyAvgPerf =policy_predict.average_performance(policy_predict.action, q=actor)
+        # get the final performance value of the algorithm using a greedy policy
+        greedyPolicyAvgPerf =policy_predict.average_performance(policy_predict.action, q=actor)
 
-    #get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
-    q_mean = np.mean(actor, axis=(0))
+        #get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
+        q_mean = np.mean(actor, axis=(0))
 
-    # print the final action state values
-    print(get_q_pretty_print(env, q_mean))
+        # print the final action state values
+        print(get_q_pretty_print(env, q_mean))
 
-    # print the optimal policy in human readable form
-    print(get_optimal_q_policy_pretty_print(env, q_mean))
+        # print the optimal policy in human readable form
+        print(get_optimal_q_policy_pretty_print(env, q_mean))
 
-    print("Greedy policy SARSA performance =", greedyPolicyAvgPerf) 
+        print("Greedy policy SARSA performance =", greedyPolicyAvgPerf) 
 
-    plt.show()
-    env.close()
+        plt.show()
+        env.close()
+
+        if greedyPolicyAvgPerf > 5:
+            print("Output file is " + artifact_filepath)
+            print("End")
+            print()
+            break
+        else:
+            os.remove(artifact_filepath)
 
 
 
