@@ -1,6 +1,6 @@
 import numpy as np
-from plots import plotAgentPath, plotActionStateQuiver
-from statistics_utils import save_stats
+from plots import plotAgentPath, plotActionStateQuiver, PlotType
+
 
 def train(env, 
         episodes, 
@@ -18,12 +18,12 @@ def train(env,
         policy_predict,
         plot_rate,
         plot_data, 
-        artifact_path,
-        do_plot=False,
+        sim_data,
+        do_plot=PlotType.NoPlots,
         record_stats=True):
 
 
-    if do_plot:
+    if do_plot != PlotType.NoPlots:
         #unpack plot objects
         fig1, ax1, ax2, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target = plot_data
         
@@ -65,27 +65,23 @@ def train(env,
 
             # Calculate the delta update and update the Q-table using the SARSA TD(lambda) rule:
             td_error = reward + gamma * critic[new_observation[1], new_observation[0], new_action] - critic[observation[1], observation[0], action]
-             
-            critic = critic + alpha_critic * td_error * E_critic
             
+            # update the actor and critic q learning tables
+            critic = critic + alpha_critic * td_error * E_critic
             actor = actor + alpha_actor * td_error * E_actor 
 
             # update the state and action values
             observation, action = new_observation, new_action
 
-            # if reward > 0:
-            #     plotAgentPath(env, fig1, ax3, ax4, xs_target,ys_target)
-
             if done or truncated:
-
-                if record_stats:
-                    #record stats
-                    save_stats(artifact_path, env)
                 break
 
-        # evaluate the agent performance
+        # evaluate the agent performance using current actor q learning table (no additional learning)
         if episode%plot_rate == 0 or episode == episodes-1:
             performance[episode//plot_rate] = policy_train.average_performance(policy_train.get_action(epsilon), q=actor)
+            if record_stats:
+                #record stats
+                sim_data.append(env.observations)
             
         # evaluate the agent performance and plot
         if episode > 0 and episode%plot_rate == 0 or episode == episodes-1:
@@ -99,16 +95,16 @@ def train(env,
             #                 np.round(shortest_trap_line_count/len(env.targets_found_order_by_episode)*100,2)) 
             #         ) 
             
-            if do_plot:
+            if do_plot == PlotType.Full:
                 fig1.suptitle("Episode {}".format(episode))
                 plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target,ys_target)
                 plotActionStateQuiver(env, actor, fig1, ax1, ax2, xs_target,ys_target)
-                print("Training perf: {}".format(performance[episode//plot_rate]))
+                # print("Training perf: {}".format(performance[episode//plot_rate]))
                 # set the spacing between subplots
                 # fig1.tight_layout()
                 
 
-    if do_plot:
+    if do_plot != PlotType.NoPlots:
         plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target,ys_target) # plot the path of the agent's last episode
         plotActionStateQuiver(env, actor, fig1, ax1, ax2,xs_target,ys_target) # plot the quiver graph of the agent's last episode
         fig1.tight_layout()

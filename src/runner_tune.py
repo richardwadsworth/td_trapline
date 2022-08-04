@@ -6,6 +6,7 @@ register_gym()
 from rl_td import train
 from q_function import initialise_actor, initialise_critic, get_q_pretty_print, get_optimal_q_policy_pretty_print
 from policies import GreedyDirectionalPolicy, SoftmaxDirectionalPolicy
+from plots import PlotType
 from ray.tune.integration.mlflow import MLflowLoggerCallback
 from ray.tune.integration.mlflow import mlflow_mixin
 from ray import tune
@@ -41,7 +42,7 @@ plot_rate = 5 # rate at which to plot predictions
 
 
 
-experiment_name = "6_small_positive_array"
+experiment_name = "james_demo"
 episodes = [50, 100]
 steps = [100, 150, 200]
 
@@ -60,7 +61,7 @@ stationary_reward = -0.01 # respiration_reward*2 # positive reward for moving, t
 revisit_inactive_target_reward = -0.1 # negative reward for revisiting an inactive target (i.e. one that has already been visited)
 change_in_orientation_reward = 0#-stationary_reward*0.5 #negative reward if orientation changes
 
-do_in_episode_plots=False
+do_in_episode_plots=PlotType.NoPlots
 do_summary_print = True
 plot_data = None
 
@@ -85,6 +86,7 @@ def train_x(config):
     policy_train = SoftmaxDirectionalPolicy(env_local, rng)
     policy_predict = GreedyDirectionalPolicy(env_local)
 
+    sim_data = []
     actor, performance = train(env_local, 
         config["episodes"],
         config["steps"],
@@ -101,6 +103,7 @@ def train_x(config):
         policy_predict,
         plot_rate,
         plot_data,
+        sim_data,
         do_in_episode_plots)
 
 
@@ -134,7 +137,7 @@ from ray.tune.suggest.bayesopt import BayesOptSearch
 analysis = tune.run(
     train_x,
     mode="max",
-    num_samples=1,
+    num_samples=5,
     config={
         # define search space here
         "episodes": tune.grid_search(episodes),

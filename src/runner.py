@@ -5,7 +5,7 @@ from gym_utils import register_gym, initialise_gym
 
 register_gym(True)
 
-from plots import plot_performance, initialise_plots
+from plots import plot_performance, initialise_plots, plot_traffic, PlotType
 
 from rl_td import train
 from q_function import initialise_actor, initialise_critic, get_q_pretty_print, get_optimal_q_policy_pretty_print
@@ -79,16 +79,16 @@ is_stochastic = False
 plot_rate = 5 # rate at which to plot predictions
 
 episodes = 100
-steps = 200
-gamma = 0.85 # discount factor
+steps = 100
+gamma = 0.75 # discount factor
 alpha_actor = 0.7 # actor learning rate, critic learning rate
-alpha_critic = 0.5 # 
-eligibility_decay = 0.1 # eligibility trace decay
+alpha_critic = 0.3 # 
+eligibility_decay = 0.7 # eligibility trace decay
 
 #softmax temperature annealing
 epsilon_start = 1
 epsilon_end = 0.2
-epsilon_annealing_stop_ratio = 0.7
+epsilon_annealing_stop_ratio = 0.9
 
 respiration_reward = -0.01 # -1/np.square(size) # -1/(steps+(steps*0.1)) # negative reward for moving 1 step in an episode
 stationary_reward = -0.01 # respiration_reward*2 # positive reward for moving, to discourage not moving
@@ -97,8 +97,11 @@ change_in_orientation_reward = 0#-stationary_reward*0.5 #negative reward if orie
 
 env = initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, steps)
 
+
+
+
 record_stats = True
-do_in_episode_plots=False
+do_in_episode_plots=PlotType.Minimal # None,Minimal, Partial, Full
 plot_data = None
 
 print("Action space = ", env.action_space)
@@ -114,19 +117,13 @@ if __name__ == "__main__":
         actor = initialise_actor(env)
         critic = initialise_critic(env, rng)
 
-        if do_in_episode_plots:
+        if do_in_episode_plots != PlotType.NoPlots:
             plot_data = initialise_plots(env)
 
-        policy_train = SoftmaxDirectionalPolicy(env, rng)
+        policy_train = SoftmaxDirectionalPolicy(env, rng, 50)
         policy_predict = GreedyDirectionalPolicy(env)
 
-        import tempfile
-        import os
-        from tempfile import gettempdir
-        artifact_dir = "./sussex/Dissertation/output"
-        artifact_filepath = os.path.join(artifact_dir, '{}.dat'.format(hash(os.times())))
-        if not os.path.exists(artifact_dir):
-            os.mkdir(artifact_dir) 
+        sim_data = []
         
         # train the algorithm
         actor, performance = train(env, 
@@ -145,41 +142,64 @@ if __name__ == "__main__":
             policy_predict,
             plot_rate,
             plot_data,
-            artifact_filepath,
+            sim_data,
             do_in_episode_plots,
             record_stats)
+
+        
+        # get the final performance value of the algorithm using a greedy policy
+        greedyPolicyAvgPerf = policy_predict.average_performance(policy_predict.action, q=actor)
+        softmaxPolicyAvgPerf = policy_train.average_performance(policy_train.get_action(epsilon_end), q=actor)
 
         print("Training performance mean: {}".format(np.mean(performance)))
         print("Training performance stdev: {}".format(np.std(performance)))
 
-        if do_in_episode_plots:
+        if do_in_episode_plots != PlotType.NoPlots:
             # visual the algorithm's performance
             plot_performance(episodes, steps, performance, plot_rate, plot_data)
-
-        # get the final performance value of the algorithm using a greedy policy
-        greedyPolicyAvgPerf =policy_predict.average_performance(policy_predict.action, q=actor)
-
-        #get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
-        q_mean = np.mean(actor, axis=(0))
-
-        # print the final action state values
-        print(get_q_pretty_print(env, q_mean))
-
-        # print the optimal policy in human readable form
-        print(get_optimal_q_policy_pretty_print(env, q_mean))
-
+        
+    
         print("Greedy policy SARSA performance =", greedyPolicyAvgPerf) 
+        print("Softmax policy SARSA performance =", softmaxPolicyAvgPerf) 
 
-        plt.show()
-        env.close()
+        if softmaxPolicyAvgPerf > 5:
 
-        if greedyPolicyAvgPerf > 5:
-            print("Output file is " + artifact_filepath)
+            #get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
+            q_mean = np.mean(actor, axis=(0))
+
+            print(get_q_pretty_print(env, q_mean)) # print the final action state values
+            print(get_optimal_q_policy_pretty_print(env, q_mean)) # print the optimal policy in human readable form
+
+
+            policy_train.num_performance_trials = 100
+            softmaxPolicyAvgPerf, obs_data = policy_train.average_performance_with_observations(policy_train.get_action(epsilon_end), q=actor)
+            print("Final Softmax policy SARSA performance =", softmaxPolicyAvgPerf) 
+
+            import os   
+            from statistics_utils import save_stats         
+            artifact_dir = "./sussex/Dissertation/output"
+            filename = '{}'.format(hash(os.times()))
+            stats_filepath = os.path.join(artifact_dir, filename + '.dat')
+            if not os.path.exists(artifact_dir):
+                os.mkdir(artifact_dir) 
+            
+            save_stats(stats_filepath, obs_data)
+            _, _, _, _, _, _, _, xs_target, ys_target = plot_data
+
+            plot_traffic(env, xs_target, ys_target, obs_data)
+            print("Output file is " + stats_filepath)
             print("End")
             print()
-            break
-        else:
-            os.remove(artifact_filepath)
 
+            if do_in_episode_plots != PlotType.NoPlots:
+                fig_filepath = os.path.join(artifact_dir, filename)
+                plt.savefig(fig_filepath)
+                plt.show()
+
+            break
+
+        env.close()
+
+        
 
 

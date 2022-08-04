@@ -1,11 +1,20 @@
 import contextlib
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
+    
+from enum import Enum
 from IPython.display import display, clear_output
+from sklearn.preprocessing import Normalizer
 from timeColouredPlots import doColourVaryingPlot2d
 from gym_utils import get_goal_coordinates
 from gym.envs.toy_text.foraging_agent import ActionType
 
+class PlotType(Enum):
+    NoPlots = 0
+    Minimal = 1
+    Partial = 2
+    Full = 3
 
 def initialise_plots(env):
 
@@ -23,6 +32,7 @@ def initialise_plots(env):
     
     # set up the subplots for visualisation
     fig1, axs = plt.subplots(2,2, figsize=(7,7))
+    
     ax1, ax2, ax3, ax4 = axs.ravel()
     remove_axis_ticks(ax1)
     remove_axis_ticks(ax2)
@@ -157,3 +167,64 @@ def plot_performance(episodes, steps, performance, plot_rate, plot_data):
         display(fig1)    
     clear_output(wait = True)
     plt.pause(0.0000000001)
+
+
+def plot_traffic(env, xs_target, ys_target, data):
+    
+    def create_segment(route):
+        points = np.array(route).reshape(-1,1,2)
+        segments = np.concatenate([points[:-1], points[1:]], axis=1)
+        return segments
+
+    from utils import map_index_to_coord
+
+    s = []
+    for observations in data:
+        #extract the index data from the observations
+        route = [map_index_to_coord(env.size,x[0]) for x in observations]
+        s += create_segment(route).tolist()
+
+    import pandas as pd
+    count = pd.Series(s).value_counts().sort_values(ascending=True)
+     
+    _s = count.index
+    _width = count.values
+
+    name = "binary"
+    from matplotlib.colors import ListedColormap, BoundaryNorm
+
+    # Use a boundary norm instead
+    cmap = plt.get_cmap(name) # ListedColormap(['r', 'g'])
+
+    X =  _width
+    X_std = (X - X.min(axis=0)) / (X.max(axis=0) - X.min(axis=0))
+    X_scaled = X_std * (230 - 20) + 20
+
+    boundaries = np.arange(0,256, 1)
+    norm = BoundaryNorm(boundaries, cmap.N)
+    lc = LineCollection(_s, cmap=cmap, norm=norm)
+    lc.set_array(X_scaled)
+    lc.set_linewidth(2)
+
+    fig,a = plt.subplots()
+    a.set_xlim(-1,env.size)
+    a.set_ylim(-1,env.size)
+
+    line = a.add_collection(lc)
+    fig.colorbar(line, ax=a)
+    # a.grid()
+
+    a.scatter([0],[0], c='g', s=100, marker='^') #origin
+    a.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
+    
+    a.invert_yaxis()
+
+    plt.show()
+
+
+
+    
+    
+    
+    
+    

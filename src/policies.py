@@ -25,6 +25,24 @@ class Policy(object):
                 acc_returns += reward
 
         return acc_returns/self.num_performance_trials
+
+    def average_performance_with_observations(self, policy_fct, q):
+    
+        acc_returns = 0.
+        observations = []
+        
+        for i in range(self.num_performance_trials):
+            done, truncated = False, False
+            s = self.env.reset()
+            while not done and not truncated:
+                a = policy_fct(q, s)
+                s, reward, done, truncated, _ = self.env.step(a)
+                acc_returns += reward
+            
+            observations.append(self.env.observations)
+
+        return acc_returns/self.num_performance_trials, observations
+    
         
 class GreedyDirectionalPolicy(Policy):
 
