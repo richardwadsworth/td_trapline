@@ -5,7 +5,7 @@ from gym_utils import register_gym, initialise_gym
 
 register_gym(True)
 
-from plots import plot_performance, initialise_plots, plot_traffic, PlotType
+from plots import plot_performance, initialise_plots, plot_traffic_greyscale, plot_traffic_noise, PlotType
 
 from rl_td import train
 from q_function import initialise_actor, initialise_critic, get_q_pretty_print, get_optimal_q_policy_pretty_print
@@ -162,7 +162,7 @@ if __name__ == "__main__":
         # print("Greedy policy SARSA performance =", greedyPolicyAvgPerf) 
         # print("Softmax policy SARSA performance =", softmaxPolicyAvgPerf) 
 
-        if np.mean(performance[-5]) > 5.8:
+        if np.mean(performance[-5]) > 6.7:
 
             #get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
             q_mean = np.mean(actor, axis=(0))
@@ -170,8 +170,6 @@ if __name__ == "__main__":
             print(get_q_pretty_print(env, q_mean)) # print the final action state values
             print(get_optimal_q_policy_pretty_print(env, q_mean)) # print the optimal policy in human readable form
 
-
-            policy_train.num_performance_trials = 100
             softmaxPolicyAvgPerf, obs_data = policy_train.average_performance_with_observations(policy_train.get_action(epsilon_end), q=actor)
             print("Final Softmax policy SARSA performance =", softmaxPolicyAvgPerf) 
 
@@ -186,8 +184,8 @@ if __name__ == "__main__":
             save_stats(stats_filepath, obs_data)
             fig1, _, _, _, _, ax5, ax6, _, _, xs_target, ys_target = plot_data
 
-            plot_traffic(env, fig1, ax5, xs_target, ys_target, sim_data, "Training")
-            plot_traffic(env, fig1, ax6, xs_target, ys_target, obs_data, "Test")
+            plot_traffic_noise(env, fig1, ax5, xs_target, ys_target, sim_data, "Training")
+            plot_traffic_noise(env, fig1, ax6, xs_target, ys_target, obs_data, "Test")
             print("Output file is " + stats_filepath)
             print("End")
             print()
