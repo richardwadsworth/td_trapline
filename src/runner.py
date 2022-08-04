@@ -162,7 +162,10 @@ if __name__ == "__main__":
         # print("Greedy policy SARSA performance =", greedyPolicyAvgPerf) 
         # print("Softmax policy SARSA performance =", softmaxPolicyAvgPerf) 
 
-        if np.mean(performance[-5]) > 6.7:
+        last_5_mean = np.mean(performance[-5])
+        print("Training performance last 5 mean: {}".format(last_5_mean))
+        
+        if last_5_mean > 5.82:
 
             #get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
             q_mean = np.mean(actor, axis=(0))
