@@ -186,8 +186,8 @@ if __name__ == "__main__":
             save_stats(stats_filepath, obs_data)
             fig1, _, _, _, _, ax5, ax6, _, _, xs_target, ys_target = plot_data
 
-            plot_traffic(env, fig1, ax5, xs_target, ys_target, sim_data)
-            plot_traffic(env, fig1, ax6, xs_target, ys_target, obs_data)
+            plot_traffic(env, fig1, ax5, xs_target, ys_target, sim_data, "Training")
+            plot_traffic(env, fig1, ax6, xs_target, ys_target, obs_data, "Test")
             print("Output file is " + stats_filepath)
             print("End")
             print()

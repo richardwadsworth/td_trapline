@@ -171,7 +171,7 @@ def plot_performance(episodes, steps, performance, plot_rate, plot_data):
     plt.pause(0.0000000001)
 
 
-def plot_traffic(env, fig, ax, xs_target, ys_target, data):
+def plot_traffic(env, fig, ax, xs_target, ys_target, data, title):
     
     def create_segment(route):
         points = np.array(route).reshape(-1,1,2)
@@ -211,6 +211,8 @@ def plot_traffic(env, fig, ax, xs_target, ys_target, data):
     
     ax.set_xlim(-1,env.size)
     ax.set_ylim(-1,env.size)
+
+    ax.set_title("Traffic plot of Agent under {}".format(title))
 
     line = ax.add_collection(lc)
     fig.colorbar(line, ax=ax)
