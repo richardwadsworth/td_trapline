@@ -2,13 +2,14 @@ import contextlib
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
-    
+
 from enum import Enum
 from IPython.display import display, clear_output
 from sklearn.preprocessing import Normalizer
 from timeColouredPlots import doColourVaryingPlot2d
 from gym_utils import get_goal_coordinates
-from gym.envs.toy_text.foraging_agent import ActionType
+from foraging_agent import ActionType
+from utils import map_index_to_coord
 
 class PlotType(Enum):
     NoPlots = 0
@@ -171,14 +172,45 @@ def plot_performance(episodes, steps, performance, plot_rate, plot_data):
     plt.pause(0.0000000001)
 
 
-def plot_traffic(env, fig, ax, xs_target, ys_target, data, title):
+def plot_traffic_noise(env, fig, ax, xs_target, ys_target, data, title, sigma = 0.05, alpha=0.2, linewidth=1.5):
+
+    def plot(x, y):
+        x_ = x * np.random.normal(1,sigma,len(x))
+        y_ = y * np.random.normal(1,sigma,len(y))
+        ax.plot(x_,y_, color="black", alpha=alpha, linewidth=linewidth)
+
+    for observations in data:
+        #extract the index data from the observations
+        coords = [map_index_to_coord(env.size,x[0]) for x in observations]
+        x = [x[0] for x in coords]
+        y = [x[1] for x in coords]
+        plot(x, y)
+
+    ax.set_xlim(-1,env.size)
+    ax.set_ylim(-1,env.size)
+    ax.set_title("Traffic plot of Agent under {}".format(title))
+
+    ax.scatter([0],[0], c='g', s=100, marker='^') #origin
+    ax.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
+    
+    ax.invert_yaxis()
+
+    with contextlib.redirect_stdout(None):
+        display(fig)    
+    clear_output(wait = True)
+    plt.pause(0.0000000001)
+
+    
+    
+        
+
+
+def plot_traffic_greyscale(env, fig, ax, xs_target, ys_target, data, title):
     
     def create_segment(route):
         points = np.array(route).reshape(-1,1,2)
         segments = np.concatenate([points[:-1], points[1:]], axis=1)
         return segments
-
-    from utils import map_index_to_coord
 
     s = []
     for observations in data:
@@ -211,7 +243,6 @@ def plot_traffic(env, fig, ax, xs_target, ys_target, data, title):
     
     ax.set_xlim(-1,env.size)
     ax.set_ylim(-1,env.size)
-
     ax.set_title("Traffic plot of Agent under {}".format(title))
 
     line = ax.add_collection(lc)
