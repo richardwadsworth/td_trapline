@@ -58,7 +58,7 @@ def map_coord_to_index(size, x, y):
 #                 ])
 
 
-# small positive array
+# small 6 positive array
 size = 7
 MDP = np.array([(map_coord_to_index(size, 1, 1),1.0), 
                 (map_coord_to_index(size, 3, 1),1.0),
@@ -68,10 +68,6 @@ MDP = np.array([(map_coord_to_index(size, 1, 1),1.0),
                 (map_coord_to_index(size, 5, 5),1.0)
                 ])
 
-
-# # curved line
-# size = 19
-# MDP = np.array([(62,1.0), (198,1.0), (300, 1.0)]) #markov decision chain including rewards for each target
 
 rng = np.random.default_rng() # random number generator
 
@@ -88,12 +84,12 @@ eligibility_decay = 0.7 # eligibility trace decay
 #softmax temperature annealing
 epsilon_start = 1
 epsilon_end = 0.2
-epsilon_annealing_stop_ratio = 0.6
+epsilon_annealing_stop_ratio = 0.05
 
 respiration_reward = -0.01 # -1/np.square(size) # -1/(steps+(steps*0.1)) # negative reward for moving 1 step in an episode
 stationary_reward = -0.01 # respiration_reward*2 # positive reward for moving, to discourage not moving
-revisit_inactive_target_reward = -0.1 # negative reward for revisiting an inactive target (i.e. one that has already been visited)
-change_in_orientation_reward = 0#-stationary_reward*0.5 #negative reward if orientation changes
+revisit_inactive_target_reward = 0 # negative reward for revisiting an inactive target (i.e. one that has already been visited)
+change_in_orientation_reward = 0 #-stationary_reward*0.5 #negative reward if orientation changes
 
 env = initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, steps)
 

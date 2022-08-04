@@ -55,27 +55,39 @@ class AgentReward(gym.Wrapper):
         """
         obs, reward, done, truncated, info = self.env.step(action)
         index = obs[0]
-        if index in self.goal_indices: # the agent has found a goal and done will be True
+        if index ==0 or index in self.goal_indices: # the agent has found a goal and done will be True
             
             if done: # target found before timed out
 
-                # reward = self.goal_rewards[index]['reward']
-                if self.goal_rewards[index]['step_count']  == -1: 
-                    # active target found
+                if index ==0 or self.goal_rewards[index]['step_count']  == -1:  # active target or nest found
 
-                    self.targets_found_order.append(index) # record the id of the target
-                    self.goal_rewards[index]['step_count'] = self.env._elapsed_steps #record when this goal was found
+                    if index != 0:
+                    
+                        self.targets_found_order.append(index) # record the id of the target
+                        self.goal_rewards[index]['step_count'] = self.env._elapsed_steps #record when this goal was found
 
-                    info["Target.found"] = True # update info to show an active target was found
+                        info["Target.found"] = True # update info to show an active target was found
 
                     # check to see if all targets have been found.  i.e. if there are not any undiscovered active targets
-                    done = True 
+                    all_targets_found = True 
                     for target in reversed(self.goal_rewards.items()): # as an optimisation, check the "last" target first
                         if target[1]['step_count'] == -1:
-                            done = False
+                            all_targets_found = False
                             break
 
-                    if done and stats:
+                    
+
+                    # reward logic. the nest only reward when all targets have been found
+                    # target found but not all targets found.  reward = 1, done = false
+                    # target found and all targets found.  reward = 1, done = false
+                    # nest found but not all targets found.  reward = 0, done = false
+                    # nest found and all targets found.  reward = 1, done = true
+                    done = (all_targets_found & (index == 0)) #all targets found and now at the nest
+
+                    if index==0 and not all_targets_found:
+                        reward = 0 # nest found, but nest not active until all targets found
+
+                    elif done and stats:
                         self.targets_found_order_by_episode.append(self.targets_found_order) # record which order the targets were found
                         # self.all_targets_found_total_steps.append(self.env._elapsed_steps)
 
@@ -84,6 +96,7 @@ class AgentReward(gym.Wrapper):
                         # else:
                         #     shortest_route = "!!NOT SHORTEST ROUTE!!"
                         # print("All targets found in average {} steps. {}".format(int(np.mean(self.all_targets_found_total_steps)),shortest_route))
+
 
                 elif self.env._elapsed_steps - self.goal_rewards[index]['step_count'] > self.reward_delay:
                     self.goal_rewards[index]['step_count'] = -1 #stop tracking the reward

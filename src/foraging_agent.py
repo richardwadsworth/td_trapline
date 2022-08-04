@@ -221,8 +221,8 @@ class ForagingAgentEnv(Env):
             newrow, newcol, newtheta = inc(row, col, action)
             newstate = (to_s(newrow, newcol), newtheta) # state comprises position and orientation (theta)
             newletter = desc[newrow, newcol]
-            done = bytes(newletter) in b"GH"
-            reward = float(newletter == b"G")
+            done = bytes(newletter) in b"SGH"
+            reward = float(newletter in b"SG")
             
             return newstate, reward, done
 
