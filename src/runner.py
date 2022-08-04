@@ -88,7 +88,7 @@ eligibility_decay = 0.7 # eligibility trace decay
 #softmax temperature annealing
 epsilon_start = 1
 epsilon_end = 0.2
-epsilon_annealing_stop_ratio = 0.9
+epsilon_annealing_stop_ratio = 0.6
 
 respiration_reward = -0.01 # -1/np.square(size) # -1/(steps+(steps*0.1)) # negative reward for moving 1 step in an episode
 stationary_reward = -0.01 # respiration_reward*2 # positive reward for moving, to discourage not moving
@@ -147,9 +147,9 @@ if __name__ == "__main__":
             record_stats)
 
         
-        # get the final performance value of the algorithm using a greedy policy
-        greedyPolicyAvgPerf = policy_predict.average_performance(policy_predict.action, q=actor)
-        softmaxPolicyAvgPerf = policy_train.average_performance(policy_train.get_action(epsilon_end), q=actor)
+        # # get the final performance value of the algorithm using a greedy policy
+        # greedyPolicyAvgPerf = policy_predict.average_performance(policy_predict.action, q=actor)
+        # softmaxPolicyAvgPerf = policy_train.average_performance(policy_train.get_action(epsilon_end), q=actor)
 
         print("Training performance mean: {}".format(np.mean(performance)))
         print("Training performance stdev: {}".format(np.std(performance)))
@@ -159,10 +159,10 @@ if __name__ == "__main__":
             plot_performance(episodes, steps, performance, plot_rate, plot_data)
         
     
-        print("Greedy policy SARSA performance =", greedyPolicyAvgPerf) 
-        print("Softmax policy SARSA performance =", softmaxPolicyAvgPerf) 
+        # print("Greedy policy SARSA performance =", greedyPolicyAvgPerf) 
+        # print("Softmax policy SARSA performance =", softmaxPolicyAvgPerf) 
 
-        if softmaxPolicyAvgPerf > 5:
+        if np.mean(performance[-5]) > 5.8:
 
             #get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
             q_mean = np.mean(actor, axis=(0))
@@ -184,9 +184,10 @@ if __name__ == "__main__":
                 os.mkdir(artifact_dir) 
             
             save_stats(stats_filepath, obs_data)
-            _, _, _, _, _, _, _, xs_target, ys_target = plot_data
+            fig1, _, _, _, _, ax5, ax6, _, _, xs_target, ys_target = plot_data
 
-            plot_traffic(env, xs_target, ys_target, obs_data)
+            plot_traffic(env, fig1, ax5, xs_target, ys_target, sim_data)
+            plot_traffic(env, fig1, ax6, xs_target, ys_target, obs_data)
             print("Output file is " + stats_filepath)
             print("End")
             print()

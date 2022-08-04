@@ -25,7 +25,7 @@ def train(env,
 
     if do_plot != PlotType.NoPlots:
         #unpack plot objects
-        fig1, ax1, ax2, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target = plot_data
+        fig1, ax1, ax2, ax3, ax4, _, _, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target = plot_data
         
     performance = np.ndarray(episodes//plot_rate) # initialise array to track algorithm's performance
 

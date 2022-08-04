@@ -114,7 +114,7 @@ class AgentReward(gym.Wrapper):
 
     def reset(self,*,seed = None):
         val = super().reset(seed=seed)
-        self.observations = []
+        self.observations = [val] # prime observations with the starting point
         self.targets_found_order = []
         self.goal_rewards = {key: {'reward':1, 'step_count':-1} for (key) in self.goal_indices} # set default rewards
         return val

@@ -31,12 +31,14 @@ def initialise_plots(env):
     
     
     # set up the subplots for visualisation
-    fig1, axs = plt.subplots(2,2, figsize=(7,7))
+    fig1, axs = plt.subplots(2,3, figsize=(11,7))
     
-    ax1, ax2, ax3, ax4 = axs.ravel()
+    ax1, ax2, ax3, ax4, ax5, ax6 = axs.ravel()
     remove_axis_ticks(ax1)
     remove_axis_ticks(ax2)
     remove_axis_ticks(ax3)
+    remove_axis_ticks(ax5)
+    remove_axis_ticks(ax6)
 
     # create coordinate lookup table
     xs_coordinate_map, ys_coordinate_map = [], []
@@ -50,7 +52,7 @@ def initialise_plots(env):
         xs_target.append(xs_coordinate_map[index])
         ys_target.append(ys_coordinate_map[index])
     
-    return (fig1, ax1, ax2, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target)
+    return (fig1, ax1, ax2, ax3, ax4, ax5, ax6, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target)
 
 
 # %%
@@ -153,7 +155,7 @@ def plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_
 def plot_performance(episodes, steps, performance, plot_rate, plot_data):
 
     #unpack plot objects
-    fig1, _, _, _, ax4, _, _, _, _= plot_data
+    fig1, _, _, _, ax4, _, _, _, _, _, _= plot_data
     
 
     ax4.plot(plot_rate*np.arange(episodes//plot_rate), performance)
@@ -169,7 +171,7 @@ def plot_performance(episodes, steps, performance, plot_rate, plot_data):
     plt.pause(0.0000000001)
 
 
-def plot_traffic(env, xs_target, ys_target, data):
+def plot_traffic(env, fig, ax, xs_target, ys_target, data):
     
     def create_segment(route):
         points = np.array(route).reshape(-1,1,2)
@@ -206,20 +208,24 @@ def plot_traffic(env, xs_target, ys_target, data):
     lc.set_array(X_scaled)
     lc.set_linewidth(2)
 
-    fig,a = plt.subplots()
-    a.set_xlim(-1,env.size)
-    a.set_ylim(-1,env.size)
+    
+    ax.set_xlim(-1,env.size)
+    ax.set_ylim(-1,env.size)
 
-    line = a.add_collection(lc)
-    fig.colorbar(line, ax=a)
+    line = ax.add_collection(lc)
+    fig.colorbar(line, ax=ax)
     # a.grid()
 
-    a.scatter([0],[0], c='g', s=100, marker='^') #origin
-    a.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
+    ax.scatter([0],[0], c='g', s=100, marker='^') #origin
+    ax.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
     
-    a.invert_yaxis()
+    ax.invert_yaxis()
 
-    plt.show()
+    with contextlib.redirect_stdout(None):
+        display(fig)    
+    clear_output(wait = True)
+    plt.pause(0.0000000001)
+
 
 
 
