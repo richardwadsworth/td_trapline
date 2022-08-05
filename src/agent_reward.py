@@ -1,13 +1,14 @@
 import gym
 class AgentReward(gym.Wrapper):
-    def __init__(self, env, size, goal_indices, reward_delay=50, respiration_reward=0, stationary_reward=0, revisit_inactive_target_reward = 0, change_in_orientation_reward=0):
+    def __init__(self, env, size, nest_index, target_indices, reward_delay=50, respiration_reward=0, stationary_reward=0, revisit_inactive_target_reward = 0, change_in_orientation_reward=0):
         """
 
         PARAMS
         ------
         env: OpenAI gym environment
         size: Arena size (width of square arena)
-        goal_indices (the indices of the targets within the arena)
+        nest_index: this index of the nest
+        target_indices: the indices of the targets within the arena)
         reward_delay: the number of episodes steps to wait until a visited target's reward is reinstated
         respiration_reward: the reward per time step (normally negative)
         stationary_reward: the reward for remaining stationary in a given time step (normally negative)
@@ -16,7 +17,8 @@ class AgentReward(gym.Wrapper):
         """
         super().__init__(env, new_step_api=True)
         self.size = size
-        self.goal_indices = goal_indices
+        self.nest_index = nest_index
+        self.target_indices = target_indices
         self.reward_delay = reward_delay
         self.respiration_reward = respiration_reward
         self.stationary_reward = stationary_reward
@@ -29,14 +31,14 @@ class AgentReward(gym.Wrapper):
         self.targets_found_order = [] # used to record which order the targets are found in an episode
         self.targets_found_order_by_episode = [] # used to record the order for each episode
         self.all_targets_found_total_steps = [] # used to record the total number of steps taken to find all targets
-        self.goal_rewards = {key: {'step_count':-1} for (key) in goal_indices} # set default rewards
+        self.goal_rewards = {key: {'step_count':-1} for (key) in target_indices} # set default rewards
 
 
-    def update_probability_matrix(self, rewards):
+    def update_probability_matrix(self, MDP):
         """
-        update the rewards
+        overwrite the default rewards
         """
-        for R in rewards:
+        for R in MDP['targets']:
             index, reward = R
             for i in range(self.env.observation_space[0].n):
                 for j in range(self.env.action_space.n):
@@ -55,13 +57,14 @@ class AgentReward(gym.Wrapper):
         """
         obs, reward, done, truncated, info = self.env.step(action)
         index = obs[0]
-        if index ==0 or index in self.goal_indices: # the agent has found a goal and done will be True
+
+        if index == self.nest_index or index in self.target_indices: # the agent has found a goal and done will be True
             
             if done: # target found before timed out
 
-                if index ==0 or self.goal_rewards[index]['step_count']  == -1:  # active target or nest found
+                if index == self.nest_index or self.goal_rewards[index]['step_count']  == -1:  # active target or nest found
 
-                    if index != 0:
+                    if index != self.nest_index:
                     
                         self.targets_found_order.append(index) # record the id of the target
                         self.goal_rewards[index]['step_count'] = self.env._elapsed_steps #record when this goal was found
@@ -82,16 +85,16 @@ class AgentReward(gym.Wrapper):
                     # target found and all targets found.  reward = 1, done = false
                     # nest found but not all targets found.  reward = 0, done = false
                     # nest found and all targets found.  reward = 1, done = true
-                    done = (all_targets_found & (index == 0)) #all targets found and now at the nest
+                    done = (all_targets_found & (index == self.nest_index)) #all targets found and now at the nest
 
-                    if index==0 and not all_targets_found:
+                    if index==self.nest_index and not all_targets_found:
                         reward = 0 # nest found, but nest not active until all targets found
 
                     elif done and stats:
                         self.targets_found_order_by_episode.append(self.targets_found_order) # record which order the targets were found
                         # self.all_targets_found_total_steps.append(self.env._elapsed_steps)
 
-                        # if self.goal_indices == self.targets_found_order:
+                        # if self.target_indices == self.targets_found_order:
                         #     shortest_route = ""
                         # else:
                         #     shortest_route = "!!NOT SHORTEST ROUTE!!"
@@ -129,5 +132,5 @@ class AgentReward(gym.Wrapper):
         val = super().reset(seed=seed)
         self.observations = [val] # prime observations with the starting point
         self.targets_found_order = []
-        self.goal_rewards = {key: {'reward':1, 'step_count':-1} for (key) in self.goal_indices} # set default rewards
+        self.goal_rewards = {key: {'reward':1, 'step_count':-1} for (key) in self.target_indices} # set default rewards
         return val

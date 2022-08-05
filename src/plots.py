@@ -7,7 +7,7 @@ from enum import Enum
 from IPython.display import display, clear_output
 from sklearn.preprocessing import Normalizer
 from timeColouredPlots import doColourVaryingPlot2d
-from gym_utils import get_goal_coordinates
+from utils import map_index_to_coord
 from foraging_agent import ActionType
 from utils import map_index_to_coord
 
@@ -44,12 +44,12 @@ def initialise_plots(env):
     # create coordinate lookup table
     xs_coordinate_map, ys_coordinate_map = [], []
     for index in range(env.observation_space[0].n):
-        x, y = get_goal_coordinates(index, env.observation_space[0].n)
+        x, y = map_index_to_coord(env.size, index)
         xs_coordinate_map.append(x)
         ys_coordinate_map.append(y)
 
     xs_target, ys_target = [],[]
-    for index in env.goal_indices:
+    for index in env.target_indices:
         xs_target.append(xs_coordinate_map[index])
         ys_target.append(ys_coordinate_map[index])
     
@@ -91,9 +91,10 @@ def plotActionStateQuiver(env, q, fig1, ax1, ax2, xs_target, ys_target):
     ax1.cla()
     ax2.cla()
 
-    ax1.scatter([0],[0], c='g', s=100, marker='^') #origin
-    ax2.scatter([0],[0], c='g', s=100, marker='^') #origin
-
+    nest_x, nest_y = map_index_to_coord(env.size, env.nest_index)
+    ax1.scatter(nest_x,nest_y, c='g', s=100, marker='^') #origin
+    ax2.scatter(nest_x,nest_y, c='g', s=100, marker='^') #origin
+    
     ax1.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
     ax2.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
     
@@ -126,7 +127,10 @@ def plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_
         showbar=False
 
     ax3.cla()
-    ax3.scatter([0],[0], c='g', s=100, marker='^') #origin
+
+    nest_x, nest_y = map_index_to_coord(env.size, env.nest_index)
+    ax3.scatter(nest_x,nest_y, c='g', s=100, marker='^') #origin
+    
     ax3.scatter(xs_target,ys_target, c='brown', s=100, marker='o') #goal
     ax3.set_title("Agent path")
     ax3.grid()
@@ -172,7 +176,7 @@ def plot_performance(episodes, steps, performance, plot_rate, plot_data):
     plt.pause(0.0000000001)
 
 
-def plot_traffic_noise(env, fig, ax, xs_target, ys_target, data, title, sigma = 0.05, alpha=0.2, linewidth=1.5):
+def plot_traffic_noise(env, fig, ax, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target, data, title, sigma = 0.05, alpha=0.2, linewidth=1.5):
 
     def plot(x, y):
         x_ = x * np.random.normal(1,sigma,len(x))
@@ -181,16 +185,17 @@ def plot_traffic_noise(env, fig, ax, xs_target, ys_target, data, title, sigma = 
 
     for observations in data:
         #extract the index data from the observations
-        coords = [map_index_to_coord(env.size,x[0]) for x in observations]
-        x = [x[0] for x in coords]
-        y = [x[1] for x in coords]
+        coords = [[xs_coordinate_map[observation[0]],ys_coordinate_map[observation[0]]] for observation in observations]
+        x = [coord[0] for coord in coords]
+        y = [coord[1] for coord in coords]
         plot(x, y)
 
     ax.set_xlim(-1,env.size)
     ax.set_ylim(-1,env.size)
     ax.set_title("Traffic plot of Agent under {}".format(title))
 
-    ax.scatter([0],[0], c='g', s=100, marker='^') #origin
+    nest_x, nest_y = map_index_to_coord(env.size, env.nest_index)
+    ax.scatter(nest_x,nest_y, c='g', s=100, marker='^') #origin
     ax.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
     
     ax.invert_yaxis()
@@ -249,7 +254,9 @@ def plot_traffic_greyscale(env, fig, ax, xs_target, ys_target, data, title):
     fig.colorbar(line, ax=ax)
     # a.grid()
 
-    ax.scatter([0],[0], c='g', s=100, marker='^') #origin
+    nest_x, nest_y = map_index_to_coord(env.size, env.nest_index)
+    ax.scatter(nest_x,nest_y, c='g', s=100, marker='^') #origin
+    
     ax.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
     
     ax.invert_yaxis()

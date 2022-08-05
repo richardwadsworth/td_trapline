@@ -192,6 +192,10 @@ class ForagingAgentEnv(Env):
         nS = nrow * ncol
 
         self.initial_state_distrib = np.array(desc == b"S").astype("float64").ravel()
+
+        if self.initial_state_distrib.sum() != 1:
+            raise ValueError("Environment description must contain only 1 start point.")
+        
         self.initial_state_distrib /= self.initial_state_distrib.sum()
 
         self.P = {s: {a: [] for a in range(nA)} for s in range(nS)}
