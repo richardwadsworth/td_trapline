@@ -185,10 +185,10 @@ if __name__ == "__main__":
                 os.mkdir(artifact_dir) 
             
             save_stats(stats_filepath, obs_data)
-            fig1, _, _, _, _, ax5, ax6, _, _, xs_target, ys_target = plot_data
+            fig1, _, _, _, _, ax5, ax6, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target = plot_data
 
-            plot_traffic_noise(env, fig1, ax5, xs_target, ys_target, sim_data, "Training")
-            plot_traffic_noise(env, fig1, ax6, xs_target, ys_target, obs_data, "Test")
+            plot_traffic_noise(env, fig1, ax5, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target, sim_data, "Training")
+            plot_traffic_noise(env, fig1, ax6, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target, obs_data, "Test")
             print("Output file is " + stats_filepath)
             print("End")
             print()

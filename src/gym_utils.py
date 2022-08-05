@@ -1,6 +1,7 @@
 import numpy as np
 import site
 import sys
+from utils import map_index_to_coord
 
 def register_gym(dev_mode=False):
 
@@ -56,16 +57,10 @@ def initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_rewa
     
     return wrapped_env
 
-def get_goal_coordinates(index, observation_space_size):
-    side = int(np.sqrt(observation_space_size))
-    x= index%side
-    y= int(np.floor(index/side))
-
-    return x, y
     
 def generate_random_map_extended(goal_indices: list = None, size: int = 8, p: float = 1.0):
     
-    from gym.envs.toy_text.foraging_agent import generate_random_map
+    from foraging_agent import generate_random_map
 
     def update_cell(desc, x, y , new_value):
         row = desc[y]
@@ -84,7 +79,7 @@ def generate_random_map_extended(goal_indices: list = None, size: int = 8, p: fl
         
         #overwrite the default goal position if goal indices given
         for index in goal_indices:
-            x, y = get_goal_coordinates(index, np.square(size))
+            x, y = map_index_to_coord(size, index)
             desc = update_cell(desc, x, y, "G") # set the cell to be a goal
             
     return desc

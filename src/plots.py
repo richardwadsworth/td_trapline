@@ -7,7 +7,7 @@ from enum import Enum
 from IPython.display import display, clear_output
 from sklearn.preprocessing import Normalizer
 from timeColouredPlots import doColourVaryingPlot2d
-from gym_utils import get_goal_coordinates
+from utils import map_index_to_coord
 from foraging_agent import ActionType
 from utils import map_index_to_coord
 
@@ -44,7 +44,7 @@ def initialise_plots(env):
     # create coordinate lookup table
     xs_coordinate_map, ys_coordinate_map = [], []
     for index in range(env.observation_space[0].n):
-        x, y = get_goal_coordinates(index, env.observation_space[0].n)
+        x, y = map_index_to_coord(env.size, index)
         xs_coordinate_map.append(x)
         ys_coordinate_map.append(y)
 
@@ -172,7 +172,7 @@ def plot_performance(episodes, steps, performance, plot_rate, plot_data):
     plt.pause(0.0000000001)
 
 
-def plot_traffic_noise(env, fig, ax, xs_target, ys_target, data, title, sigma = 0.05, alpha=0.2, linewidth=1.5):
+def plot_traffic_noise(env, fig, ax, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target, data, title, sigma = 0.05, alpha=0.2, linewidth=1.5):
 
     def plot(x, y):
         x_ = x * np.random.normal(1,sigma,len(x))
@@ -181,9 +181,9 @@ def plot_traffic_noise(env, fig, ax, xs_target, ys_target, data, title, sigma = 
 
     for observations in data:
         #extract the index data from the observations
-        coords = [map_index_to_coord(env.size,x[0]) for x in observations]
-        x = [x[0] for x in coords]
-        y = [x[1] for x in coords]
+        coords = [[xs_coordinate_map[observation[0]],ys_coordinate_map[observation[0]]] for observation in observations]
+        x = [coord[0] for coord in coords]
+        y = [coord[1] for coord in coords]
         plot(x, y)
 
     ax.set_xlim(-1,env.size)

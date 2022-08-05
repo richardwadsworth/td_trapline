@@ -16,4 +16,4 @@ class Test_Map(unittest.TestCase):
         self.assertEqual(map_index_to_coord(8, 63), self.mutate(7,7))
 
 
-unittest.main('utils', argv=[''], verbosity=2, exit=False)
+unittest.main('test_utils', argv=[''], verbosity=2, exit=False)
