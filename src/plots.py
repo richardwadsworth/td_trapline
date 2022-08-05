@@ -157,17 +157,14 @@ def plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_
     plt.pause(0.0000000001)
 
 
-def plot_performance(episodes, steps, performance, plot_rate, plot_data):
+def plot_performance(fig1, ax, episodes, steps, performance, plot_rate):
 
-    #unpack plot objects
-    fig1, _, _, _, ax4, _, _, _, _, _, _= plot_data
     
-
-    ax4.plot(plot_rate*np.arange(episodes//plot_rate), performance)
-    ax4.set_xlabel("Episodes")
-    ax4.set_title("Learning progress for SARSA")
-    ax4.set_ylabel("Average reward of an Episode")
-    ax4.grid()
+    ax.plot(plot_rate*np.arange(episodes//plot_rate), performance)
+    ax.set_xlabel("Episodes")
+    ax.set_title("Learning progress for SARSA")
+    ax.set_ylabel("Average reward of an Episode")
+    ax.grid()
     fig1.tight_layout()
 
     with contextlib.redirect_stdout(None):

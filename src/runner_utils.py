@@ -3,7 +3,7 @@ from gym_utils import initialise_gym
 from rl_td import train
 from q_function import initialise_actor, initialise_critic, get_q_pretty_print, get_optimal_q_policy_pretty_print
 from policies import GreedyDirectionalPolicy, SoftmaxDirectionalPolicy
-from plots import PlotType
+from plots import plotAgentPath, plotActionStateQuiver, PlotType
 
 from ray.tune.integration.mlflow import MLflowLoggerCallback
 from ray import tune
@@ -172,7 +172,8 @@ def train_fnn(is_stochastic,
             plot_rate,
             do_plots,
             record_stats,
-            rng):
+            rng,
+            threshold=5):
 
     plot_data = None
     env = initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, steps)
@@ -189,7 +190,7 @@ def train_fnn(is_stochastic,
         actor = initialise_actor(env)
         critic = initialise_critic(env, rng)
 
-        if do_plots != PlotType.NoPlots:
+        if do_plots == PlotType.Full:
             plot_data = initialise_plots(env)
 
         policy_train = SoftmaxDirectionalPolicy(env, rng, 50)
@@ -218,26 +219,26 @@ def train_fnn(is_stochastic,
             do_plots,
             record_stats)
 
-        
-        # # get the final performance value of the algorithm using a greedy policy
-        # greedyPolicyAvgPerf = policy_predict.average_performance(policy_predict.action, q=actor)
-        # softmaxPolicyAvgPerf = policy_train.average_performance(policy_train.get_action(epsilon_end), q=actor)
-
         print("Training performance mean: {}".format(np.mean(performance)))
         print("Training performance stdev: {}".format(np.std(performance)))
 
-        if do_plots != PlotType.NoPlots:
-            # visual the algorithm's performance
-            plot_performance(episodes, steps, performance, plot_rate, plot_data)
-        
-    
-        # print("Greedy policy SARSA performance =", greedyPolicyAvgPerf) 
-        # print("Softmax policy SARSA performance =", softmaxPolicyAvgPerf) 
-
-        last_x_mean = np.mean(performance[-3])
+        last_x_mean = np.mean(performance[-5])
         print("Training performance last x mean: {}".format(last_x_mean))
+                
+        if do_plots==PlotType.Full or \
+                do_plots==PlotType.Partial or \
+                do_plots == PlotType.Minimal and last_x_mean > threshold:
+
+            # plot data needed, but not yet initialised
+            fig1, ax1, ax2, ax3, ax4, ax5, ax6, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target = initialise_plots(env)
+
+            plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target,ys_target) # plot the path of the agent's last episode
+            plotActionStateQuiver(env, actor, fig1, ax1, ax2, xs_target,ys_target) # plot the quiver graph of the agent's last episode
+            plot_performance(fig1, ax4, episodes, steps, performance, plot_rate) # visual the algorithm's performance
+            fig1.tight_layout()
+
         
-        if last_x_mean > 4:
+        if last_x_mean > threshold:
 
             #get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
             q_mean = np.mean(actor, axis=(0))
@@ -257,20 +258,24 @@ def train_fnn(is_stochastic,
                 os.mkdir(artifact_dir) 
             
             save_stats(stats_filepath, sim_data) # save this simulation's data to disk
-
-            fig1, _, _, _, _, ax5, ax6, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target = plot_data
-            plot_traffic_noise(env, fig1, ax5, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target, sim_data, "Training")
-            plot_traffic_noise(env, fig1, ax6, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target, obs_data, "Test")
             print("Output file is " + stats_filepath)
-            print("End")
-            print()
+
+            if do_plots!=PlotType.NoPlots:
+                plot_traffic_noise(env, fig1, ax5, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target, sim_data, "Training")
+                plot_traffic_noise(env, fig1, ax6, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target, obs_data, "Test")
+
+            
+            
 
             if do_plots != PlotType.NoPlots:
                 fig_filepath = os.path.join(artifact_dir, filename)
                 plt.savefig(fig_filepath)
                 plt.show()
 
-            if last_x_mean > 5:
-                break
+            
+            break
 
+        print("End")
+        print()
+        
         env.close()

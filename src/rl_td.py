@@ -21,12 +21,12 @@ def train(env,
         sim_data,
         do_plot=PlotType.NoPlots,
         record_stats=True,
-        clip=False):
+        clip=True):
 
     abend=False
     performance_counter = 0
 
-    if do_plot != PlotType.NoPlots:
+    if do_plot == PlotType.Full:
         #unpack plot objects
         fig1, ax1, ax2, ax3, ax4, _, _, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target = plot_data
         
@@ -64,10 +64,10 @@ def train(env,
             new_observation, reward, done, truncated, info = env.step(action, record_stats)
 
             if clip:
-                if episode >= 75 and performance[performance_counter]  < 3 and not (done or truncated):
-                    print("Abending.. poor performance")
+                if episode == 75 and performance[performance_counter-1]  < 2.5 and not (done or truncated):
+                    print("Abending.. poor performance ({})".format(str(performance[performance_counter-1])))
                     abend = True
-                    reward -= 2
+                    # reward -= 1
                 
             # get the next action using the annealed softmax policy
             new_action = policy_train.action(actor, new_observation, epsilon)
@@ -117,10 +117,5 @@ def train(env,
                 # fig1.tight_layout()
         if abend:
             break         
-
-    if do_plot != PlotType.NoPlots:
-        plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target,ys_target) # plot the path of the agent's last episode
-        plotActionStateQuiver(env, actor, fig1, ax1, ax2,xs_target,ys_target) # plot the quiver graph of the agent's last episode
-        fig1.tight_layout()
 
     return actor, performance
