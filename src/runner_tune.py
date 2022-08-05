@@ -27,22 +27,23 @@ def map_coord_to_index(size, x, y):
 #                 ])
 
 
-# small positive array
-size = 7
-MDP = np.array([(map_coord_to_index(size, 1, 1),1.0), 
-                (map_coord_to_index(size, 3, 1),1.0),
-                (map_coord_to_index(size, 1, 3),1.0),
-                (map_coord_to_index(size, 5, 3),1.0),
-                (map_coord_to_index(size, 3, 5),1.0),
-                (map_coord_to_index(size, 5, 5),1.0)
+# small positive array, offest nest
+size = 8
+MDP = {"nest":map_coord_to_index(size, 1, 1),
+        "targets": np.array([(map_coord_to_index(size, 2, 2),1.0), 
+                (map_coord_to_index(size, 4, 2),1.0),
+                (map_coord_to_index(size, 2, 4),1.0),
+                (map_coord_to_index(size, 6, 4),1.0),
+                (map_coord_to_index(size, 4, 6),1.0),
+                (map_coord_to_index(size, 6, 6),1.0)
                 ])
+    }
+
 
 is_stochastic = False
 plot_rate = 5 # rate at which to plot predictions
 
-
-
-experiment_name = "james_demo"
+experiment_name = "6_small_neutral_array_offest"
 episodes = [50, 100]
 steps = [100, 150, 200]
 
@@ -54,7 +55,7 @@ eligibility_decay = {"lower":0.1, "upper":0.9, "q":0.05}# eligibility trace deca
 #softmax temperature annealing
 epsilon_start = 1
 epsilon_end = 0.2
-epsilon_annealing_stop_ratio = {"lower":0.7, "upper":0.9, "q":0.1}
+epsilon_annealing_stop_ratio = {"lower":0.2, "upper":0.9, "q":0.1}
 
 respiration_reward = -0.01 # -1/np.square(size) # -1/(steps+(steps*0.1)) # negative reward for moving 1 step in an episode
 stationary_reward = -0.01 # respiration_reward*2 # positive reward for moving, to discourage not moving
@@ -137,7 +138,7 @@ from ray.tune.suggest.bayesopt import BayesOptSearch
 analysis = tune.run(
     train_x,
     mode="max",
-    num_samples=5,
+    num_samples=1,
     config={
         # define search space here
         "episodes": tune.grid_search(episodes),

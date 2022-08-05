@@ -49,7 +49,7 @@ def initialise_plots(env):
         ys_coordinate_map.append(y)
 
     xs_target, ys_target = [],[]
-    for index in env.goal_indices:
+    for index in env.target_indices:
         xs_target.append(xs_coordinate_map[index])
         ys_target.append(ys_coordinate_map[index])
     
@@ -91,9 +91,10 @@ def plotActionStateQuiver(env, q, fig1, ax1, ax2, xs_target, ys_target):
     ax1.cla()
     ax2.cla()
 
-    ax1.scatter([0],[0], c='g', s=100, marker='^') #origin
-    ax2.scatter([0],[0], c='g', s=100, marker='^') #origin
-
+    nest_x, nest_y = map_index_to_coord(env.size, env.nest_index)
+    ax1.scatter(nest_x,nest_y, c='g', s=100, marker='^') #origin
+    ax2.scatter(nest_x,nest_y, c='g', s=100, marker='^') #origin
+    
     ax1.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
     ax2.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
     
@@ -126,7 +127,10 @@ def plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_
         showbar=False
 
     ax3.cla()
-    ax3.scatter([0],[0], c='g', s=100, marker='^') #origin
+
+    nest_x, nest_y = map_index_to_coord(env.size, env.nest_index)
+    ax3.scatter(nest_x,nest_y, c='g', s=100, marker='^') #origin
+    
     ax3.scatter(xs_target,ys_target, c='brown', s=100, marker='o') #goal
     ax3.set_title("Agent path")
     ax3.grid()
@@ -190,7 +194,8 @@ def plot_traffic_noise(env, fig, ax, xs_coordinate_map, ys_coordinate_map, xs_ta
     ax.set_ylim(-1,env.size)
     ax.set_title("Traffic plot of Agent under {}".format(title))
 
-    ax.scatter([0],[0], c='g', s=100, marker='^') #origin
+    nest_x, nest_y = map_index_to_coord(env.size, env.nest_index)
+    ax.scatter(nest_x,nest_y, c='g', s=100, marker='^') #origin
     ax.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
     
     ax.invert_yaxis()
@@ -249,7 +254,9 @@ def plot_traffic_greyscale(env, fig, ax, xs_target, ys_target, data, title):
     fig.colorbar(line, ax=ax)
     # a.grid()
 
-    ax.scatter([0],[0], c='g', s=100, marker='^') #origin
+    nest_x, nest_y = map_index_to_coord(env.size, env.nest_index)
+    ax.scatter(nest_x,nest_y, c='g', s=100, marker='^') #origin
+    
     ax.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
     
     ax.invert_yaxis()

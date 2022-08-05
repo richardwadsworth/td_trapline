@@ -58,15 +58,18 @@ def map_coord_to_index(size, x, y):
 #                 ])
 
 
-# small positive array
-size = 7
-MDP = np.array([(map_coord_to_index(size, 1, 1),1.0), 
-                (map_coord_to_index(size, 3, 1),1.0),
-                (map_coord_to_index(size, 1, 3),1.0),
-                (map_coord_to_index(size, 5, 3),1.0),
-                (map_coord_to_index(size, 3, 5),1.0),
-                (map_coord_to_index(size, 5, 5),1.0)
+
+# small positive array, offest nest
+size = 8
+MDP = {"nest":map_coord_to_index(size, 1, 1),
+        "targets": np.array([(map_coord_to_index(size, 2, 2),1.0), 
+                (map_coord_to_index(size, 4, 2),1.0),
+                (map_coord_to_index(size, 2, 4),1.0),
+                (map_coord_to_index(size, 6, 4),1.0),
+                (map_coord_to_index(size, 4, 6),1.0),
+                (map_coord_to_index(size, 6, 6),1.0)
                 ])
+    }
 
 
 # # curved line
@@ -96,8 +99,6 @@ revisit_inactive_target_reward = -0.1 # negative reward for revisiting an inacti
 change_in_orientation_reward = 0#-stationary_reward*0.5 #negative reward if orientation changes
 
 env = initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, steps)
-
-
 
 
 record_stats = True

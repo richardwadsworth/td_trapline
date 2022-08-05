@@ -58,7 +58,7 @@ def get_optimal_q_policy_pretty_print(env, q_mean):
     policy = GreedyFlattenedPolicy(env)
 
     def resolveActionDict(q, s):
-        if s in env.goal_indices:
+        if s in env.target_indices:
             return actionsDict[policy.action(q, s)].upper() #" ! "
         elif all(a == 0 for a in q[s]):
             return " - "

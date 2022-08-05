@@ -86,7 +86,7 @@ def train(env,
         # evaluate the agent performance and plot
         if episode > 0 and episode%plot_rate == 0 or episode == episodes-1:
             # print("Episode {}. Epsilon {}.".format(episode, epsilon))    
-            # shortest_trap_line_count = len([x for x in env.targets_found_order_by_episode if x == env.goal_indices]) #check each trap line to see if it is optimal    
+            # shortest_trap_line_count = len([x for x in env.targets_found_order_by_episode if x == env.target_indices]) #check each trap line to see if it is optimal    
             # if shortest_trap_line_count > 0:
             #     print("Total # trap lines: {2}\tOptimal TL:{0}\tOptimal TL as % of all TL ({3}%)\tOptimal TL as % of all episodes ({1}%)".format(\
             #     shortest_trap_line_count, \
