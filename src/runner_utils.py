@@ -148,3 +148,129 @@ def train_parallel_with_config(num_samples,
             save_artifact=True)])
 
     return analysis
+
+
+from plots import plot_performance, initialise_plots, plot_traffic_greyscale, plot_traffic_noise, PlotType
+import matplotlib.pyplot as plt
+
+def train_fnn(is_stochastic,
+            size, 
+            MDP, 
+            respiration_reward,
+            stationary_reward,
+            revisit_inactive_target_reward,
+            change_in_orientation_reward,
+            episodes,
+            steps,
+            eligibility_decay,
+            alpha_actor,
+            alpha_critic,
+            gamma,
+            epsilon_start,
+            epsilon_end,
+            epsilon_annealing_stop_ratio,
+            plot_rate,
+            do_plots,
+            record_stats,
+            rng):
+
+    plot_data = None
+    env = initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, steps)
+
+    print("Action space = ", env.action_space)
+    print("Observation space = ", env.observation_space)
+
+    while True:
+
+        env.reset()
+        # env.render()
+
+        # initialise the action state values
+        actor = initialise_actor(env)
+        critic = initialise_critic(env, rng)
+
+        if do_plots != PlotType.NoPlots:
+            plot_data = initialise_plots(env)
+
+        policy_train = SoftmaxDirectionalPolicy(env, rng, 50)
+        policy_predict = GreedyDirectionalPolicy(env)
+
+        sim_data = []
+        
+        # train the algorithm
+        actor, performance = train(env, 
+            episodes, 
+            steps, 
+            eligibility_decay, 
+            alpha_actor,
+            alpha_critic, 
+            gamma, 
+            epsilon_start, 
+            epsilon_end, 
+            epsilon_annealing_stop_ratio, 
+            actor,
+            critic, 
+            policy_train,
+            policy_predict,
+            plot_rate,
+            plot_data,
+            sim_data,
+            do_plots,
+            record_stats)
+
+        
+        # # get the final performance value of the algorithm using a greedy policy
+        # greedyPolicyAvgPerf = policy_predict.average_performance(policy_predict.action, q=actor)
+        # softmaxPolicyAvgPerf = policy_train.average_performance(policy_train.get_action(epsilon_end), q=actor)
+
+        print("Training performance mean: {}".format(np.mean(performance)))
+        print("Training performance stdev: {}".format(np.std(performance)))
+
+        if do_plots != PlotType.NoPlots:
+            # visual the algorithm's performance
+            plot_performance(episodes, steps, performance, plot_rate, plot_data)
+        
+    
+        # print("Greedy policy SARSA performance =", greedyPolicyAvgPerf) 
+        # print("Softmax policy SARSA performance =", softmaxPolicyAvgPerf) 
+
+        last_x_mean = np.mean(performance[-3])
+        print("Training performance last x mean: {}".format(last_x_mean))
+        
+        if last_x_mean > 4:
+
+            #get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
+            q_mean = np.mean(actor, axis=(0))
+
+            print(get_q_pretty_print(env, q_mean)) # print the final action state values
+            print(get_optimal_q_policy_pretty_print(env, q_mean)) # print the optimal policy in human readable form
+
+            softmaxPolicyAvgPerf, obs_data = policy_train.average_performance_with_observations(policy_train.get_action(epsilon_end), q=actor)
+            print("Final Softmax policy SARSA performance =", softmaxPolicyAvgPerf) 
+
+            import os   
+            from statistics_utils import save_stats         
+            artifact_dir = "./sussex/Dissertation/output"
+            filename = '{}'.format(hash(os.times()))
+            stats_filepath = os.path.join(artifact_dir, filename + '.dat')
+            if not os.path.exists(artifact_dir):
+                os.mkdir(artifact_dir) 
+            
+            save_stats(stats_filepath, sim_data) # save this simulation's data to disk
+
+            fig1, _, _, _, _, ax5, ax6, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target = plot_data
+            plot_traffic_noise(env, fig1, ax5, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target, sim_data, "Training")
+            plot_traffic_noise(env, fig1, ax6, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target, obs_data, "Test")
+            print("Output file is " + stats_filepath)
+            print("End")
+            print()
+
+            if do_plots != PlotType.NoPlots:
+                fig_filepath = os.path.join(artifact_dir, filename)
+                plt.savefig(fig_filepath)
+                plt.show()
+
+            if last_x_mean > 5:
+                break
+
+        env.close()
