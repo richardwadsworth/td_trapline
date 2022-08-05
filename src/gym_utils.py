@@ -1,4 +1,4 @@
-import numpy as np
+from json import loads
 import site
 import sys
 from utils import map_index_to_coord
@@ -36,8 +36,9 @@ def register_gym(dev_mode=False):
     
 def initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, max_episode_steps=100):
 
-    nest_index = MDP['nest']
-    target_indices = [int(x) for x in MDP['targets'][:,0]]
+    MDP = loads(MDP) #convert from string to json
+    nest_index = int(MDP['nest'])
+    target_indices = [int(x[0]) for x in MDP['targets']]
 
     import gym
 

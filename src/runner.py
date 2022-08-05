@@ -16,7 +16,6 @@ from mdp import *
 
 
 size, MDP, _ = get_large_positive_array()
-
 rng = np.random.default_rng() # random number generator
 
 is_stochastic = False
