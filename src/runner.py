@@ -32,7 +32,7 @@ change_in_orientation_reward = 0#-stationary_reward*0.5 #negative reward if orie
 is_stochastic = False
 plot_rate = 5 # rate at which to plot predictions
 record_stats = True
-do_in_episode_plots=PlotType.Partial # None,Minimal, Partial, Full
+do_in_episode_plots=PlotType.Full # None,Minimal, Partial, Full
 
 if __name__ == "__main__":
 

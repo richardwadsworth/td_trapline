@@ -36,21 +36,32 @@ with tempfile.TemporaryDirectory() as tmpdirname:
         from json import load
         with open(local_path, "r") as read_content:
             result = load(read_content)
-            performance = result["performance"]
+            observations = result["observations"]
             done = result["done"]
             plot_rate = 5 #result["plot_rate"]
-            all_runs_in_experiment.append(performance)
+            all_runs_in_experiment.append(observations)
             runs_done.append(done)
 
 
-all_runs_in_experiment = np.array(all_runs_in_experiment)
+all_runs_in_experiment = np.array(all_runs_in_experiment) # convert to array for easier processing
 total_num_samples = all_runs_in_experiment.shape[0]
 
-# filter out all runs that did not return to the nest
+# pre process observations.  extract the index position out of each step taken for each episode
+runs_routes = []
+for i in range(total_num_samples):
+    run_observations = all_runs_in_experiment[i] # all the observations in a specific run.  i,e. all the episodes and their runs
+
+    # get the total number of steps taken for each episode in this run
+    run_step_count_per_episode = [len(observations) for observations in run_observations]
+    runs_routes.append(run_step_count_per_episode) # save the total number of steps
+    
+runs_routes = np.array(runs_routes) # convert to array for easier processing
+
+
 runs_returned_to_nest = []
 for i in range(total_num_samples):
     if runs_done[i]:
-        runs_returned_to_nest.append(all_runs_in_experiment[i])
+        runs_returned_to_nest.append(runs_routes[i])
 
 runs_returned_to_nest=np.array(runs_returned_to_nest)
 
@@ -71,7 +82,7 @@ def plot_errors(num_samples, num_performance_samples_per_episode, plot_rate, dat
 xs1, ys1, zs1 = plot_errors(runs_returned_to_nest.shape[0], num_performance_samples_per_episode, plot_rate, runs_returned_to_nest) 
 
 #get data for all training runs
-xs2, ys2, zs2 = plot_errors(all_runs_in_experiment.shape[0], num_performance_samples_per_episode, plot_rate, all_runs_in_experiment)
+xs2, ys2, zs2 = plot_errors(runs_routes.shape[0], num_performance_samples_per_episode, plot_rate, runs_routes)
 
 # plot the data
 plt.errorbar(xs1, ys1,yerr=zs1, label='Returned to nest')
@@ -79,6 +90,6 @@ plt.errorbar(xs2, ys2,yerr=zs2, label='All runs', alpha=0.7)
 
 plt.legend(loc='upper left')
 plt.xlabel('Episode')
-plt.ylabel('Mean Softmax Performance')
-plt.title('Average Learning Performance per Episode')
+plt.ylabel('Number of steps')
+plt.title('Average Num Steps per Episode')
 plt.show()
