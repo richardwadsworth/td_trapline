@@ -1,12 +1,14 @@
 #plot learning over n experiments, showing error bars
-import mlflow
 import numpy as np
 import matplotlib.pyplot as plt
 
 from mlflow_utils import get_experiment_runs_data
 
 #data, plot_rate = get_experiment_runs_data("analyse_bc764671207f4bf5b14a2f445083d0c6_10_medium_positive_array_offset")
-data, plot_rate = get_experiment_runs_data("analyse_2859cc9d8c3242918c9af22cdcb6b5d9_6_medium_positive_array_offset")
+#data, plot_rate = get_experiment_runs_data("analyse_2859cc9d8c3242918c9af22cdcb6b5d9_6_medium_positive_array_offset")
+
+#data, plot_rate = get_experiment_runs_data("analyse_0b07230d28ed43aabe9f04aaebe1afbe_6_medium_positive_array_offset") #after MDP refactor
+data, plot_rate = get_experiment_runs_data("analyse_8c76ffb6fae54f4893adfdf7804c1b7a_10_medium_positive_array_offset")
 
 all_runs_in_experiment = data["observations"]
 all_runs_done = data["done"]

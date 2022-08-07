@@ -12,7 +12,10 @@ import mlflow
 
 if __name__ == "__main__":
 
-    run = mlflow.get_run("2859cc9d8c3242918c9af22cdcb6b5d9")
+    #run = mlflow.get_run("2859cc9d8c3242918c9af22cdcb6b5d9")
+    run = mlflow.get_run("0b07230d28ed43aabe9f04aaebe1afbe") #best 6 medium after mdp refactor
+    run = mlflow.get_run("8c76ffb6fae54f4893adfdf7804c1b7a") #best 10 medium after mdp refactor
+
     
     
     
