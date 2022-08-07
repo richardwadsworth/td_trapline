@@ -8,7 +8,7 @@ record_stats = True
 sim_data = []
 
 experiment = mlflow.get_experiment_by_name("analyse_bc764671207f4bf5b14a2f445083d0c6_10_medium_positive_array_offset")
-experiment = mlflow.get_experiment_by_name("analyse_2859cc9d8c3242918c9xaf22cdcb6b5d9_6_medium_positive_array_offset")
+# experiment = mlflow.get_experiment_by_name("analyse_2859cc9d8c3242918c9xaf22cdcb6b5d9_6_medium_positive_array_offset")
 print("Experiment name {}.".format(experiment.name))
 experiment_artifact_location = experiment.artifact_location
 
