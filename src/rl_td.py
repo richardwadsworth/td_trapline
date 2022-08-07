@@ -21,7 +21,7 @@ def train(env,
         sim_data,
         do_plot=PlotType.NoPlots,
         record_stats=True,
-        clip=True):
+        clip=False):
 
     abend=False
     performance_counter = 0
@@ -85,7 +85,6 @@ def train(env,
             if done or truncated or abend:
                 break
 
-        
         # evaluate the agent performance using current actor q learning table (no additional learning)
         if episode%plot_rate == 0 or episode == episodes-1:
             performance[episode//plot_rate] = policy_train.average_performance(policy_train.get_action(epsilon), q=actor)
@@ -118,4 +117,4 @@ def train(env,
         if abend:
             break         
 
-    return actor, performance
+    return actor, performance, done

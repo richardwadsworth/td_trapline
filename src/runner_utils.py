@@ -38,7 +38,7 @@ def train_fn(config):
     policy_predict = GreedyDirectionalPolicy(env_local)
 
     sim_data = []
-    actor, performance = train(env_local, 
+    actor, performance, done = train(env_local, 
         int(config["episodes"]),
         int(config["steps"]),
         float(config["eligibility_decay"]),
@@ -80,7 +80,8 @@ def train_fn(config):
             "score_softmax_last_20": softmaxPolicyAvgLas20XPerf,
             "score_greedy": greedyPolicyAvgPerf, 
             "pi_optimal__flattened": pretty_print_optimal_q,
-            "pi_flattened": pretty_print_q
+            "pi_flattened": pretty_print_q,
+            "done":done
             }
 
 
@@ -173,7 +174,7 @@ def train_fnn(is_stochastic,
             do_plots,
             record_stats,
             rng,
-            threshold=5):
+            threshold=5.2):
 
     plot_data = None
     env = initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, steps)
@@ -199,7 +200,7 @@ def train_fnn(is_stochastic,
         sim_data = []
         
         # train the algorithm
-        actor, performance = train(env, 
+        actor, performance, done = train(env, 
             episodes, 
             steps, 
             eligibility_decay, 
@@ -227,7 +228,7 @@ def train_fnn(is_stochastic,
                 
         if do_plots==PlotType.Full or \
                 do_plots==PlotType.Partial or \
-                do_plots == PlotType.Minimal and last_x_mean > threshold:
+                do_plots == PlotType.Minimal and done: #last_x_mean > threshold:
 
             # plot data needed, but not yet initialised
             fig1, ax1, ax2, ax3, ax4, ax5, ax6, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target = initialise_plots(env)
@@ -238,7 +239,7 @@ def train_fnn(is_stochastic,
             fig1.tight_layout()
 
         
-        if last_x_mean > threshold:
+        if done: # last_x_mean > threshold:
 
             #get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
             q_mean = np.mean(actor, axis=(0))
@@ -273,9 +274,12 @@ def train_fnn(is_stochastic,
                 plt.show()
 
             
+            print("End.")
             break
-
-        print("End")
-        print()
         
+        else:
+            print("Continue...")
+            
+        print()
+
         env.close()

@@ -12,7 +12,7 @@ import mlflow
 
 if __name__ == "__main__":
 
-    run = mlflow.get_run("87c8daa3ebf0400dbad10c437bb1abc0")
+    run = mlflow.get_run("2859cc9d8c3242918c9af22cdcb6b5d9")
     
     config = run.data.params
 

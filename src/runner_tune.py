@@ -7,14 +7,14 @@ from runner_utils import train_parallel
 from mdp import *
 
 # parameters for sarsa(lambda)
-size, MDP, experiment_name = get_large_positive_array()
+size, MDP, experiment_name = get_medium_positive_array()
 
 episodes = [100]
-steps = [100, 150]
+steps = [125, 150]
 
 gamma = {"lower":0.7, "upper":0.9, "q":0.1} # discount factor
 alpha_actor = alpha_critic = [0.3, 0.5, 0.7] # actor learning rate, critic learning rate
-eligibility_decay = {"lower":0.7, "upper":0.8, "q":0.1}# eligibility trace decay
+eligibility_decay = {"lower":0.6, "upper":0.8, "q":0.1}# eligibility trace decay
 
 #softmax temperature annealing
 epsilon_start = 1

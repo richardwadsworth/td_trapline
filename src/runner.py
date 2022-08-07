@@ -1,18 +1,11 @@
-import matplotlib.pyplot as plt
 import numpy as np
 
-from gym_utils import register_gym, initialise_gym
+from gym_utils import register_gym
 register_gym(True)
 
 
 from runner_utils import train_fnn
-
-
-from plots import plot_performance, initialise_plots, plot_traffic_greyscale, plot_traffic_noise, PlotType
-from rl_td import train
-from q_function import initialise_actor, initialise_critic, get_q_pretty_print, get_optimal_q_policy_pretty_print
-from policies import GreedyDirectionalPolicy
-from policies import SoftmaxDirectionalPolicy, SoftmaxFlattenedPolicy
+from plots import PlotType
 from mdp import *
 
 # parameters for sarsa(lambda)
@@ -20,7 +13,7 @@ size, MDP, _ = get_medium_positive_array()
 rng = np.random.default_rng() # random number generator
 
 episodes = 100
-steps = 150
+steps = 180
 gamma = 0.8 # discount factor
 alpha_actor = 0.7 # actor learning rate, critic learning rate
 alpha_critic = 0.3 # 
@@ -39,7 +32,7 @@ change_in_orientation_reward = 0#-stationary_reward*0.5 #negative reward if orie
 is_stochastic = False
 plot_rate = 5 # rate at which to plot predictions
 record_stats = True
-do_in_episode_plots=PlotType.Partial # None,Minimal, Partial, Full
+do_in_episode_plots=PlotType.Minimal # None,Minimal, Partial, Full
 
 if __name__ == "__main__":
 
