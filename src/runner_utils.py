@@ -14,7 +14,7 @@ def train_fn(config):
 
     is_stochastic = False
     plot_data = None
-    plot_rate = 5 # rate at which to plot predictions
+    plot_rate = int(config["plot_rate"]) # rate at which to plot predictions
     do_in_episode_plots=PlotType.NoPlots
     do_summary_print = True
 
@@ -83,8 +83,7 @@ def train_fn(config):
             "pi_optimal__flattened": pretty_print_optimal_q,
             "pi_flattened": pretty_print_q,
             "observations": sim_data,
-            "done":done,
-            "plot_rate": plot_rate
+            "done":done
             }
 
 
@@ -128,6 +127,7 @@ def train_parallel(num_samples,
             "epsilon_start": tune.choice([epsilon_start]),
             "epsilon_end": tune.choice([epsilon_end]),
             "epsilon_annealing_stop_ratio": tune.grid_search(epsilon_annealing_stop_ratio),
+            "plot_rate" : 5,
             "mlflow": {
                 "experiment_name": experiment_name,
                 "tracking_uri": mlflow.get_tracking_uri()}

@@ -3,47 +3,15 @@ import mlflow
 import numpy as np
 import matplotlib.pyplot as plt
 
-experiment_path = ""
-record_stats = True
-sim_data = []
+from mlflow_utils import get_experiment_runs_data
 
-experiment = mlflow.get_experiment_by_name("analyse_bc764671207f4bf5b14a2f445083d0c6_10_medium_positive_array_offset")
-# experiment = mlflow.get_experiment_by_name("analyse_2859cc9d8c3242918c9xaf22cdcb6b5d9_6_medium_positive_array_offset")
-print("Experiment name {}.".format(experiment.name))
-experiment_artifact_location = experiment.artifact_location
+#data, plot_rate = get_experiment_runs_data("analyse_bc764671207f4bf5b14a2f445083d0c6_10_medium_positive_array_offset")
+data, plot_rate = get_experiment_runs_data("analyse_2859cc9d8c3242918c9af22cdcb6b5d9_6_medium_positive_array_offset")
 
-import os
-from urllib.parse import urlparse
-p = urlparse(experiment_artifact_location)
-files = [f for f in os.listdir(p.path) if not f=="meta.yaml"] # get a list of all files in the dir
-all_runs_in_experiment = []
-runs_done = []
-
-import tempfile
-from mlflow.tracking import MlflowClient
-        
-client = MlflowClient()
-        
-with tempfile.TemporaryDirectory() as tmpdirname:
-    for filename in files:
-        #read file name
-
-        run = mlflow.get_run(filename)
-        
-        # Download artifacts
-        local_path = client.download_artifacts(run.info.run_id, "result.json", tmpdirname)
-        
-        from json import load
-        with open(local_path, "r") as read_content:
-            result = load(read_content)
-            observations = result["observations"]
-            done = result["done"]
-            plot_rate = 5 #result["plot_rate"]
-            all_runs_in_experiment.append(observations)
-            runs_done.append(done)
+all_runs_in_experiment = data["observations"]
+all_runs_done = data["done"]
 
 
-all_runs_in_experiment = np.array(all_runs_in_experiment) # convert to array for easier processing
 total_num_samples = all_runs_in_experiment.shape[0]
 
 # pre process observations.  extract the index position out of each step taken for each episode
@@ -60,7 +28,7 @@ runs_routes = np.array(runs_routes) # convert to array for easier processing
 
 runs_returned_to_nest = []
 for i in range(total_num_samples):
-    if runs_done[i]:
+    if all_runs_done[i]:
         runs_returned_to_nest.append(runs_routes[i])
 
 runs_returned_to_nest=np.array(runs_returned_to_nest)
