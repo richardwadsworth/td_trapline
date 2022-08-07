@@ -79,9 +79,12 @@ def train_fn(config):
             "score_softmax_last_05": softmaxPolicyAvgLast05Perf,
             "score_softmax_last_20": softmaxPolicyAvgLas20XPerf,
             "score_greedy": greedyPolicyAvgPerf, 
+            "performance": performance,
             "pi_optimal__flattened": pretty_print_optimal_q,
             "pi_flattened": pretty_print_q,
-            "done":done
+            "observations": sim_data,
+            "done":done,
+            "plot_rate": plot_rate
             }
 
 
@@ -124,7 +127,7 @@ def train_parallel(num_samples,
             "gamma": tune.quniform(**gamma),
             "epsilon_start": tune.choice([epsilon_start]),
             "epsilon_end": tune.choice([epsilon_end]),
-            "epsilon_annealing_stop_ratio": tune.quniform(**epsilon_annealing_stop_ratio),
+            "epsilon_annealing_stop_ratio": tune.grid_search(epsilon_annealing_stop_ratio),
             "mlflow": {
                 "experiment_name": experiment_name,
                 "tracking_uri": mlflow.get_tracking_uri()}

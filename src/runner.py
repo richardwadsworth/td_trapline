@@ -9,11 +9,11 @@ from plots import PlotType
 from mdp import *
 
 # parameters for sarsa(lambda)
-size, MDP, _ = get_medium_positive_array()
+size, MDP, _ = get_10_medium_positive_array()
 rng = np.random.default_rng() # random number generator
 
 episodes = 100
-steps = 180
+steps = 200
 gamma = 0.8 # discount factor
 alpha_actor = 0.7 # actor learning rate, critic learning rate
 alpha_critic = 0.3 # 
@@ -32,7 +32,7 @@ change_in_orientation_reward = 0#-stationary_reward*0.5 #negative reward if orie
 is_stochastic = False
 plot_rate = 5 # rate at which to plot predictions
 record_stats = True
-do_in_episode_plots=PlotType.Minimal # None,Minimal, Partial, Full
+do_in_episode_plots=PlotType.Partial # None,Minimal, Partial, Full
 
 if __name__ == "__main__":
 

@@ -14,6 +14,8 @@ if __name__ == "__main__":
 
     run = mlflow.get_run("2859cc9d8c3242918c9af22cdcb6b5d9")
     
+    
+    
     config = run.data.params
 
     experiment_name = "analyse_" + run.info.run_id + "_" + config["experiment_name"]
