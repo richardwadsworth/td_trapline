@@ -20,14 +20,17 @@ def train(env,
         plot_data, 
         sim_data,
         do_plot=PlotType.NoPlots,
-        record_stats=True):
+        record_stats=True,
+        clip=True):
 
+    abend=False
+    performance_counter = 0
 
-    if do_plot != PlotType.NoPlots:
+    if do_plot == PlotType.Full:
         #unpack plot objects
         fig1, ax1, ax2, ax3, ax4, _, _, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target = plot_data
         
-    performance = np.ndarray(episodes//plot_rate) # initialise array to track algorithm's performance
+    performance = np.zeros(episodes//plot_rate) # initialise array to track algorithm's performance
 
     epsilon_annealing_stop = epsilon_annealing_stop_ratio * episodes
 
@@ -59,7 +62,13 @@ def train(env,
             
             # step through the environment
             new_observation, reward, done, truncated, info = env.step(action, record_stats)
-            
+
+            if clip:
+                if episode == 75 and performance[performance_counter-1]  < 2.5 and not (done or truncated):
+                    print("Abending.. poor performance ({})".format(str(performance[performance_counter-1])))
+                    abend = True
+                    # reward -= 1
+                
             # get the next action using the annealed softmax policy
             new_action = policy_train.action(actor, new_observation, epsilon)
 
@@ -73,12 +82,16 @@ def train(env,
             # update the state and action values
             observation, action = new_observation, new_action
 
-            if done or truncated:
+            if done or truncated or abend:
                 break
 
+        
         # evaluate the agent performance using current actor q learning table (no additional learning)
         if episode%plot_rate == 0 or episode == episodes-1:
             performance[episode//plot_rate] = policy_train.average_performance(policy_train.get_action(epsilon), q=actor)
+            performance_counter +=1
+            # print("p:{}, e:{}".format(performance[episode//plot_rate], episode))
+            
             if record_stats:
                 #record stats
                 sim_data.append(env.observations)
@@ -102,11 +115,7 @@ def train(env,
                 # print("Training perf: {}".format(performance[episode//plot_rate]))
                 # set the spacing between subplots
                 # fig1.tight_layout()
-                
-
-    if do_plot != PlotType.NoPlots:
-        plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_target,ys_target) # plot the path of the agent's last episode
-        plotActionStateQuiver(env, actor, fig1, ax1, ax2,xs_target,ys_target) # plot the quiver graph of the agent's last episode
-        fig1.tight_layout()
+        if abend:
+            break         
 
     return actor, performance
