@@ -87,7 +87,7 @@ def train(env,
 
         # evaluate the agent performance using current actor q learning table (no additional learning)
         if episode%plot_rate == 0 or episode == episodes-1:
-            performance[episode//plot_rate] = policy_train.average_performance(policy_train.get_action(epsilon), q=actor)
+            performance[episode//plot_rate] = policy_train.average_performance(policy_train.get_action(epsilon_end), q=actor)
             performance_counter +=1
             # print("p:{}, e:{}".format(performance[episode//plot_rate], episode))
             
