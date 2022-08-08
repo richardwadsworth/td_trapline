@@ -177,7 +177,7 @@ def train_fnn(is_stochastic,
             do_plots,
             record_stats,
             rng,
-            threshold=5.2):
+            threshold=6):
 
     plot_data = None
     env = initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, steps)
@@ -231,7 +231,7 @@ def train_fnn(is_stochastic,
                 
         if do_plots==PlotType.Full or \
                 do_plots==PlotType.Partial or \
-                do_plots == PlotType.Minimal and done: #last_x_mean > threshold:
+                do_plots == PlotType.Minimal and last_x_mean > threshold:
 
             # plot data needed, but not yet initialised
             fig1, ax1, ax2, ax3, ax4, ax5, ax6, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target = initialise_plots(env)
@@ -242,7 +242,7 @@ def train_fnn(is_stochastic,
             fig1.tight_layout()
 
         
-        if done: # last_x_mean > threshold:
+        if last_x_mean > threshold:
 
             #get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
             q_mean = np.mean(actor, axis=(0))

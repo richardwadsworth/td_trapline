@@ -9,6 +9,16 @@ dump_mdp  = lambda x : dumps(x)
 #       trapline (which can also be reversed).
 ##########################################################################
 
+def get_1_small_test_array():
+    # small neutral array, offest nest
+    name = "6_small_neutral_array_offset"
+    size = 4
+    MDP = {"nest":map_coord_to_index(size, 1, 1),
+            "targets": [(map_coord_to_index(size, 2, 2),1.0)
+                    ]
+        }
+    return size, dump_mdp(MDP), name
+
 def get_6_small_neutral_array():
     # small neutral array, offest nest
     name = "6_small_neutral_array_offset"

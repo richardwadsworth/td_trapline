@@ -61,7 +61,7 @@ def train(env,
             E_actor[observation[1], observation[0], action] = 1
             
             # step through the environment
-            new_observation, reward, done, truncated, info = env.step(action, record_stats)
+            new_observation, reward, done, truncated, info = env.step(action)
 
             if clip:
                 if episode == 75 and performance[performance_counter-1]  < 2.5 and not (done or truncated):
@@ -97,15 +97,6 @@ def train(env,
             
         # evaluate the agent performance and plot
         if episode > 0 and episode%plot_rate == 0 or episode == episodes-1:
-            # print("Episode {}. Epsilon {}.".format(episode, epsilon))    
-            # shortest_trap_line_count = len([x for x in env.targets_found_order_by_episode if x == env.target_indices]) #check each trap line to see if it is optimal    
-            # if shortest_trap_line_count > 0:
-            #     print("Total # trap lines: {2}\tOptimal TL:{0}\tOptimal TL as % of all TL ({3}%)\tOptimal TL as % of all episodes ({1}%)".format(\
-            #     shortest_trap_line_count, \
-            #         np.round(shortest_trap_line_count/episode*100,2), \
-            #             len(env.targets_found_order_by_episode), \
-            #                 np.round(shortest_trap_line_count/len(env.targets_found_order_by_episode)*100,2)) 
-            #         ) 
             
             if do_plot == PlotType.Full:
                 fig1.suptitle("Episode {}".format(episode))

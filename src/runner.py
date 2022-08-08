@@ -9,11 +9,11 @@ from plots import PlotType
 from mdp import *
 
 # parameters for sarsa(lambda)
-size, MDP, _ = get_10_medium_positive_array()
+size, MDP, _ = get_6_medium_positive_array()
 rng = np.random.default_rng() # random number generator
 
 episodes = 100
-steps = 200
+steps = 100
 gamma = 0.8 # discount factor
 alpha_actor = 0.7 # actor learning rate, critic learning rate
 alpha_critic = 0.3 # 
@@ -22,7 +22,7 @@ eligibility_decay = 0.8 # eligibility trace decay
 #softmax temperature annealing
 epsilon_start = 1
 epsilon_end = 0.2
-epsilon_annealing_stop_ratio = 0.5
+epsilon_annealing_stop_ratio = 0.2
 
 respiration_reward = -0.005 # -1/np.square(size) # -1/(steps+(steps*0.1)) # negative reward for moving 1 step in an episode
 stationary_reward = -0.005 # respiration_reward*2 # positive reward for moving, to discourage not moving

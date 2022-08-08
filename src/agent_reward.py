@@ -24,13 +24,8 @@ class AgentReward(gym.Wrapper):
         self.stationary_reward = stationary_reward
         self.revisit_inactive_target_reward = revisit_inactive_target_reward
         self.change_in_orientation_reward = change_in_orientation_reward
+        self.targets_found_order = []
         self.observations = []
-
-        self.target_found = False
-
-        self.targets_found_order = [] # used to record which order the targets are found in an episode
-        self.targets_found_order_by_episode = [] # used to record the order for each episode
-        self.all_targets_found_total_steps = [] # used to record the total number of steps taken to find all targets
         self.goal_rewards = {key: {'step_count':-1} for (key) in target_indices} # set default rewards
 
 
@@ -49,7 +44,7 @@ class AgentReward(gym.Wrapper):
                         
         
 
-    def step(self, action, stats=False):
+    def step(self, action):
         """
         PARAMS:
         action: action to take
@@ -58,57 +53,34 @@ class AgentReward(gym.Wrapper):
         obs, reward, done, truncated, info = self.env.step(action)
         index = obs[0]
 
-        if index == self.nest_index or index in self.target_indices: # the agent has found a goal and done will be True
+        if done:
+            if  len(self.targets_found_order) <=2:
+                done=False
+                reward = 0
+            else:
+                reward = reward * len(self.targets_found_order)/len(self.target_indices)
+
+        if index in self.target_indices: # the agent has found a goal
             
-            if done: # target found before timed out
+            if self.goal_rewards[index]['step_count']  == -1:  # active target found
 
-                if index == self.nest_index or self.goal_rewards[index]['step_count']  == -1:  # active target or nest found
+                self.goal_rewards[index]['step_count'] = self.env._elapsed_steps #record when this goal was found
+                self.targets_found_order.append(index) # record the id of the target
+                info["Target.found"] = True # update info to show an active target was found
 
-                    if index != self.nest_index:
-                    
-                        self.targets_found_order.append(index) # record the id of the target
-                        self.goal_rewards[index]['step_count'] = self.env._elapsed_steps #record when this goal was found
+                # check to see if all targets have been found.  i.e. if there are not any undiscovered active targets
+                all_targets_found = True 
+                for target in reversed(self.goal_rewards.items()): # as an optimisation, check the "last" target first
+                    if target[1]['step_count'] == -1:
+                        all_targets_found = False
+                        break
 
-                        info["Target.found"] = True # update info to show an active target was found
+            elif self.env._elapsed_steps - self.goal_rewards[index]['step_count'] > self.reward_delay:
+                self.goal_rewards[index]['step_count'] = -1 #stop tracking the reward
+                reward = self.revisit_inactive_target_reward # discourage agent from going back to this target
 
-                    # check to see if all targets have been found.  i.e. if there are not any undiscovered active targets
-                    all_targets_found = True 
-                    for target in reversed(self.goal_rewards.items()): # as an optimisation, check the "last" target first
-                        if target[1]['step_count'] == -1:
-                            all_targets_found = False
-                            break
-
-                    
-
-                    # reward logic. the nest only reward when all targets have been found
-                    # target found but not all targets found.  reward = 1, done = false
-                    # target found and all targets found.  reward = 1, done = false
-                    # nest found but not all targets found.  reward = 0, done = false
-                    # nest found and all targets found.  reward = 1, done = true
-                    done = (all_targets_found & (index == self.nest_index)) #all targets found and now at the nest
-
-                    if index==self.nest_index and not all_targets_found:
-                        reward = 0 # nest found, but nest not active until all targets found
-
-                    elif done and stats:
-                        self.targets_found_order_by_episode.append(self.targets_found_order) # record which order the targets were found
-                        # self.all_targets_found_total_steps.append(self.env._elapsed_steps)
-
-                        # if self.target_indices == self.targets_found_order:
-                        #     shortest_route = ""
-                        # else:
-                        #     shortest_route = "!!NOT SHORTEST ROUTE!!"
-                        # print("All targets found in average {} steps. {}".format(int(np.mean(self.all_targets_found_total_steps)),shortest_route))
-
-
-                elif self.env._elapsed_steps - self.goal_rewards[index]['step_count'] > self.reward_delay:
-                    self.goal_rewards[index]['step_count'] = -1 #stop tracking the reward
-                    reward = 0
-                    done = False # NOT done yet
-
-                else:
-                    reward = self.revisit_inactive_target_reward # discourage agent from going back to this target
-                    done = False # NOT done yet, there are still undiscovered targets
+            else:
+                reward = self.revisit_inactive_target_reward # discourage agent from going back to this target
             
         ## other rewards
 
@@ -130,7 +102,7 @@ class AgentReward(gym.Wrapper):
 
     def reset(self,*,seed = None):
         val = super().reset(seed=seed)
-        self.observations = [val] # prime observations with the starting point
         self.targets_found_order = []
+        self.observations = [val] # prime observations with the starting point
         self.goal_rewards = {key: {'reward':1, 'step_count':-1} for (key) in self.target_indices} # set default rewards
         return val
