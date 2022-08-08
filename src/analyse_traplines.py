@@ -21,13 +21,14 @@ MDP = data["MDP"]
 total_num_samples = all_runs_in_experiment.shape[0]
 num_samples_per_run = all_runs_in_experiment.shape[1]
 
-# filter out all runs that did not return to the nest
+
 runs_returned_to_nest = []
 for i in range(total_num_samples):
     if all_runs_done[i]:
         runs_returned_to_nest.append(all_runs_in_experiment[i])
 
-        
+runs_returned_to_nest=np.array(runs_returned_to_nest)
+total_num_samples = runs_returned_to_nest.shape[0]
 
 #identify the a trapline
 optimal_trapline_master = [observation[0] for observation in MDP["targets"]]
@@ -46,7 +47,7 @@ results = pd.DataFrame(route_data)
 
 #for each episode, find the order that the the targets where discovered in
 for i in range(total_num_samples):
-    run_observations = all_runs_in_experiment[i] # all the observations in a specific run.  i,e. all the episodes and their runs
+    run_observations = runs_returned_to_nest[i] # all the observations in a specific run.  i,e. all the episodes and their runs
 
     run_route_only_targets = [] # all filtered routes for this run
     for k in range(num_samples_per_run):
@@ -65,24 +66,30 @@ for i in range(total_num_samples):
                 route_only_targets.append(index) # record the order the target was found
                 trapline_lookup.remove(index) #remove the target incase it was visited again
 
-        if len(route_only_targets)==len(optimal_trapline_master) and route[-1] == MDP["nest"]:
-            #this episode found all the routes and the nest
+        
+        #if this episode found the nest then add to the route
+        if route[-1] == MDP["nest"]:
             route_only_targets.append(MDP["nest"])
+        else:
+            1==1
 
-        if len(route_only_targets)>0:
+        if len(route_only_targets)>2 and route[-1] == MDP["nest"]:
             #at least one target discovered
             run_route_only_targets.append(route_only_targets)
 
         # if a trapline was created in this run, then the latter episodes should visit the targets in the same order
 
-    count = pd.Series(run_route_only_targets).value_counts().sort_values(ascending=False)
-    
-    most_popular_route = count.index[0] # we ordered by count of routes descending
-    
-    
-    results["route"][i] = count.index[0]
-    results["count"][i] = count[0]
-    
+    if len(run_route_only_targets)>0:
+        count = pd.Series(run_route_only_targets).value_counts().sort_values(ascending=False)
+        
+        most_popular_route = count.index[0] # we ordered by count of routes descending
+        
+        
+        results["route"][i] = count.index[0]
+        results["count"][i] = count[0]
+    else:
+        results["route"][i] = 0
+        results["count"][i] = 0
     # res = (most_popular_route == optimal_trapline_master) or (most_popular_route == optimal_trapline_reversed_master)
     # if res:
     #     #this is an optimal trapline 
