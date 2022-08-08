@@ -176,8 +176,8 @@ def plot_performance(fig1, ax, episodes, steps, performance, plot_rate):
 def plot_traffic_noise(env, fig, ax, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target, data, title, sigma = 0.05, alpha=0.2, linewidth=1.5):
 
     def plot(x, y):
-        x_ = x * np.random.normal(1,sigma,len(x))
-        y_ = y * np.random.normal(1,sigma,len(y))
+        x_ = x + np.random.normal(1,sigma,len(x))
+        y_ = y + np.random.normal(1,sigma,len(y))
         ax.plot(x_,y_, color="black", alpha=alpha, linewidth=linewidth)
 
     for observations in data:
