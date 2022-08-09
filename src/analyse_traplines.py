@@ -80,8 +80,8 @@ for run_index in range(num_runs_in_experiment):
     route, count = get_trapline_for_run_using_route_distribution(sliding_sequence_used_for_identifying_trapline_route, run_episodes_targets_found)
 
     # use the sliding sequence to determine is there is a stable trapline
-    stable_trapline_found = is_stable_trapline_1(MDP["size"], sliding_sequence_used_for_trapline_stability, run_episodes_routes, 100)
-    stable_trapline_found = is_stable_trapline_2(MDP["size"], sliding_sequence_used_for_trapline_stability, run_episodes_routes, 300)
+    # stable_trapline_found = is_stable_trapline_1(MDP["size"], sliding_sequence_used_for_trapline_stability, run_episodes_routes, 100) #version1
+    stable_trapline_found = is_stable_trapline_2(MDP["size"], sliding_sequence_used_for_trapline_stability, run_episodes_routes, 300) #version2 using segmentation
     print()
     
     results.loc[run_index, 'route'] = str(route if stable_trapline_found else []) #only save the route if a stable trapline was found
