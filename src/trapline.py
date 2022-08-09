@@ -58,65 +58,71 @@ def get_trapline_for_run_using_route_distribution(sliding_sequence, routes):
         return route, count
 
 
-def cluster_common_route_segments(route1, route2):
+def cluster_common_route_segments(route_1, route_2):
     '''
     take two routes and split the routes in to clusters of common and uncommon routes
     '''
+    pointer_1=0
+    pointer_2=0
 
-    # # work out which route is shorter
-    # if len(route1)<len(route2):
-    #     route_s = route1 #shortest
-    #     route_l = route2 #longest
-    # else:
-    #     route_s = route2 #shortest
-    #     route_l = route1 #longest
+    route_1_segments = []
+    route_2_segments = []
 
-    route_s = route1 #shortest
-    route_l = route2 #longest
+    last_common_1 = 0
+    last_common_2 = 0
 
-    pointer_s=0
-    pointer_l=0
-    route_s_segments = []
-    route_l_segments = []
-    last_common_s = 0
-    last_common_l = 0
-    while pointer_s<len(route_s):
+    while pointer_1<len(route_1):
 
-        if route_s[pointer_s]==route_l[pointer_l]:
+        if route_1[pointer_1]==route_2[pointer_2]:
             # the route position is the same.  
 
-            if (pointer_s+1 == len(route_s) or pointer_l+1 == len(route_l)) or \
-                ((route_s[pointer_s-1]==route_l[pointer_l-1]) and (route_s[pointer_s+1]!=route_l[pointer_l+1])) or \
-                ((route_s[pointer_s-1]!=route_l[pointer_l-1]) and (route_s[pointer_s]!=route_l[pointer_l-1]))   :
+            if (pointer_1+1 == len(route_1) or pointer_2+1 == len(route_2)) or \
+                ((route_1[pointer_1-1]==route_2[pointer_2-1]) and (route_1[pointer_1+1]!=route_2[pointer_2+1])) or \
+                ((route_1[pointer_1-1]!=route_2[pointer_2-1]) and (route_1[pointer_1]!=route_2[pointer_2-1]))   :
                 #the next indexes do not match
             
+                if (pointer_1+1 != len(route_1)) and (pointer_2+1 == len(route_2)):
+                    # Found matching indexes but we're at the end of route 2 so no where
+                    # else to go after this so need to include the remainder of route 1 in 
+                    # segment by setting the route_1 pointer to the end of the route.
+                    pointer_1 = len(route_1)-1
+
                 #create segments for each route
-                route_s_segment = route_s[last_common_s: pointer_s+1]
-                route_l_segment = route_l[last_common_l: pointer_l+1]
+                route_1_segment = route_1[last_common_1: pointer_1+1]
+                route_2_segment = route_2[last_common_2: pointer_2+1]
 
-                route_s_segments.append(route_s_segment)
-                route_l_segments.append(route_l_segment)
+                route_1_segments.append(route_1_segment)
+                route_2_segments.append(route_2_segment)
             
-                last_common_s = pointer_s
-                last_common_l = pointer_l
+                last_common_1 = pointer_1
+                last_common_2 = pointer_2
             
-            pointer_s+=1
-            pointer_l+=1
+            pointer_1+=1
+            pointer_2+=1
             
-        elif pointer_l == len(route_l)-1: 
-            # we are at the end of the longest route and no additional common index found.
+        elif (pointer_2 == len(route_2)-1) and (pointer_1 != len(route_1)-1): 
+            # we are at the end of route2 and no additional common index found.
             
-            # move on to next index to search for
-            pointer_s+=1
-            pointer_l = last_common_l+1
+            # move on to next index in route1 to continue the search
+            pointer_1+=1
+            pointer_2 = last_common_2+1
 
-        elif pointer_s== len(route_s)-1:
+        elif (pointer_1== len(route_1)-1) and (pointer_2 == len(route_2)-1):
+
+            # we're at the end of both routes. create final segments for each route
+            route_1_segment = route_1[last_common_1: pointer_1+1]
+            route_2_segment = route_2[last_common_2: pointer_2+1]
+
+            route_1_segments.append(route_1_segment)
+            route_2_segments.append(route_2_segment)
+
             break 
 
         else:
-            pointer_l+=1
+            pointer_2+=1
             
-    return route_s_segments, route_l_segments
+    return route_1_segments, route_2_segments
+
 
 def is_stable_trapline_2(arena_size, sliding_sequence, routes, stability_threshold=100):
     '''
@@ -132,15 +138,34 @@ def is_stable_trapline_2(arena_size, sliding_sequence, routes, stability_thresho
         route_2 = routes[route_index2]
 
         #break routes up in clusters of commonality
+        route1_segments, route2_segments = cluster_common_route_segments(route_1, route_2)
+
+        # validate resultant clusters
+        if len(route1_segments) != len(route2_segments):
+            raise ValueError("Cluster segments are not the same length.  Route 1: {}.  Route 2:{}".format(route_1, route_2))
+
+        total_segmented_manhattan_distance = 0
+        for i, segment1 in enumerate(route1_segments):
+            segment2 = route2_segments[i]
+            
+            distance = get_manhattan_distance(arena_size, segment1, segment2)
+            total_segmented_manhattan_distance += distance
+
+        manhattan_distances.append(total_segmented_manhattan_distance)
+
+    # compare the mean sum of manhattan distances with the stability threshold
+    mean_distance = np.mean(manhattan_distances)
+    print("Mean Manhattan distance: {}".format(mean_distance))
+
+    if mean_distance <= stability_threshold:
+        trapline_found = True
+    else:
+        trapline_found = False
+
+    return trapline_found
 
 
-        distance = get_manhattan_distance(arena_size, route_1, route_2)
-        manhattan_distances.append(distance)
-
-    
-
-
-def is_stable_trapline(arena_size, sliding_sequence, routes, stability_threshold=100):
+def is_stable_trapline_1(arena_size, sliding_sequence, routes, stability_threshold=100):
     '''
     determine if a stable trapline has developed using the manhattan distance 
     (L1 norm) between each adjacent routes for the last X episode samples in a run
