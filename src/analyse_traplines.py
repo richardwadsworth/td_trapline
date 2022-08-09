@@ -19,7 +19,8 @@ from trapline import get_optimal_trapline_for_diamond_array, is_stable_trapline,
 #data, plot_rate = get_experiment_runs_data("analyse_e7b4f076dad248828dc574816f7417a9_10_medium_positive_array_offset") #best 10 medium after dynamic nest refactor
 
 # data, plot_rate = get_experiment_runs_data("analyse_5e4293a925fd4c9bbd69df400bd1b97b_6_medium_positive_array_offset") #best 10 medium after perftest use min softmax
-# #data, plot_rate = get_experiment_runs_data("analyse_e9e589b3596f4b10a5af8fe6273c9497_10_medium_positive_array_offset") #best 10 medium after perftest use min softmax
+
+# data, plot_rate = get_experiment_runs_data("analyse_e9e589b3596f4b10a5af8fe6273c9497_10_medium_positive_array_offset") #best 10 medium after perftest use min softmax
 
 # all_run_sample_episodes_in_experiment = data["observations"]
 # all_run_sample_done_in_experiment = data["done"]
@@ -34,7 +35,7 @@ from trapline import get_optimal_trapline_for_diamond_array, is_stable_trapline,
 all_run_sample_episodes_in_experiment = pickle.load( open( "all_run_sample_episodes_in_experiment.p", "rb" ) )
 all_run_sample_done_in_experiment = pickle.load( open( "all_run_sample_done_in_experiment.p", "rb" ) )
 MDP = pickle.load( open( "all_MDP.p", "rb" ) )
-MDP["size"] = 12
+MDP["size"] = 16
 
 num_runs_in_experiment = all_run_sample_episodes_in_experiment.shape[0]
 num_sample_episodes_per_run = all_run_sample_episodes_in_experiment.shape[1]
@@ -89,7 +90,7 @@ for run_index in range(num_runs_in_experiment):
     
 # get a count of all the different routes of the traplines from each run
 count3 = pd.Series(results["route"]).value_counts().sort_values(ascending=False)
-
+print(count3)
 LABEL_NO_TRAPLINE_FOUND = 'No trapline found'
 x = [str(x if x!='[]' else LABEL_NO_TRAPLINE_FOUND) for x in count3.index.to_list()] # convert index (which is the route), to a str
 fig, ax = plt.subplots(1,1)

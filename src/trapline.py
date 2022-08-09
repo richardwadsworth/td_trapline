@@ -58,6 +58,88 @@ def get_trapline_for_run_using_route_distribution(sliding_sequence, routes):
         return route, count
 
 
+def cluster_common_route_segments(route1, route2):
+    '''
+    take two routes and split the routes in to clusters of common and uncommon routes
+    '''
+
+    # # work out which route is shorter
+    # if len(route1)<len(route2):
+    #     route_s = route1 #shortest
+    #     route_l = route2 #longest
+    # else:
+    #     route_s = route2 #shortest
+    #     route_l = route1 #longest
+
+    route_s = route1 #shortest
+    route_l = route2 #longest
+
+    pointer_s=0
+    pointer_l=0
+    route_s_segments = []
+    route_l_segments = []
+    last_common_s = 0
+    last_common_l = 0
+    while pointer_s<len(route_s):
+
+        if route_s[pointer_s]==route_l[pointer_l]:
+            # the route position is the same.  
+
+            if (pointer_s+1 == len(route_s) or pointer_l+1 == len(route_l)) or \
+                ((route_s[pointer_s-1]==route_l[pointer_l-1]) and (route_s[pointer_s+1]!=route_l[pointer_l+1])) or \
+                ((route_s[pointer_s-1]!=route_l[pointer_l-1]) and (route_s[pointer_s]!=route_l[pointer_l-1]))   :
+                #the next indexes do not match
+            
+                #create segments for each route
+                route_s_segment = route_s[last_common_s: pointer_s+1]
+                route_l_segment = route_l[last_common_l: pointer_l+1]
+
+                route_s_segments.append(route_s_segment)
+                route_l_segments.append(route_l_segment)
+            
+                last_common_s = pointer_s
+                last_common_l = pointer_l
+            
+            pointer_s+=1
+            pointer_l+=1
+            
+        elif pointer_l == len(route_l)-1: 
+            # we are at the end of the longest route and no additional common index found.
+            
+            # move on to next index to search for
+            pointer_s+=1
+            pointer_l = last_common_l+1
+
+        elif pointer_s== len(route_s)-1:
+            break 
+
+        else:
+            pointer_l+=1
+            
+    return route_s_segments, route_l_segments
+
+def is_stable_trapline_2(arena_size, sliding_sequence, routes, stability_threshold=100):
+    '''
+    determine if a stable trapline has developed using the manhattan distance 
+    (L1 norm) between each adjacent clusters of common steps in  a routes for 
+    the last X episode samples in a run.
+    '''
+
+    manhattan_distances = []
+    for window in sliding_sequence:
+        route_index1, route_index2 = window
+        route_1 = routes[route_index1]
+        route_2 = routes[route_index2]
+
+        #break routes up in clusters of commonality
+
+
+        distance = get_manhattan_distance(arena_size, route_1, route_2)
+        manhattan_distances.append(distance)
+
+    
+
+
 def is_stable_trapline(arena_size, sliding_sequence, routes, stability_threshold=100):
     '''
     determine if a stable trapline has developed using the manhattan distance 
