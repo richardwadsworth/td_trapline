@@ -19,6 +19,10 @@ def get_sliding_window_sequence(sliding_window_size, num_routes, stable_point_ra
 
     # get the latter episode samples using the stable_point as the cut off point
     num_episode_samples_to_sample = int(num_routes*stable_point_ratio)
+
+    if num_episode_samples_to_sample<sliding_window_size:
+        raise ValueError("Number of samples is less than sliding widow size.  Consider increasing stable_point_ratio.")
+
     episode_samples_to_sample = np.arange(num_routes)[-num_episode_samples_to_sample:]
 
     # get a sliding window of adjacent routes

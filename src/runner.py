@@ -9,11 +9,11 @@ from plots import PlotType
 from mdp import *
 
 # parameters for sarsa(lambda)
-size, MDP, _ = get_10_medium_positive_array_chittka()
+size, MDP, _ = get_10_medium_negative_array_chittka()
 rng = np.random.default_rng() # random number generator
 
 episodes = 250
-steps = 100
+steps = 150
 gamma = 0.8 # discount factor
 alpha_actor = 0.7 # actor learning rate, critic learning rate
 alpha_critic = 0.3 # 

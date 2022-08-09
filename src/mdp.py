@@ -110,8 +110,8 @@ def get_10_medium_positive_array():
 
 
 def get_10_medium_positive_array_chittka():
-    # medium positive array, offest nest
-    name = "10_medium_positive_array_offset"
+    # medium positive array, offest nest, based on chitka et al 2013
+    name = "10_medium_positive_array_chittka"
     size = 17
     MDP = {"size": size,
             "nest":map_coord_to_index(size, 8, 2),
@@ -126,6 +126,28 @@ def get_10_medium_positive_array_chittka():
                     (map_coord_to_index(size, 6, 10),1.0),
                     (map_coord_to_index(size, 6, 8),1.0),
                     (map_coord_to_index(size, 6, 6),1.0)
+                    ]
+        }
+    return size, dump_mdp(MDP), name
+
+
+def get_10_medium_negative_array_chittka():
+    # medium negative array, offest nest, based on chitka et al 2013
+    name = "10_medium_negative_array_chittka"
+    size = 17
+    MDP = {"size": size,
+            "nest":map_coord_to_index(size, 8, 2),
+            "targets": [
+                    (map_coord_to_index(size, 8, 4),1.0), 
+                    (map_coord_to_index(size, 9, 6),1.0),
+                    (map_coord_to_index(size, 9, 8),1.0),
+                    (map_coord_to_index(size, 9, 10),1.0),
+                    (map_coord_to_index(size, 9, 12),1.0),
+                    (map_coord_to_index(size, 8, 14),1.0),
+                    (map_coord_to_index(size, 7, 12),1.0),
+                    (map_coord_to_index(size, 7, 10),1.0),
+                    (map_coord_to_index(size, 7, 8),1.0),
+                    (map_coord_to_index(size, 7, 6),1.0)
                     ]
         }
     return size, dump_mdp(MDP), name

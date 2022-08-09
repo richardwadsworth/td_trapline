@@ -52,7 +52,10 @@ def get_trapline_for_run_using_route_distribution(sliding_sequence, routes):
         # get a count of al routes in the final sequence
         count = pd.Series(sequence).value_counts().sort_values(ascending=False) 
 
-        route = str(count.index[0])
+        try:
+            route = str(count.index[0])
+        except:
+            1==1
         count = count[0]
 
         return route, count

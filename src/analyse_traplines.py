@@ -18,14 +18,16 @@ from trapline import get_optimal_trapline_for_diamond_array, is_stable_trapline_
 #data, plot_rate = get_experiment_runs_data("analyse_c1954e74680641d6a0a4aed9110fd575_6_medium_positive_array_offset") #best 6 medium after dynamic nest refactor
 #data, plot_rate = get_experiment_runs_data("analyse_e7b4f076dad248828dc574816f7417a9_10_medium_positive_array_offset") #best 10 medium after dynamic nest refactor
 
-data, plot_rate = get_experiment_runs_data("analyse_5e4293a925fd4c9bbd69df400bd1b97b_6_medium_positive_array_offset") #best 10 medium after perftest use min softmax
+#data, plot_rate = get_experiment_runs_data("analyse_5e4293a925fd4c9bbd69df400bd1b97b_6_medium_positive_array_offset") #best 10 medium after perftest use min softmax
 #data, plot_rate = get_experiment_runs_data("analyse_e9e589b3596f4b10a5af8fe6273c9497_10_medium_positive_array_offset") #best 10 medium after perftest use min softmax
 
+data, plot_rate = get_experiment_runs_data("analyse_ee9e2444031644129f8414dae1540094_get_10_medium_negative_array_chittka") #best 10 negative after manhattan, 200 episodes
+data, plot_rate = get_experiment_runs_data("analyse_d1e93bc2a1654c649f49ce2e31b103eb_get_10_medium_negative_array_chittka") #best 10 negative after manhattan, 250 episodes
 all_run_sample_episodes_in_experiment = data["observations"]
 all_run_sample_done_in_experiment = data["done"]
 MDP = data["MDP"]
 
-MDP["size"] = 16
+
 # pickle.dump( all_run_sample_episodes_in_experiment, open( "all_run_sample_episodes_in_experiment.p", "wb" ) )
 # pickle.dump( all_run_sample_done_in_experiment, open( "all_run_sample_done_in_experiment.p", "wb" ) )
 # pickle.dump( MDP, open( "all_MDP.p", "wb" ) )
@@ -54,11 +56,12 @@ results["count"] = np.zeros(num_runs_in_experiment, dtype=int)
 results["stable"] = np.zeros(num_runs_in_experiment, dtype=bool)
             
 STABLE_POINT = 0.25 # the ratio of latter sample episodes to use in this algorithm to determine the trapline
-
+SLIDING_WINDOW_SIZE_USED_FOR_IDENTIFYING_TRAPLINE_ROUTE =5
+SLIDING_WINDOW_SIZE_USED_FOR_TRAPLINE_STABILITY = 2
 # get the sliding sequence used to determine what the trapline route is
-sliding_sequence_used_for_identifying_trapline_route = get_sliding_window_sequence(5, num_sample_episodes_per_run, STABLE_POINT)
+sliding_sequence_used_for_identifying_trapline_route = get_sliding_window_sequence(SLIDING_WINDOW_SIZE_USED_FOR_IDENTIFYING_TRAPLINE_ROUTE, num_sample_episodes_per_run, STABLE_POINT)
 # get the sliding widow to use in determining if there is a stable trapline
-sliding_sequence_used_for_trapline_stability = get_sliding_window_sequence(2, num_sample_episodes_per_run, STABLE_POINT)
+sliding_sequence_used_for_trapline_stability = get_sliding_window_sequence(SLIDING_WINDOW_SIZE_USED_FOR_TRAPLINE_STABILITY, num_sample_episodes_per_run, STABLE_POINT)
 
 
 #for each episode, find the order that the the targets where discovered in
