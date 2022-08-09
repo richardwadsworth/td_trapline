@@ -177,7 +177,7 @@ def train_fnn(is_stochastic,
             do_plots,
             record_stats,
             rng,
-            threshold=6):
+            threshold=5):
 
     plot_data = None
     env = initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, steps)

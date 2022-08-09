@@ -55,7 +55,8 @@ def get_6_medium_positive_array():
     # medium positive array, offest nest
     name = "6_medium_positive_array_offset"
     size = 12
-    MDP = {"nest":map_coord_to_index(size, 2, 2),
+    MDP = {"size": size,
+            "nest":map_coord_to_index(size, 2, 2),
             "targets": [
                     (map_coord_to_index(size, 4, 4),1.0), 
                     (map_coord_to_index(size, 7, 4),1.0),
@@ -71,7 +72,8 @@ def get_6_large_positive_array():
     # large positive array, offest nest
     name = "6_large_positive_array_offset"
     size = 19
-    MDP = {"nest":map_coord_to_index(size, 3, 3),
+    MDP = {"size": size,
+            "nest":map_coord_to_index(size, 3, 3),
             "targets": [
                     (map_coord_to_index(size, 6, 6),1.0), 
                     (map_coord_to_index(size, 11, 6),1.0),
@@ -89,7 +91,8 @@ def get_10_medium_positive_array():
     # medium positive array, offest nest
     name = "10_medium_positive_array_offset"
     size = 16
-    MDP = {"nest":map_coord_to_index(size, 2, 2),
+    MDP = {"size": size,
+            "nest":map_coord_to_index(size, 2, 2),
             "targets": [
                     (map_coord_to_index(size, 4, 4),1.0), 
                     (map_coord_to_index(size, 7, 4),1.0),

@@ -12,7 +12,7 @@ from mdp import *
 size, MDP, _ = get_6_medium_positive_array()
 rng = np.random.default_rng() # random number generator
 
-episodes = 100
+episodes = 250
 steps = 100
 gamma = 0.8 # discount factor
 alpha_actor = 0.7 # actor learning rate, critic learning rate
@@ -24,15 +24,15 @@ epsilon_start = 1
 epsilon_end = 0.2
 epsilon_annealing_stop_ratio = 0.2
 
-respiration_reward = -0.005 # -1/np.square(size) # -1/(steps+(steps*0.1)) # negative reward for moving 1 step in an episode
-stationary_reward = -0.005 # respiration_reward*2 # positive reward for moving, to discourage not moving
+respiration_reward = -0.01 # -1/np.square(size) # -1/(steps+(steps*0.1)) # negative reward for moving 1 step in an episode
+stationary_reward = -0.01 # respiration_reward*2 # positive reward for moving, to discourage not moving
 revisit_inactive_target_reward = -0.0 # negative reward for revisiting an inactive target (i.e. one that has already been visited)
 change_in_orientation_reward = 0#-stationary_reward*0.5 #negative reward if orientation changes
 
 is_stochastic = False
 plot_rate = 5 # rate at which to plot predictions
 record_stats = True
-do_in_episode_plots=PlotType.Full # None,Minimal, Partial, Full
+do_in_episode_plots=PlotType.Minimal 
 
 if __name__ == "__main__":
 
@@ -55,7 +55,8 @@ if __name__ == "__main__":
             plot_rate,
             do_in_episode_plots,
             record_stats,
-            rng)
+            rng,
+            threshold=6)
 
         
 

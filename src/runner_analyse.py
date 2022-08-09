@@ -20,9 +20,9 @@ if __name__ == "__main__":
     # run = mlflow.get_run("e7b4f076dad248828dc574816f7417a9") #best 10 medium after dynamic nest refactor
 
     run = mlflow.get_run("a8ba9383841a49b481372e5a1ece3af5") #best 6 medium after using lowest softmax for perf test
+    #run = mlflow.get_run("e9e589b3596f4b10a5af8fe6273c9497") #best 10 medium after using lowest softmax for perf test
     
-    run = mlflow.get_run("e9e589b3596f4b10a5af8fe6273c9497") #best 10 medium after using lowest softmax for perf test
-    
+    #run = mlflow.get_run("5e4293a925fd4c9bbd69df400bd1b97b") #best 6 medium after catchup
     
     
     config = run.data.params

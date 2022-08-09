@@ -11,11 +11,12 @@ from utils import map_index_to_coord
 from foraging_agent import ActionType
 from utils import map_index_to_coord
 
+# Plotting verbosity 
 class PlotType(Enum):
-    NoPlots = 0
-    Minimal = 1
-    Partial = 2
-    Full = 3
+    NoPlots = 0 # do not display any plots
+    Minimal = 1 # only display plot if threshold exceeded
+    Partial = 2 # display plot at end of training
+    Full = 3 # display and update plot throughout trainingx
 
 def initialise_plots(env):
 
@@ -176,8 +177,8 @@ def plot_performance(fig1, ax, episodes, steps, performance, plot_rate):
 def plot_traffic_noise(env, fig, ax, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target, data, title, sigma = 0.05, alpha=0.2, linewidth=1.5):
 
     def plot(x, y):
-        x_ = x + np.random.normal(1,sigma,len(x))
-        y_ = y + np.random.normal(1,sigma,len(y))
+        x_ = x + np.random.normal(0,sigma,len(x))
+        y_ = y + np.random.normal(0,sigma,len(y))
         ax.plot(x_,y_, color="black", alpha=alpha, linewidth=linewidth)
 
     for observations in data:
@@ -187,13 +188,13 @@ def plot_traffic_noise(env, fig, ax, xs_coordinate_map, ys_coordinate_map, xs_ta
         y = [coord[1] for coord in coords]
         plot(x, y)
 
-    ax.set_xlim(-1,env.size)
-    ax.set_ylim(-1,env.size)
-    ax.set_title("Traffic plot of Agent under {}".format(title))
-
     nest_x, nest_y = map_index_to_coord(env.size, env.nest_index)
     ax.scatter(nest_x,nest_y, c='g', s=100, marker='^') #origin
     ax.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
+
+    ax.set_xlim(-1,env.size)
+    ax.set_ylim(-1,env.size)
+    ax.set_title("Traffic plot of Agent under {}".format(title))
     
     ax.invert_yaxis()
 

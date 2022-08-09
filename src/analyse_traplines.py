@@ -1,9 +1,13 @@
 #plot learning over n experiments, showing error bars
+
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import pickle
 
 from mlflow_utils import get_experiment_runs_data
+from utils import get_sliding_window_sequence
+from trapline import get_optimal_trapline_for_diamond_array, is_stable_trapline, get_trapline_for_run_using_route_distribution, get_ordered_target_list_for_episode
 
 #data, plot_rate = get_experiment_runs_data("analyse_bc764671207f4bf5b14a2f445083d0c6_10_medium_positive_array_offset")
 #data, plot_rate = get_experiment_runs_data("analyse_2859cc9d8c3242918c9af22cdcb6b5d9_6_medium_positive_array_offset")
@@ -14,99 +18,94 @@ from mlflow_utils import get_experiment_runs_data
 #data, plot_rate = get_experiment_runs_data("analyse_c1954e74680641d6a0a4aed9110fd575_6_medium_positive_array_offset") #best 6 medium after dynamic nest refactor
 #data, plot_rate = get_experiment_runs_data("analyse_e7b4f076dad248828dc574816f7417a9_10_medium_positive_array_offset") #best 10 medium after dynamic nest refactor
 
+# data, plot_rate = get_experiment_runs_data("analyse_5e4293a925fd4c9bbd69df400bd1b97b_6_medium_positive_array_offset") #best 10 medium after perftest use min softmax
+# #data, plot_rate = get_experiment_runs_data("analyse_e9e589b3596f4b10a5af8fe6273c9497_10_medium_positive_array_offset") #best 10 medium after perftest use min softmax
 
-data, plot_rate = get_experiment_runs_data("analyse_e9e589b3596f4b10a5af8fe6273c9497_10_medium_positive_array_offset") #best 10 medium after perftest use min softmax
-
-all_runs_in_experiment = data["observations"]
-all_runs_done = data["done"]
-MDP = data["MDP"]
-
-total_num_samples = all_runs_in_experiment.shape[0]
-num_samples_per_run = all_runs_in_experiment.shape[1]
+# all_run_sample_episodes_in_experiment = data["observations"]
+# all_run_sample_done_in_experiment = data["done"]
+# MDP = data["MDP"]
 
 
-# runs_returned_to_nest = []
-# for i in range(total_num_samples):
-#     if all_runs_done[i]:
-#         runs_returned_to_nest.append(all_runs_in_experiment[i])
+# pickle.dump( all_run_sample_episodes_in_experiment, open( "all_run_sample_episodes_in_experiment.p", "wb" ) )
+# pickle.dump( all_run_sample_done_in_experiment, open( "all_run_sample_done_in_experiment.p", "wb" ) )
+# pickle.dump( MDP, open( "all_MDP.p", "wb" ) )
 
-# runs_returned_to_nest=np.array(runs_returned_to_nest)
-# total_num_samples = runs_returned_to_nest.shape[0]
 
-#identify the a trapline
-optimal_trapline_master = [observation[0] for observation in MDP["targets"]]
+all_run_sample_episodes_in_experiment = pickle.load( open( "all_run_sample_episodes_in_experiment.p", "rb" ) )
+all_run_sample_done_in_experiment = pickle.load( open( "all_run_sample_done_in_experiment.p", "rb" ) )
+MDP = pickle.load( open( "all_MDP.p", "rb" ) )
+MDP["size"] = 12
 
-# calculate the resevered MDP.  Note:  Only works for diamonds where the first target is a corner
-remaining = optimal_trapline_master[1:]
-remaining.reverse()
-optimal_trapline_reversed_master = [optimal_trapline_master[0]] + remaining #get the optimal trapline the other direction
+num_runs_in_experiment = all_run_sample_episodes_in_experiment.shape[0]
+num_sample_episodes_per_run = all_run_sample_episodes_in_experiment.shape[1]
 
-# optimal_trapline_master.append(MDP["nest"]) # add the nest to the trapline
-# optimal_trapline_reversed_master.append(MDP["nest"]) # add the nest to the trapline
+def get_route_index_from_observation(route_observations):
+    route_indexes = [[observation[0] for observation in observations] for observations in route_observations]
+    return route_indexes
 
-route_data = {"route":np.array(total_num_samples, dtype=object),
-            "count":np.zeros(total_num_samples)}
-results = pd.DataFrame(route_data)
+
+
+optimal_trapline_master, optimal_trapline_reversed_master = get_optimal_trapline_for_diamond_array(MDP["targets"])
+
+# initalise results arrays
+results = pd.DataFrame(
+            {
+                "route":np.array(num_runs_in_experiment, dtype=object),
+                "count":np.zeros(num_runs_in_experiment, dtype=int),
+                "stable":np.zeros(num_runs_in_experiment, dtype=bool)
+            }
+            )
+
+STABLE_POINT = 0.25 # the ratio of latter sample episodes to use in this algorithm to determine the trapline
+
+# get the sliding sequence used to determine what the trapline route is
+sliding_sequence_used_for_identifying_trapline_route = get_sliding_window_sequence(5, num_sample_episodes_per_run, STABLE_POINT)
+# get the sliding widow to use in determining if there is a stable trapline
+sliding_sequence_used_for_trapline_stability = get_sliding_window_sequence(2, num_sample_episodes_per_run, STABLE_POINT)
+
 
 #for each episode, find the order that the the targets where discovered in
-for i in range(total_num_samples):
-    run_observations = all_runs_in_experiment[i] # all the observations in a specific run.  i,e. all the episodes and their runs
+for run_index in range(num_runs_in_experiment):
 
-    run_route_only_targets = [] # all filtered routes for this run
-    for k in range(num_samples_per_run):
+    run_episodes_route_observations = all_run_sample_episodes_in_experiment[run_index] # all the observations in a specific run.  i,e. all the episodes and their runs
 
-        episode = run_observations[k]
-
-        #filter out all steps that are not targets.  only take the first time the target was hit (i.e. ignore when a target is revisited)
-        trapline_lookup = optimal_trapline_master.copy()
+    run_episodes_routes = get_route_index_from_observation(run_episodes_route_observations) #extract the route indexes from the route observations
+    
+    run_episodes_targets_found = np.zeros((num_sample_episodes_per_run), dtype=object) # array of an ordered list of the order targets were discovered for each sample episode in this run
+    
+    #filter out all steps that are not targets.  only take the first time the target was hit (i.e. ignore when a target is revisited)
+    for episode_index in range(num_sample_episodes_per_run):
+    
+        route = run_episodes_routes[episode_index]
         
-        #get the route from the observations
-        route = [observation[0] for observation in episode]
+        run_episodes_targets_found[episode_index] = get_ordered_target_list_for_episode(optimal_trapline_master, MDP["nest"], route)
 
-        route_only_targets = [] # the filtered route of only the targets
-        for index in route:
-            if index in trapline_lookup: # is this index a target?
-                route_only_targets.append(index) # record the order the target was found
-                trapline_lookup.remove(index) #remove the target incase it was visited again
+    route, count = get_trapline_for_run_using_route_distribution(sliding_sequence_used_for_identifying_trapline_route, run_episodes_targets_found)
 
-        #if this episode found the nest then add to the route
-        if len(route_only_targets)>2 and route[-1] == MDP["nest"]:
-            #at least two targets discovered
-            route_only_targets.append(MDP["nest"])
-            run_route_only_targets.append(route_only_targets)
+    # use the sliding sequence to determine is there is a stable trapline
+    stable_trapline_found = is_stable_trapline(MDP["size"], sliding_sequence_used_for_trapline_stability, run_episodes_routes, 100)
 
-        # if a trapline was created in this run, then the latter episodes should visit the targets in the same order
-
-    if len(run_route_only_targets)>0:
-        count = pd.Series(run_route_only_targets).value_counts().sort_values(ascending=False)
-        
-        most_popular_route = count.index[0] # we ordered by count of routes descending
-        
-        results["route"][i] = str(count.index[0])
-        results["count"][i] = count[0]
-    else:
-        results["route"][i] = "0"
-        results["count"][i] = 0
-    # res = (most_popular_route == optimal_trapline_master) or (most_popular_route == optimal_trapline_reversed_master)
-    # if res:
-    #     #this is an optimal trapline 
-    #     pass
-    # else:
-    #     pass
-
-
+    results["route"][run_index] = route
+    results["count"][run_index] = count
+    results["stable"][run_index] = stable_trapline_found
+    
+# get a count of all the different routes of the traplines from each run
 count3 = pd.Series(results["route"]).value_counts().sort_values(ascending=False)
 
-x = [str(x) for x in count3.index.to_list()]
+x = [str(x) for x in count3.index.to_list()] # convert index (which is the route), to a str
 fig, ax = plt.subplots(1,1)
-barlist = ax.bar(x, count3)
+barlist = ax.bar(x, count3) # plot the bar chart
 
-# highlight the optimal traplines if present in the results
+
+# add nest to optimal route
 optimal_trapline_master.append(MDP["nest"])
 optimal_trapline_master_inc_nest = str(optimal_trapline_master)
 
+# add nest to reverse of optimal route
 optimal_trapline_reversed_master.append(MDP["nest"])
 optimal_trapline_reversed_master_inc_nest = str(optimal_trapline_reversed_master)
+
+# highlight the optimal traplines if present in the results
 for l in range(len(x)):
     index = x[l]
     res = (index == optimal_trapline_master_inc_nest) or (index == optimal_trapline_reversed_master_inc_nest)
@@ -118,10 +117,3 @@ ax.set_xticklabels(x, rotation = 90)
 fig.tight_layout()
 plt.grid()
 plt.show()
-1==1
-
-    
-
-1==1
-
-
