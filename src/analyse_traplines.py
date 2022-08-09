@@ -48,14 +48,11 @@ def get_route_index_from_observation(route_observations):
 optimal_trapline_master, optimal_trapline_reversed_master = get_optimal_trapline_for_diamond_array(MDP["targets"])
 
 # initalise results arrays
-results = pd.DataFrame(
-            {
-                "route":np.array(num_runs_in_experiment, dtype=object),
-                "count":np.zeros(num_runs_in_experiment, dtype=int),
-                "stable":np.zeros(num_runs_in_experiment, dtype=bool)
-            }
-            )
-
+results = pd.DataFrame()
+results["route"] = np.array(num_runs_in_experiment, dtype=object)
+results["count"] = np.zeros(num_runs_in_experiment, dtype=int)
+results["stable"] = np.zeros(num_runs_in_experiment, dtype=bool)
+            
 STABLE_POINT = 0.25 # the ratio of latter sample episodes to use in this algorithm to determine the trapline
 
 # get the sliding sequence used to determine what the trapline route is
@@ -85,14 +82,16 @@ for run_index in range(num_runs_in_experiment):
     # use the sliding sequence to determine is there is a stable trapline
     stable_trapline_found = is_stable_trapline(MDP["size"], sliding_sequence_used_for_trapline_stability, run_episodes_routes, 100)
 
-    results["route"][run_index] = route
-    results["count"][run_index] = count
-    results["stable"][run_index] = stable_trapline_found
+    
+    results.loc[run_index, 'route'] = str(route if stable_trapline_found else []) #only save the route if a stable trapline was found
+    results.loc[run_index, 'count'] = count
+    results.loc[run_index, 'stable'] = stable_trapline_found
     
 # get a count of all the different routes of the traplines from each run
 count3 = pd.Series(results["route"]).value_counts().sort_values(ascending=False)
 
-x = [str(x) for x in count3.index.to_list()] # convert index (which is the route), to a str
+LABEL_NO_TRAPLINE_FOUND = 'No trapline found'
+x = [str(x if x!='[]' else LABEL_NO_TRAPLINE_FOUND) for x in count3.index.to_list()] # convert index (which is the route), to a str
 fig, ax = plt.subplots(1,1)
 barlist = ax.bar(x, count3) # plot the bar chart
 
@@ -108,9 +107,10 @@ optimal_trapline_reversed_master_inc_nest = str(optimal_trapline_reversed_master
 # highlight the optimal traplines if present in the results
 for l in range(len(x)):
     index = x[l]
-    res = (index == optimal_trapline_master_inc_nest) or (index == optimal_trapline_reversed_master_inc_nest)
-    if res:
+    if index == LABEL_NO_TRAPLINE_FOUND:
         barlist[l].set_color('r')
+    elif (index == optimal_trapline_master_inc_nest) or (index == optimal_trapline_reversed_master_inc_nest):
+        barlist[l].set_color('g')
 
 
 ax.set_xticklabels(x, rotation = 90)
