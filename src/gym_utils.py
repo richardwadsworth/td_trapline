@@ -65,11 +65,11 @@ def generate_random_map_extended(nest_index: int, target_indices: list, size: in
     res = [ ["F"]*size for i in range(size)] # create default map
 
     x, y = map_index_to_coord(size, nest_index)
-    res[x][y] = "S" # set the nest position
+    res[y][x] = "S" # set the nest position
 
     for index in target_indices:
         x, y = map_index_to_coord(size, index)
-        desc = res[x][y] = "G"# set the cell to be a target
+        res[y][x] = "G"# set the cell to be a target
     
     desc = ["".join(x) for x in res]
         
