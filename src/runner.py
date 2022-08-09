@@ -9,7 +9,7 @@ from plots import PlotType
 from mdp import *
 
 # parameters for sarsa(lambda)
-size, MDP, _ = get_6_medium_positive_array()
+size, MDP, _ = get_10_medium_positive_array_chittka()
 rng = np.random.default_rng() # random number generator
 
 episodes = 250
@@ -32,7 +32,7 @@ change_in_orientation_reward = 0#-stationary_reward*0.5 #negative reward if orie
 is_stochastic = False
 plot_rate = 5 # rate at which to plot predictions
 record_stats = True
-do_in_episode_plots=PlotType.Minimal 
+do_in_episode_plots=PlotType.Full 
 
 if __name__ == "__main__":
 
@@ -56,7 +56,7 @@ if __name__ == "__main__":
             do_in_episode_plots,
             record_stats,
             rng,
-            threshold=6)
+            threshold=10)
 
         
 

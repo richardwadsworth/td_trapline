@@ -107,3 +107,25 @@ def get_10_medium_positive_array():
                     ]
         }
     return size, dump_mdp(MDP), name
+
+
+def get_10_medium_positive_array_chittka():
+    # medium positive array, offest nest
+    name = "10_medium_positive_array_offset"
+    size = 17
+    MDP = {"size": size,
+            "nest":map_coord_to_index(size, 8, 2),
+            "targets": [
+                    (map_coord_to_index(size, 8, 4),1.0), 
+                    (map_coord_to_index(size, 10, 6),1.0),
+                    (map_coord_to_index(size, 10, 8),1.0),
+                    (map_coord_to_index(size, 10, 10),1.0),
+                    (map_coord_to_index(size, 10, 12),1.0),
+                    (map_coord_to_index(size, 8, 14),1.0),
+                    (map_coord_to_index(size, 6, 12),1.0),
+                    (map_coord_to_index(size, 6, 10),1.0),
+                    (map_coord_to_index(size, 6, 8),1.0),
+                    (map_coord_to_index(size, 6, 6),1.0)
+                    ]
+        }
+    return size, dump_mdp(MDP), name
