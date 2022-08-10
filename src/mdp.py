@@ -11,13 +11,49 @@ dump_mdp  = lambda x : dumps(x)
 
 def get_1_small_test_array():
     # small neutral array, offest nest
-    name = "6_small_neutral_array_offset"
+    name = "1_small_test_array"
     size = 4
     MDP = {"nest":map_coord_to_index(size, 1, 1),
             "targets": [(map_coord_to_index(size, 2, 2),1.0)
                     ]
         }
     return size, dump_mdp(MDP), name
+
+
+def get_1_medium_test_array():
+    # small neutral array, offest nest
+    name = "1_medium_test_array"
+    size = 8
+    MDP = {"nest":map_coord_to_index(size, 1, 1),
+            "targets": [(map_coord_to_index(size, 7, 7),1.0)
+                    ]
+        }
+    return size, dump_mdp(MDP), name
+
+def get_2_medium_test_array():
+    # small neutral array, offest nest
+    name = "2_medium_test_array"
+    size = 8
+    MDP = {"nest":map_coord_to_index(size, 1, 1),
+            "targets": [(map_coord_to_index(size, 4, 4),1.0),
+                        (map_coord_to_index(size, 7, 7),1.0)
+                    ]
+        }
+    return size, dump_mdp(MDP), name
+
+
+def get_3_medium_test_array():
+    # small neutral array, offest nest
+    name = "3_medium_test_array"
+    size = 8
+    MDP = {"nest":map_coord_to_index(size, 1, 1),
+            "targets": [(map_coord_to_index(size, 2, 4),1.0),
+                        (map_coord_to_index(size, 7, 7),1.0),
+                        (map_coord_to_index(size, 0, 7),1.0)
+                    ]
+        }
+    return size, dump_mdp(MDP), name
+
 
 def get_6_small_neutral_array():
     # small neutral array, offest nest

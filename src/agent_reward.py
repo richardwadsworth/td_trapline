@@ -19,6 +19,7 @@ class AgentReward(gym.Wrapper):
         self.size = size
         self.nest_index = nest_index
         self.target_indices = target_indices
+        self.target_indices_local = self.target_indices.copy()
         self.reward_delay = reward_delay
         self.respiration_reward = respiration_reward
         self.stationary_reward = stationary_reward
@@ -53,35 +54,22 @@ class AgentReward(gym.Wrapper):
         obs, reward, done, truncated, info = self.env.step(action)
         index = obs[0]
 
-        if done:
-            if  len(self.targets_found_order) <=2:
-                done=False
-                reward = 0
-            else:
-                reward = reward * len(self.targets_found_order)/len(self.target_indices)
-
-        if index in self.target_indices: # the agent has found a goal
+        done= False
+        if index in self.target_indices_local: # the agent has found a goal
             
-            if self.goal_rewards[index]['step_count']  == -1:  # active target found
+            self.target_indices_local.remove(index)
 
-                self.goal_rewards[index]['step_count'] = self.env._elapsed_steps #record when this goal was found
-                self.targets_found_order.append(index) # record the id of the target
-                info["Target.found"] = True # update info to show an active target was found
-
-                # check to see if all targets have been found.  i.e. if there are not any undiscovered active targets
-                all_targets_found = True 
-                for target in reversed(self.goal_rewards.items()): # as an optimisation, check the "last" target first
-                    if target[1]['step_count'] == -1:
-                        all_targets_found = False
-                        break
-
-            elif self.env._elapsed_steps - self.goal_rewards[index]['step_count'] > self.reward_delay:
-                self.goal_rewards[index]['step_count'] = -1 #stop tracking the reward
-                reward = self.revisit_inactive_target_reward # discourage agent from going back to this target
-
-            else:
-                reward = self.revisit_inactive_target_reward # discourage agent from going back to this target
             
+            self.goal_rewards[index]['step_count'] = self.env._elapsed_steps #record when this goal was found
+            self.targets_found_order.append(index) # record the id of the target
+            info["Target.found"] = True # update info to show an active target was found
+
+            done = (len(self.target_indices_local)==0)
+
+        else:
+            # not done yet
+            reward = 0
+
         ## other rewards
 
         # respiration reward.  a negative reward for every time step
@@ -103,6 +91,7 @@ class AgentReward(gym.Wrapper):
     def reset(self,*,seed = None):
         val = super().reset(seed=seed)
         self.targets_found_order = []
+        self.target_indices_local = self.target_indices.copy()
         self.observations = [val] # prime observations with the starting point
         self.goal_rewards = {key: {'reward':1, 'step_count':-1} for (key) in self.target_indices} # set default rewards
         return val

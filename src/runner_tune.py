@@ -9,7 +9,7 @@ from mdp import *
 # parameters for sarsa(lambda)
 size, MDP, experiment_name = get_10_medium_positive_array_chittka()
 
-episodes = [200, 250]
+episodes = [200]
 steps = [100]
 
 gamma =  [0.7, 0.8, 0.9] # discount factor
