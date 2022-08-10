@@ -8,6 +8,7 @@ import pickle
 from mlflow_utils import get_experiment_runs_data
 from utils import get_sliding_window_sequence
 from trapline import get_optimal_trapline_for_diamond_array, is_stable_trapline_1, is_stable_trapline_2, get_trapline_for_run_using_route_distribution, get_ordered_target_list_for_episode
+from plots import plot_route
 
 #data, plot_rate = get_experiment_runs_data("analyse_bc764671207f4bf5b14a2f445083d0c6_10_medium_positive_array_offset")
 #data, plot_rate = get_experiment_runs_data("analyse_2859cc9d8c3242918c9af22cdcb6b5d9_6_medium_positive_array_offset")
@@ -94,7 +95,7 @@ for run_index in range(num_runs_in_experiment):
 route_count_for_experiment = pd.Series(results["route"]).value_counts().sort_values(ascending=False)
 #print(route_count_for_experiment)
 
-LABEL_NO_TRAPLINE_FOUND = 'No trapline found'
+LABEL_NO_ROUTE_FOUND = 'No route found'
 
 # reformat data frame for plotting
 df = pd.DataFrame(route_count_for_experiment)
@@ -107,7 +108,7 @@ counter = 1
 x_axis = []
 for i, r in enumerate(df['route']):
     if r == '[]':
-        x_axis.append(LABEL_NO_TRAPLINE_FOUND)
+        x_axis.append(LABEL_NO_ROUTE_FOUND)
     else:
         x_axis.append(str(counter))
         counter += 1
@@ -115,30 +116,51 @@ df['x-axis'] = x_axis
 
 
 #plot bar chart
-fig, ax = plt.subplots(1,1)
+fig1, ax = plt.subplots(1,1)
 bar_list = ax.bar(df['x-axis'], df['count']) # plot the bar chart
 ax.set_yscale('log') # use logarithmic scale
 ax.set_xlabel('Routes')
 ax.set_ylabel('Logarithmic Count of Routes')
 
 # add nest to optimal route
-optimal_trapline_master.append(MDP["nest"])
-optimal_trapline_master_inc_nest = str(optimal_trapline_master)
+optimal_trapline = optimal_trapline_master.copy()
+optimal_trapline.append(MDP["nest"])
+optimal_trapline_inc_nest = str(optimal_trapline)
 
 # add nest to reverse of optimal route
-optimal_trapline_reversed_master.append(MDP["nest"])
-optimal_trapline_reversed_master_inc_nest = str(optimal_trapline_reversed_master)
+optimal_trapline_reversed = optimal_trapline_reversed_master.copy()
+optimal_trapline_reversed.append(MDP["nest"])
+optimal_trapline_reversed_inc_nest = str(optimal_trapline_reversed)
 
 # highlight the optimal traplines if present in the results
 for i in range(len(df)):
     label = df['x-axis'][i]
     route = df['route'][i]
-    if label == LABEL_NO_TRAPLINE_FOUND:
+    if label == LABEL_NO_ROUTE_FOUND:
         bar_list[i].set_color('r')
-    elif (route == optimal_trapline_master_inc_nest) or (route == optimal_trapline_reversed_master_inc_nest):
+    elif (route == optimal_trapline_inc_nest) or (route == optimal_trapline_reversed_inc_nest):
         bar_list[i].set_color('g')
 
 # ax.set_xticklabels(x, rotation = 90)
-fig.tight_layout()
+fig1.tight_layout()
 plt.grid()
+
+# drop the route count with no discernable target based route found
+df = df.drop(df[df['x-axis'] == LABEL_NO_ROUTE_FOUND].index)
+
+from json import loads
+plot_size = int(np.ceil(np.sqrt(len(df))))
+fig2, axs = plt.subplots(plot_size, plot_size, figsize=(plot_size*4, plot_size*4))
+
+axs = np.array(axs).reshape(-1)
+
+for i, ax in enumerate(axs):
+
+    if i >= len(df):
+        break
+    # Convert string representation of route to list using json
+    route = loads(df['route'][df.index[i]])
+
+    plot_route(fig2, ax, MDP["size"],MDP["nest"], optimal_trapline_master, route, str(label))
+
 plt.show()
