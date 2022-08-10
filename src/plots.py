@@ -271,7 +271,7 @@ def plot_route( fig, ax, size, nest, targets, route, optimal, subtitle):
     target_coords = [map_index_to_coord(size, index) for index in targets]
     
     from utils import get_sliding_window_sequence
-    sequence = get_sliding_window_sequence(2,len(route_coords), 1)
+    sequence = get_sliding_window_sequence(2,len(route_coords))
 
     ax.set_xlim(0,size)
     ax.set_ylim(0,size)

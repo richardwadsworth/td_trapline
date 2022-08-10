@@ -27,7 +27,8 @@ if __name__ == "__main__":
     #run = mlflow.get_run("ee9e2444031644129f8414dae1540094") #best 10 negative after manhattan, 200 episodes
     #run = mlflow.get_run("d1e93bc2a1654c649f49ce2e31b103eb") #best 10 negative after manhattan, 250 episodes
 
-    run_id="692e2276ec7d4dd59fbb23ad49b41ce8"
+    run_id = "d1e93bc2a1654c649f49ce2e31b103eb" # negative 10
+    #run_id= "692e2276ec7d4dd59fbb23ad49b41ce8" # positve 10
     run = mlflow.get_run(run_id) #best 10 positive, 250 episodes
 
     config = run.data.params

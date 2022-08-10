@@ -11,7 +11,13 @@ from mlflow_utils import get_experiment_runs_data
 #data, plot_rate = get_experiment_runs_data("analyse_8c76ffb6fae54f4893adfdf7804c1b7a_10_medium_positive_array_offset") #after MDP refactor
 
 #data, plot_rate = get_experiment_runs_data("analyse_c1954e74680641d6a0a4aed9110fd575_6_medium_positive_array_offset") #best 6 medium after dynamic nest refactor
-data, plot_rate = get_experiment_runs_data("analyse_e7b4f076dad248828dc574816f7417a9_10_medium_positive_array_offset") #best 10 medium after dynamic nest refactor
+#data, plot_rate = get_experiment_runs_data("analyse_e7b4f076dad248828dc574816f7417a9_10_medium_positive_array_offset") #best 10 medium after dynamic nest refactor
+
+#experiment_name = "analyse_692e2276ec7d4dd59fbb23ad49b41ce8_10_medium_positive_array_chittka" #best 10 positive chittka, 250 episodes
+
+experiment_name = "analyse_d1e93bc2a1654c649f49ce2e31b103eb_get_10_medium_negative_array_chittka" #best 10 negative chittka, 250 episodes
+data, plot_rate = get_experiment_runs_data(experiment_name) 
+
 
 all_runs_in_experiment = data["performance"]
 all_runs_done = data["done"]
