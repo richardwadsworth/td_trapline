@@ -52,10 +52,7 @@ def get_trapline_for_run_using_route_distribution(sliding_sequence, routes):
         # get a count of al routes in the final sequence
         count = pd.Series(sequence).value_counts().sort_values(ascending=False) 
 
-        try:
-            route = str(count.index[0])
-        except:
-            1==1
+        route = str(count.index[0])
         count = count[0]
 
         return route, count
@@ -158,7 +155,7 @@ def is_stable_trapline_2(arena_size, sliding_sequence, routes, stability_thresho
 
     # compare the mean sum of manhattan distances with the stability threshold
     mean_distance = np.mean(manhattan_distances)
-    print("Mean Manhattan distance: {}".format(mean_distance))
+    #print("Mean Manhattan distance: {}".format(mean_distance))
 
     if mean_distance <= stability_threshold:
         trapline_found = True

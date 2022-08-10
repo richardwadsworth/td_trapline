@@ -21,7 +21,7 @@ from trapline import get_optimal_trapline_for_diamond_array, is_stable_trapline_
 #data, plot_rate = get_experiment_runs_data("analyse_5e4293a925fd4c9bbd69df400bd1b97b_6_medium_positive_array_offset") #best 10 medium after perftest use min softmax
 #data, plot_rate = get_experiment_runs_data("analyse_e9e589b3596f4b10a5af8fe6273c9497_10_medium_positive_array_offset") #best 10 medium after perftest use min softmax
 
-data, plot_rate = get_experiment_runs_data("analyse_ee9e2444031644129f8414dae1540094_get_10_medium_negative_array_chittka") #best 10 negative after manhattan, 200 episodes
+#data, plot_rate = get_experiment_runs_data("analyse_ee9e2444031644129f8414dae1540094_get_10_medium_negative_array_chittka") #best 10 negative after manhattan, 200 episodes
 data, plot_rate = get_experiment_runs_data("analyse_d1e93bc2a1654c649f49ce2e31b103eb_get_10_medium_negative_array_chittka") #best 10 negative after manhattan, 250 episodes
 all_run_sample_episodes_in_experiment = data["observations"]
 all_run_sample_done_in_experiment = data["done"]
@@ -80,25 +80,46 @@ for run_index in range(num_runs_in_experiment):
         
         run_episodes_targets_found[episode_index] = get_ordered_target_list_for_episode(optimal_trapline_master, MDP["nest"], route)
 
-    route, count = get_trapline_for_run_using_route_distribution(sliding_sequence_used_for_identifying_trapline_route, run_episodes_targets_found)
+    route, route_count_for_run = get_trapline_for_run_using_route_distribution(sliding_sequence_used_for_identifying_trapline_route, run_episodes_targets_found)
 
     # use the sliding sequence to determine is there is a stable trapline
     # stable_trapline_found = is_stable_trapline_1(MDP["size"], sliding_sequence_used_for_trapline_stability, run_episodes_routes, 100) #version1
     stable_trapline_found = is_stable_trapline_2(MDP["size"], sliding_sequence_used_for_trapline_stability, run_episodes_routes, 300) #version2 using segmentation
-    print()
     
     results.loc[run_index, 'route'] = str(route if stable_trapline_found else []) #only save the route if a stable trapline was found
-    results.loc[run_index, 'count'] = count
+    results.loc[run_index, 'count'] = route_count_for_run
     results.loc[run_index, 'stable'] = stable_trapline_found
     
 # get a count of all the different routes of the traplines from each run
-count3 = pd.Series(results["route"]).value_counts().sort_values(ascending=False)
-print(count3)
-LABEL_NO_TRAPLINE_FOUND = 'No trapline found'
-x = [str(x if x!='[]' else LABEL_NO_TRAPLINE_FOUND) for x in count3.index.to_list()] # convert index (which is the route), to a str
-fig, ax = plt.subplots(1,1)
-barlist = ax.bar(x, count3) # plot the bar chart
+route_count_for_experiment = pd.Series(results["route"]).value_counts().sort_values(ascending=False)
+#print(route_count_for_experiment)
 
+LABEL_NO_TRAPLINE_FOUND = 'No trapline found'
+
+# reformat data frame for plotting
+df = pd.DataFrame(route_count_for_experiment)
+df['count'] = df['route']
+df['route'] = df.index.to_list()
+df.index = np.arange(0, len(df))
+
+# build x-axis labels
+counter = 1
+x_axis = []
+for i, r in enumerate(df['route']):
+    if r == '[]':
+        x_axis.append(LABEL_NO_TRAPLINE_FOUND)
+    else:
+        x_axis.append(str(counter))
+        counter += 1
+df['x-axis'] = x_axis
+
+
+#plot bar chart
+fig, ax = plt.subplots(1,1)
+bar_list = ax.bar(df['x-axis'], df['count']) # plot the bar chart
+ax.set_yscale('log') # use logarithmic scale
+ax.set_xlabel('Routes')
+ax.set_ylabel('Logarithmic Count of Routes')
 
 # add nest to optimal route
 optimal_trapline_master.append(MDP["nest"])
@@ -109,15 +130,15 @@ optimal_trapline_reversed_master.append(MDP["nest"])
 optimal_trapline_reversed_master_inc_nest = str(optimal_trapline_reversed_master)
 
 # highlight the optimal traplines if present in the results
-for l in range(len(x)):
-    index = x[l]
-    if index == LABEL_NO_TRAPLINE_FOUND:
-        barlist[l].set_color('r')
-    elif (index == optimal_trapline_master_inc_nest) or (index == optimal_trapline_reversed_master_inc_nest):
-        barlist[l].set_color('g')
+for i in range(len(df)):
+    label = df['x-axis'][i]
+    route = df['route'][i]
+    if label == LABEL_NO_TRAPLINE_FOUND:
+        bar_list[i].set_color('r')
+    elif (route == optimal_trapline_master_inc_nest) or (route == optimal_trapline_reversed_master_inc_nest):
+        bar_list[i].set_color('g')
 
-
-ax.set_xticklabels(x, rotation = 90)
+# ax.set_xticklabels(x, rotation = 90)
 fig.tight_layout()
 plt.grid()
 plt.show()

@@ -264,11 +264,34 @@ def plot_traffic_greyscale(env, fig, ax, xs_target, ys_target, data, title):
     clear_output(wait = True)
     plt.pause(0.0000000001)
 
+def plot_route(size, route, nest, subtitle):
+    coords = []
+    for index in route:
+        coord = map_index_to_coord(size, index)
+        coords.append(coord)
+
+    from utils import get_sliding_window_sequence
+    sequence = get_sliding_window_sequence(2,len(coords), 1)
+
+    fig, ax = plt.subplots(1,1)
+    ax.set_xlim(0,17)
+    ax.set_ylim(0,17)
+
+    nest_x, nest_y = map_index_to_coord(size, nest)
+    ax.scatter(nest_x,nest_y, c='g', s=100, marker='^') #origin
 
 
+    xs_target = [coord[0] for coord in coords[1:-1]]
+    ys_target = [coord[1] for coord in coords[1:-1]]
+    ax.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
 
-    
-    
-    
-    
-    
+    for window in sequence:
+        xy1 = coords[window[0]]
+        xy2 = coords[window[1]]
+        ax.annotate("", xy=xy2, xytext=xy1,
+                arrowprops=dict(arrowstyle="->", lw=2))
+        
+    ax.set_title("Route " + subtitle)
+    fig.tight_layout()
+    ax.invert_yaxis()
+    plt.show()
