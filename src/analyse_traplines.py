@@ -18,23 +18,8 @@ from utils import get_sliding_window_sequence
 from trapline import get_optimal_trapline_for_diamond_array, get_routes_similarity, get_valid_target_sequence_from_route
 from plots import plot_route
 
-#data, plot_rate = get_experiment_runs_data("analyse_bc764671207f4bf5b14a2f445083d0c6_10_medium_positive_array_offset")
-#data, plot_rate = get_experiment_runs_data("analyse_2859cc9d8c3242918c9af22cdcb6b5d9_6_medium_positive_array_offset")
 
-#data, plot_rate = get_experiment_runs_data("analyse_0b07230d28ed43aabe9f04aaebe1afbe_6_medium_positive_array_offset") #after MDP refactor
-#data, plot_rate = get_experiment_runs_data("analyse_8c76ffb6fae54f4893adfdf7804c1b7a_10_medium_positive_array_offset") #after MDP refactor
-
-#data, plot_rate = get_experiment_runs_data("analyse_c1954e74680641d6a0a4aed9110fd575_6_medium_positive_array_offset") #best 6 medium after dynamic nest refactor
-#data, plot_rate = get_experiment_runs_data("analyse_e7b4f076dad248828dc574816f7417a9_10_medium_positive_array_offset") #best 10 medium after dynamic nest refactor
-
-#data, plot_rate = get_experiment_runs_data("analyse_5e4293a925fd4c9bbd69df400bd1b97b_6_medium_positive_array_offset") #best 10 medium after perftest use min softmax
-#experiment_name = "analyse_e9e589b3596f4b10a5af8fe6273c9497_10_medium_positive_array_offset" #best 10 medium after perftest use min softmax
-
-#experiment_name = "analyse_ee9e2444031644129f8414dae1540094_get_10_medium_negative_array_chittka" #best 10 negative after manhattan, 200 episodes
-# experiment_name = "analyse_d1e93bc2a1654c649f49ce2e31b103eb_get_10_medium_negative_array_chittka"  #best 10 negative after manhattan, 250 episodes
-
-experiment_name = "analyse_692e2276ec7d4dd59fbb23ad49b41ce8_10_medium_positive_array_chittka" #best 10 positive chittka, 250 episodes
-#experiment_name = "analyse_d1e93bc2a1654c649f49ce2e31b103eb_get_10_medium_negative_array_chittka" #best 10 negative chittka, 250 episodes
+experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka" #best 10 positive chittka, 200 episodes
 
 # data, plot_rate = get_experiment_runs_data(experiment_name) 
 # all_run_sample_episodes_in_experiment = data["observations"]
@@ -169,17 +154,8 @@ for i, r in enumerate(df['route']):
         counter += 1
 df['x-axis'] = x_axis
 
-
-# add nest to optimal route
-optimal_trapline_inc_nest = optimal_trapline_master.copy()
-optimal_trapline_inc_nest.append(MDP["nest"])
-
-# add nest to reverse of optimal route
-optimal_trapline_reversed_inc_nest = optimal_trapline_reversed_master.copy()
-optimal_trapline_reversed_inc_nest.append(MDP["nest"])
-
 # determine if each route is an optimal route
-is_optimal_route = lambda x : (x == optimal_trapline_inc_nest) or (x == optimal_trapline_reversed_inc_nest)
+is_optimal_route = lambda x : (x == optimal_trapline_master) or (x == optimal_trapline_reversed_master)
 df['optimal_route'] = [is_optimal_route(route) for route in df['route']]
 
 #plot bar chart
