@@ -93,8 +93,8 @@ def plotActionStateQuiver(env, q, fig1, ax1, ax2, xs_target, ys_target):
     ax2.cla()
 
     nest_x, nest_y = map_index_to_coord(env.size, env.nest_index)
-    ax1.scatter(nest_x,nest_y, c='g', s=100, marker='^') #origin
-    ax2.scatter(nest_x,nest_y, c='g', s=100, marker='^') #origin
+    ax1.scatter(nest_x,nest_y, c='brown', s=100, marker='^') #origin
+    ax2.scatter(nest_x,nest_y, c='brown', s=100, marker='^') #origin
     
     ax1.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
     ax2.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
@@ -130,7 +130,7 @@ def plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_
     ax3.cla()
 
     nest_x, nest_y = map_index_to_coord(env.size, env.nest_index)
-    ax3.scatter(nest_x,nest_y, c='g', s=100, marker='^') #origin
+    ax3.scatter(nest_x,nest_y, c='brown', s=100, marker='^') #origin
     
     ax3.scatter(xs_target,ys_target, c='brown', s=100, marker='o') #goal
     ax3.set_title("Agent path")
@@ -189,7 +189,7 @@ def plot_traffic_noise(env, fig, ax, xs_coordinate_map, ys_coordinate_map, xs_ta
         plot(x, y)
 
     nest_x, nest_y = map_index_to_coord(env.size, env.nest_index)
-    ax.scatter(nest_x,nest_y, c='g', s=100, marker='^') #origin
+    ax.scatter(nest_x,nest_y, c='brown', s=100, marker='^') #origin
     ax.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
 
     ax.set_xlim(-1,env.size)
@@ -253,7 +253,7 @@ def plot_traffic_greyscale(env, fig, ax, xs_target, ys_target, data, title):
     # a.grid()
 
     nest_x, nest_y = map_index_to_coord(env.size, env.nest_index)
-    ax.scatter(nest_x,nest_y, c='g', s=100, marker='^') #origin
+    ax.scatter(nest_x,nest_y, c='brown', s=100, marker='^') #origin
     
     ax.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
     
@@ -264,7 +264,7 @@ def plot_traffic_greyscale(env, fig, ax, xs_target, ys_target, data, title):
     clear_output(wait = True)
     plt.pause(0.0000000001)
 
-def plot_route( fig, ax, size, nest, targets, route, subtitle):
+def plot_route( fig, ax, size, nest, targets, route, optimal, subtitle):
     # coords = []
 
     route_coords = [map_index_to_coord(size, index) for index in route]
@@ -273,23 +273,28 @@ def plot_route( fig, ax, size, nest, targets, route, subtitle):
     from utils import get_sliding_window_sequence
     sequence = get_sliding_window_sequence(2,len(route_coords), 1)
 
-    
     ax.set_xlim(0,size)
     ax.set_ylim(0,size)
 
     nest_x, nest_y = map_index_to_coord(size, nest)
-    ax.scatter(nest_x,nest_y, c='g', s=100, marker='^') #origin
+    ax.scatter(nest_x,nest_y, c='brown', s=100, marker='^') #origin
 
     xs_target = [coord[0] for coord in target_coords]
     ys_target = [coord[1] for coord in target_coords]
     ax.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
     
+    color = 'green' if optimal else 'blue'
+    linestyle = 'solid' if optimal else 'dashed'
+    label= 'Optimal' if optimal else 'Not Optimal'
     for window in sequence:
         xy1 = route_coords[window[0]]
         xy2 = route_coords[window[1]]
-        ax.annotate("", xy=xy2, xytext=xy1,
-                arrowprops=dict(arrowstyle="->", lw=2.5))
-        
+        t = ax.annotate("", xy=xy2, xytext=xy1,
+                arrowprops=dict(color=color, arrowstyle="->", lw=2.5, linestyle=linestyle))
+    
+    ax.plot([0],[0], label=label, color=color, lw=2.5, linestyle=linestyle)
+    ax.legend(loc='upper left')
+    
     ax.set_title("Route " + subtitle)
     fig.tight_layout()
     ax.invert_yaxis()

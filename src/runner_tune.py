@@ -7,10 +7,10 @@ from runner_utils import train_parallel
 from mdp import *
 
 # parameters for sarsa(lambda)
-size, MDP, experiment_name = get_10_medium_negative_array_chittka()
+size, MDP, experiment_name = get_10_medium_positive_array_chittka()
 
 episodes = [200, 250]
-steps = [100, 150, 200]
+steps = [100]
 
 gamma =  [0.7, 0.8, 0.9] # discount factor
 alpha_actor = [0.7] # actor learning rate
@@ -24,7 +24,7 @@ epsilon_annealing_stop_ratio = [0.2]
 
 respiration_reward = [-0.01] # -1/np.square(size) # -1/(steps+(steps*0.1)) # negative reward for moving 1 step in an episode
 stationary_reward = [-0.01] # respiration_reward*2 # positive reward for moving, to discourage not moving
-revisit_inactive_target_reward = [-0.1] # negative reward for revisiting an inactive target (i.e. one that has already been visited)
+revisit_inactive_target_reward = [-0.0] # negative reward for revisiting an inactive target (i.e. one that has already been visited)
 change_in_orientation_reward = [0]#-stationary_reward*0.5 #negative reward if orientation changes
     
 if __name__ == "__main__":
