@@ -1,8 +1,15 @@
 import numpy as np
 import pandas as pd
-
+from enum import Enum
 from utils import sliding_window
 from manhattan import get_manhattan_distance
+
+class RouteType(Enum):
+    Incomplete = 0 # not all targets found
+    SubOptimal = 1 # all targets found but not optimal, TSP route
+    Optimal = 2 # all targets found using optimal route
+
+
 
 def get_optimal_trapline_for_diamond_array(targets):
     '''
@@ -21,7 +28,7 @@ def get_optimal_trapline_for_diamond_array(targets):
 
 def get_valid_target_sequence_from_route(optimal_trapline, route):
 
-    MIN_NUM_TARGETS_FOUND_TO_CONSIDER_AS_TRAPLINE = 2 # the minimum number of targets that must be found in an episode to be considered a trapline
+    MIN_NUM_TARGETS_FOUND_TO_CONSIDER_AS_TRAPLINE = len(optimal_trapline) # the minimum number of targets that must be found in an episode to be considered a trapline
 
     trapline_lookup = optimal_trapline.copy()
 
@@ -34,7 +41,7 @@ def get_valid_target_sequence_from_route(optimal_trapline, route):
 
     #if this episode found the minimum number of targets AND then found the nest, then this episode should be considered
     # for further trapline analysis
-    if len(episode_target_list) > MIN_NUM_TARGETS_FOUND_TO_CONSIDER_AS_TRAPLINE:
+    if len(episode_target_list) >= MIN_NUM_TARGETS_FOUND_TO_CONSIDER_AS_TRAPLINE:
         # a valid route was found in this episode
 
         # record the ordered list of targets discovered for this episode

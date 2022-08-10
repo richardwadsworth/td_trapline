@@ -13,27 +13,30 @@ import pandas as pd
 import pickle
 from json import loads
 
+
 from mlflow_utils import get_experiment_runs_data
 from utils import get_sliding_window_sequence
-from trapline import get_optimal_trapline_for_diamond_array, get_routes_similarity, get_valid_target_sequence_from_route
+from trapline import get_optimal_trapline_for_diamond_array, get_routes_similarity, get_valid_target_sequence_from_route, RouteType
 from plots import plot_route
+ 
+
+#experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka" #best 10 positive chittka, 200 episodes
+experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka" #best 10 negative chittka, 200 episodes
 
 
-experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka" #best 10 positive chittka, 200 episodes
-
-# data, plot_rate = get_experiment_runs_data(experiment_name) 
-# all_run_sample_episodes_in_experiment = data["observations"]
-# all_run_sample_done_in_experiment = data["done"]
-# MDP = data["MDP"]
+data, plot_rate = get_experiment_runs_data(experiment_name) 
+all_run_sample_episodes_in_experiment = data["observations"]
+all_run_sample_done_in_experiment = data["done"]
+MDP = data["MDP"]
 
 
 # pickle.dump( all_run_sample_episodes_in_experiment, open( "all_run_sample_episodes_in_experiment.p", "wb" ) )
 # pickle.dump( all_run_sample_done_in_experiment, open( "all_run_sample_done_in_experiment.p", "wb" ) )
 # pickle.dump( MDP, open( "all_MDP.p", "wb" ) )
 
-all_run_sample_episodes_in_experiment = pickle.load( open( "all_run_sample_episodes_in_experiment.p", "rb" ) )
-all_run_sample_done_in_experiment = pickle.load( open( "all_run_sample_done_in_experiment.p", "rb" ) )
-MDP = pickle.load( open( "all_MDP.p", "rb" ) )
+# all_run_sample_episodes_in_experiment = pickle.load( open( "all_run_sample_episodes_in_experiment.p", "rb" ) )
+# all_run_sample_done_in_experiment = pickle.load( open( "all_run_sample_done_in_experiment.p", "rb" ) )
+# MDP = pickle.load( open( "all_MDP.p", "rb" ) )
 
 
 def get_route_index_from_observation(route_observations):
@@ -112,8 +115,6 @@ SLIDING_WINDOW_SIZE_USED_FOR_COMPARING_ROUTE_SIMILARITY = 2
 # get the sliding widow to use in determining if there is a stable trapline
 sliding_sequence_used_for_route_similarity = get_sliding_window_sequence(SLIDING_WINDOW_SIZE_USED_FOR_COMPARING_ROUTE_SIMILARITY, num_sample_episodes_per_run)
 
-
-    
 for run_index in range(num_runs_in_experiment):
 
     run_episodes_route_observations = all_run_sample_episodes_in_experiment[run_index] # all the observations in a specific run.  i,e. all the episodes and their runs
@@ -135,7 +136,7 @@ for run_index in range(num_runs_in_experiment):
 route_count_for_experiment = pd.Series(results["route"]).value_counts().sort_values(ascending=False)
 #print(route_count_for_experiment)
 
-LABEL_NO_ROUTE_FOUND = 'No route found'
+LABEL_NO_ROUTE_FOUND = 'Invalid Route'
 
 # reformat data frame for plotting
 df = pd.DataFrame(route_count_for_experiment)
@@ -154,40 +155,49 @@ for i, r in enumerate(df['route']):
         counter += 1
 df['x-axis'] = x_axis
 
-# determine if each route is an optimal route
-is_optimal_route = lambda x : (x == optimal_trapline_master) or (x == optimal_trapline_reversed_master)
-df['optimal_route'] = [is_optimal_route(route) for route in df['route']]
+# determine the optimality of each route
+def get_route_type(target_sequence):
+    if (target_sequence == optimal_trapline_master) or (target_sequence == optimal_trapline_reversed_master):
+        return RouteType.Optimal
+    elif len(target_sequence) == len(optimal_trapline_master):
+        return RouteType.SubOptimal
+    else:
+        return RouteType.Incomplete
+
+df['route_type'] = [get_route_type(route) for route in df['route']]
 
 #plot bar chart
 fig1, ax = plt.subplots(1,1)
 bar_list = ax.bar(df['x-axis'], df['count']) # plot the bar chart
 
-use_logarithmic  = False
 ax.set_xlabel('Routes')
-if use_logarithmic:
-    ax.set_yscale('log') # use logarithmic scale
-    ax.set_ylabel('Logarithmic Count of Routes')
-else:
-    ax.set_ylabel('Count of Routes')
+ax.set_ylabel('Count of Routes')
+fig1.suptitle("Trapline Distribution by Route")
+ax.set_title(experiment_name, fontsize=10)
 
 # highlight the optimal traplines if present in the results
 for i in range(len(df)):
     label = df['x-axis'][i]
     route = df['route'][i]
-    optimal = df['optimal_route'][i]
-    if label == LABEL_NO_ROUTE_FOUND:
-        bar_list[i].set_color('r')
-    elif optimal:
-        bar_list[i].set_color('g')
+    route_type = df['route_type'][i]
+    if route_type == RouteType.Incomplete:
+        bar_list[i].set_color('grey')
+    elif route_type == RouteType.Optimal:
+        bar_list[i].set_color('green')
+    elif route_type == RouteType.SubOptimal:
+        bar_list[i].set_color('blue')
 
 ax.set_xticklabels(df['x-axis'], rotation = 90)
 fig1.tight_layout()
+ax.grid()
 
 # drop the route count with no discernable target based route found
 df = df.drop(df[df['x-axis'] == LABEL_NO_ROUTE_FOUND].index)
 
 plot_size = int(np.ceil(np.sqrt(len(df))))
 fig2, axs = plt.subplots(plot_size, plot_size, figsize=(plot_size*3, plot_size*3))
+fig2.suptitle("Route Lookup for Trapline Distribution by Route\n" + experiment_name)
+
 
 axs = np.array(axs).reshape(-1)
 
@@ -198,8 +208,9 @@ for i, ax in enumerate(axs):
     # Convert string representation of route to list using json
     route = df['route'][df.index[i]]
     label= df['x-axis'][df.index[i]]
-    optimal= df['optimal_route'][df.index[i]]
+    route_type= df['route_type'][df.index[i]]
 
-    plot_route(fig2, ax, MDP["size"],MDP["nest"], optimal_trapline_master, route, optimal, str(label))
+    plot_route(fig2, ax, MDP["size"],MDP["nest"], optimal_trapline_master, route, route_type, str(label))
 
+plt.subplots_adjust(left=0.1, right=0.9, top=0.93, bottom=0.1)
 plt.show()

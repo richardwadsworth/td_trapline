@@ -7,7 +7,7 @@ from runner_utils import train_parallel
 from mdp import *
 
 # parameters for sarsa(lambda)
-size, MDP, experiment_name = get_10_medium_positive_array_chittka()
+size, MDP, experiment_name = get_10_medium_negative_array_chittka()
 
 episodes = [200]
 steps = [100]

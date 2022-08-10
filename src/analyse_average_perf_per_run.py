@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 from mlflow_utils import get_experiment_runs_data
 
 
-experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka" #best 10 positive chittka, 200 episodes
+#experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka" #best 10 positive chittka, 200 episodes
+experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka" #best 10 negative chittka, 200 episodes
 
 
 data, plot_rate = get_experiment_runs_data(experiment_name) 

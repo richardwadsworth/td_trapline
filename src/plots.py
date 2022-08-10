@@ -7,6 +7,7 @@ from enum import Enum
 from IPython.display import display, clear_output
 from sklearn.preprocessing import Normalizer
 from timeColouredPlots import doColourVaryingPlot2d
+from trapline import RouteType
 from utils import map_index_to_coord
 from foraging_agent import ActionType
 from utils import map_index_to_coord
@@ -264,7 +265,7 @@ def plot_traffic_greyscale(env, fig, ax, xs_target, ys_target, data, title):
     clear_output(wait = True)
     plt.pause(0.0000000001)
 
-def plot_route( fig, ax, size, nest, targets, route, optimal, subtitle):
+def plot_route( fig, ax, size, nest, targets, route, route_type, subtitle):
     # coords = []
 
     route_coords = [map_index_to_coord(size, index) for index in route]
@@ -283,9 +284,21 @@ def plot_route( fig, ax, size, nest, targets, route, optimal, subtitle):
     ys_target = [coord[1] for coord in target_coords]
     ax.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
     
-    color = 'green' if optimal else 'blue'
-    linestyle = 'solid' if optimal else 'dashed'
-    label= 'Optimal' if optimal else 'Not Optimal'
+    if route_type == RouteType.Optimal:
+        color = 'green' 
+        linestyle = 'solid' 
+        label= 'Optimal' 
+    
+    elif route_type == RouteType.SubOptimal:
+
+        color = 'blue' 
+        linestyle = 'dashed'
+        label= 'Sub Optimal'
+    else:
+        color = 'grey' 
+        linestyle = 'dashed'
+        label= 'Incomplete'
+
     for window in sequence:
         xy1 = route_coords[window[0]]
         xy2 = route_coords[window[1]]
