@@ -4,9 +4,11 @@ import matplotlib.pyplot as plt
 
 from mlflow_utils import get_experiment_runs_data
 
+import seaborn as sns
+sns.set_theme(style="whitegrid")
 
-#experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka" #best 10 positive chittka, 200 episodes
-experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka" #best 10 negative chittka, 200 episodes
+experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka" #best 10 positive chittka, 200 episodes
+#experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka" #best 10 negative chittka, 200 episodes
 
 data, plot_rate = get_experiment_runs_data(experiment_name) 
 
@@ -56,11 +58,14 @@ xs1, ys1, zs1 = plot_errors(runs_completed_target_sequence.shape[0], num_samples
 xs2, ys2, zs2 = plot_errors(runs_routes.shape[0], num_samples_per_episode, plot_rate, runs_routes)
 
 # plot the data
-plt.errorbar(xs1, ys1,yerr=zs1, label='All targets found')
-plt.errorbar(xs2, ys2,yerr=zs2, label='All runs', alpha=0.7)
+fig, ax = plt.subplots()
+fig.suptitle('Mean Num Steps per Episode')
+ax.set_title(experiment_name, fontsize=10)
 
-plt.legend(loc='upper left')
-plt.xlabel('Episode')
-plt.ylabel('Number of steps')
-plt.title('Average Num Steps per Episode')
+ax.errorbar(xs1, ys1,yerr=zs1, label='All targets found')
+ax.errorbar(xs2, ys2,yerr=zs2, label='All runs', alpha=0.7)
+
+ax.legend(loc='upper left')
+ax.set_xlabel('Episode')
+ax.set_ylabel('Number of steps')
 plt.show()

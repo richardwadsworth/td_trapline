@@ -4,9 +4,11 @@ import matplotlib.pyplot as plt
 
 from mlflow_utils import get_experiment_runs_data
 
+import seaborn as sns
+sns.set_theme(style="whitegrid")
 
-#experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka" #best 10 positive chittka, 200 episodes
-experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka" #best 10 negative chittka, 200 episodes
+experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka" #best 10 positive chittka, 200 episodes
+#experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka" #best 10 negative chittka, 200 episodes
 
 
 data, plot_rate = get_experiment_runs_data(experiment_name) 
@@ -45,11 +47,16 @@ xs1, ys1, zs1 = plot_errors(runs_completed_target_sequence.shape[0], num_perform
 xs2, ys2, zs2 = plot_errors(all_runs_in_experiment.shape[0], num_performance_samples_per_episode, plot_rate, all_runs_in_experiment)
 
 # plot the data
-plt.errorbar(xs1, ys1,yerr=zs1, label='All Targets Found')
-plt.errorbar(xs2, ys2,yerr=zs2, label='All runs', alpha=0.7)
 
-plt.legend(loc='upper left')
-plt.xlabel('Episode')
-plt.ylabel('Mean Reward Using Softmax Policy')
-plt.title('Average Learning Performance per Episode')
+fig, ax = plt.subplots()
+fig.suptitle("Mean Learning Performance per Episode")
+ax.set_title(experiment_name, fontsize=10)
+
+ax.errorbar(xs1, ys1,yerr=zs1, label='All Targets Found')
+ax.errorbar(xs2, ys2,yerr=zs2, label='All runs', alpha=0.7)
+
+ax.legend(loc='upper left')
+ax.set_xlabel('Episode')
+ax.set_ylabel('Mean Reward Using Softmax Policy')
+
 plt.show()
