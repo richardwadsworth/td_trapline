@@ -2,6 +2,9 @@ import contextlib
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
+import pandas as pd
+import seaborn as sns
+from json import loads
 
 from enum import Enum
 from IPython.display import display, clear_output
@@ -35,6 +38,7 @@ def initialise_plots(env):
     
     # set up the subplots for visualisation
     fig1, axs = plt.subplots(2,3, figsize=(11,7))
+    sns.set_theme(style="whitegrid")
     
     ax1, ax2, ax3, ax4, ax5, ax6 = axs.ravel()
     remove_axis_ticks(ax1)
@@ -278,20 +282,23 @@ def plot_route( fig, ax, size, nest, targets, route, route_type, subtitle):
     ax.set_ylim(0,size)
 
     nest_x, nest_y = map_index_to_coord(size, nest)
+    # sns.scatterplot([nest_x],[nest_y], s=100, marker='^', ax=ax)  #origin
+    
     ax.scatter(nest_x,nest_y, c='brown', s=100, marker='^') #origin
 
     xs_target = [coord[0] for coord in target_coords]
     ys_target = [coord[1] for coord in target_coords]
     ax.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
+    #sns.scatterplot(xs_target,ys_target, s=100, marker='o', ax=ax) #goal
     
     if route_type == RouteType.Optimal:
-        color = 'green' 
+        color = 'g' 
         linestyle = 'solid' 
         label= 'Optimal' 
     
     elif route_type == RouteType.SubOptimal:
 
-        color = 'blue' 
+        color = 'b' 
         linestyle = 'dashed'
         label= 'Sub Optimal'
     else:
@@ -316,3 +323,89 @@ def plot_route( fig, ax, size, nest, targets, route, route_type, subtitle):
         display(fig)    
     clear_output(wait = True)
     plt.pause(0.0000000001)
+
+
+def plot_trapline_distribution(experiment_name, MDP, route_count_for_experiment, optimal_trapline, optimal_trapline_reversed):
+
+    LABEL_NO_ROUTE_FOUND = 'Invalid Route'
+
+    # reformat data frame for plotting
+    df = pd.DataFrame(route_count_for_experiment)
+    df['count'] = df['route']
+    df['route'] = [loads(d) for d in df.index.to_list()]
+    df.index = np.arange(0, len(df))
+
+    # build x-axis labels
+    counter = 1
+    x_axis = []
+    for i, r in enumerate(df['route']):
+        if r == []:
+            x_axis.append(LABEL_NO_ROUTE_FOUND)
+        else:
+            x_axis.append(str(counter))
+            counter += 1
+    df['x-axis'] = x_axis
+
+    # determine the optimality of each route
+    def get_route_type(target_sequence):
+        if (target_sequence == optimal_trapline) or (target_sequence == optimal_trapline_reversed):
+            return RouteType.Optimal
+        elif len(target_sequence) == len(optimal_trapline):
+            return RouteType.SubOptimal
+        else:
+            return RouteType.Incomplete
+
+    df['route_type'] = [get_route_type(route) for route in df['route']]
+
+    #plot bar chart
+    fig1, ax = plt.subplots(1,1)
+    sns.set_theme(style="whitegrid")
+
+    bar_list = ax.bar(df['x-axis'], df['count']) # plot the bar chart
+    
+    ax.set_xlabel('Routes')
+    ax.set_ylabel('Count of Routes')
+    fig1.suptitle("Trapline Distribution by Route")
+    ax.set_title(experiment_name, fontsize=10)
+
+    # highlight the optimal traplines if present in the results
+    for i in range(len(df)):
+        label = df['x-axis'][i]
+        route = df['route'][i]
+        route_type = df['route_type'][i]
+        if route_type == RouteType.Incomplete:
+            bar_list[i].set_color('grey')
+        elif route_type == RouteType.Optimal:
+            bar_list[i].set_color('g')
+        elif route_type == RouteType.SubOptimal:
+            bar_list[i].set_color('b')
+
+    ax.set_xticklabels(df['x-axis'], rotation = 90)
+    fig1.tight_layout()
+    ax.grid()
+
+    # drop the route count with no discernable target based route found
+    df = df.drop(df[df['x-axis'] == LABEL_NO_ROUTE_FOUND].index)
+
+    plot_size = int(np.ceil(np.sqrt(len(df))))
+    fig2, axs = plt.subplots(plot_size, plot_size, figsize=(plot_size*3, plot_size*3))
+    sns.set_theme(style="whitegrid")
+    
+    fig2.suptitle("Route Lookup for Trapline Distribution by Route\n" + experiment_name)
+
+
+    axs = np.array(axs).reshape(-1)
+
+    for i, ax in enumerate(axs):
+
+        if i >= len(df):
+            break
+        # Convert string representation of route to list using json
+        route = df['route'][df.index[i]]
+        label= df['x-axis'][df.index[i]]
+        route_type= df['route_type'][df.index[i]]
+
+        plot_route(fig2, ax, MDP["size"],MDP["nest"], optimal_trapline, route, route_type, str(label))
+
+    plt.subplots_adjust(left=0.1, right=0.9, top=0.93, bottom=0.1)
+    plt.show()

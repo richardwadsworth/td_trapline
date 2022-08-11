@@ -7,21 +7,20 @@
     #find modal target sequence from that point
 
 
+from cProfile import label
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
 import pickle
-from json import loads
-
+import pandas as pd
 
 from mlflow_utils import get_experiment_runs_data
 from utils import get_sliding_window_sequence
 from trapline import get_optimal_trapline_for_diamond_array, get_routes_similarity, get_valid_target_sequence_from_route, RouteType
-from plots import plot_route
+from plots import plot_route, plot_trapline_distribution
  
 
-#experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka" #best 10 positive chittka, 200 episodes
-experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka" #best 10 negative chittka, 200 episodes
+experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka" #best 10 positive chittka, 200 episodes
+#experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka" #best 10 negative chittka, 200 episodes
 
 
 data, plot_rate = get_experiment_runs_data(experiment_name) 
@@ -72,7 +71,7 @@ def get_C_scores_index_for_run(size, sliding_window_sequence, routes):
     else:
         index = len(run_episodes_route_similarity_adjusted) - temp_index
 
-    return index
+    return index, run_episodes_route_similarity_adjusted
 
 def get_modal_target_sequence_for_run(optimal_trapline, C_score_index, routes): 
 
@@ -106,7 +105,7 @@ optimal_trapline_master, optimal_trapline_reversed_master = get_optimal_trapline
 
 # initalise result arrays
 results = pd.DataFrame()
-results["route"] = np.array(num_runs_in_experiment, dtype=object) # one entry for each run
+results["route"] = np.empty((num_runs_in_experiment,), dtype=object) # one entry for each run
 results["count"] = np.zeros(num_runs_in_experiment, dtype=int)
 results["c_score_index"] = np.zeros(num_runs_in_experiment, dtype=int)
             
@@ -115,15 +114,17 @@ SLIDING_WINDOW_SIZE_USED_FOR_COMPARING_ROUTE_SIMILARITY = 2
 # get the sliding widow to use in determining if there is a stable trapline
 sliding_sequence_used_for_route_similarity = get_sliding_window_sequence(SLIDING_WINDOW_SIZE_USED_FOR_COMPARING_ROUTE_SIMILARITY, num_sample_episodes_per_run)
 
+route_c_scores = []
 for run_index in range(num_runs_in_experiment):
 
     run_episodes_route_observations = all_run_sample_episodes_in_experiment[run_index] # all the observations in a specific run.  i,e. all the episodes and their runs
     run_episodes_routes = get_route_index_from_observation(run_episodes_route_observations) #extract the route indexes from the route observations
 
     # get thw C score index for this run
-    C_score_index = get_C_scores_index_for_run(MDP["size"], sliding_sequence_used_for_route_similarity, run_episodes_routes)
-
-    # save the index value
+    C_score_index, run_episodes_route_similarity_adjusted = get_C_scores_index_for_run(MDP["size"], sliding_sequence_used_for_route_similarity, run_episodes_routes)
+    
+    # save the index value and smoothed  scores
+    route_c_scores.append(run_episodes_route_similarity_adjusted)
     results.loc[run_index, 'c_score_index'] = C_score_index
 
     route, count = get_modal_target_sequence_for_run(optimal_trapline_master, C_score_index, run_episodes_routes)
@@ -136,81 +137,35 @@ for run_index in range(num_runs_in_experiment):
 route_count_for_experiment = pd.Series(results["route"]).value_counts().sort_values(ascending=False)
 #print(route_count_for_experiment)
 
-LABEL_NO_ROUTE_FOUND = 'Invalid Route'
+import json
+import seaborn as sns
 
-# reformat data frame for plotting
-df = pd.DataFrame(route_count_for_experiment)
-df['count'] = df['route']
-df['route'] = [loads(d) for d in df.index.to_list()]
-df.index = np.arange(0, len(df))
+def plot_c_Scores(experiment_name, smoothed):
+    fig, ax = plt.subplots(1,1)
+    sns.set_theme(style="whitegrid")
+    
+    for route in smoothed:
+        xs = np.arange(0, len(route)) * 5
+       
+        alpha = 0.9
+        ax.plot(xs, route, alpha=alpha)
 
-# build x-axis labels
-counter = 1
-x_axis = []
-for i, r in enumerate(df['route']):
-    if r == []:
-        x_axis.append(LABEL_NO_ROUTE_FOUND)
-    else:
-        x_axis.append(str(counter))
-        counter += 1
-df['x-axis'] = x_axis
+    
+    # calculate the mean C score across all runs
+    df = pd.DataFrame(smoothed)
+    mean = df.mean() 
+    xs = np.arange(0, len(mean)) * 5
+    alpha = 1
+    ax.plot(xs, mean, alpha=alpha, lw=2, color='black', label="Mean C score")
+    ax.legend(loc='upper right')
 
-# determine the optimality of each route
-def get_route_type(target_sequence):
-    if (target_sequence == optimal_trapline_master) or (target_sequence == optimal_trapline_reversed_master):
-        return RouteType.Optimal
-    elif len(target_sequence) == len(optimal_trapline_master):
-        return RouteType.SubOptimal
-    else:
-        return RouteType.Incomplete
+    ax.set_xlabel('Episode')
+    ax.set_ylabel('(Smoothed) C Score')
+    fig.suptitle("Route C Score by Episode")
+    ax.set_title(experiment_name, fontsize=10)
 
-df['route_type'] = [get_route_type(route) for route in df['route']]
+    plt.pause(0.00000000001)
 
-#plot bar chart
-fig1, ax = plt.subplots(1,1)
-bar_list = ax.bar(df['x-axis'], df['count']) # plot the bar chart
+plot_c_Scores(experiment_name, route_c_scores)
 
-ax.set_xlabel('Routes')
-ax.set_ylabel('Count of Routes')
-fig1.suptitle("Trapline Distribution by Route")
-ax.set_title(experiment_name, fontsize=10)
-
-# highlight the optimal traplines if present in the results
-for i in range(len(df)):
-    label = df['x-axis'][i]
-    route = df['route'][i]
-    route_type = df['route_type'][i]
-    if route_type == RouteType.Incomplete:
-        bar_list[i].set_color('grey')
-    elif route_type == RouteType.Optimal:
-        bar_list[i].set_color('green')
-    elif route_type == RouteType.SubOptimal:
-        bar_list[i].set_color('blue')
-
-ax.set_xticklabels(df['x-axis'], rotation = 90)
-fig1.tight_layout()
-ax.grid()
-
-# drop the route count with no discernable target based route found
-df = df.drop(df[df['x-axis'] == LABEL_NO_ROUTE_FOUND].index)
-
-plot_size = int(np.ceil(np.sqrt(len(df))))
-fig2, axs = plt.subplots(plot_size, plot_size, figsize=(plot_size*3, plot_size*3))
-fig2.suptitle("Route Lookup for Trapline Distribution by Route\n" + experiment_name)
-
-
-axs = np.array(axs).reshape(-1)
-
-for i, ax in enumerate(axs):
-
-    if i >= len(df):
-        break
-    # Convert string representation of route to list using json
-    route = df['route'][df.index[i]]
-    label= df['x-axis'][df.index[i]]
-    route_type= df['route_type'][df.index[i]]
-
-    plot_route(fig2, ax, MDP["size"],MDP["nest"], optimal_trapline_master, route, route_type, str(label))
-
-plt.subplots_adjust(left=0.1, right=0.9, top=0.93, bottom=0.1)
-plt.show()
+plot_trapline_distribution(experiment_name, MDP, route_count_for_experiment, optimal_trapline_master, optimal_trapline_reversed_master)
