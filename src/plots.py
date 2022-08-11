@@ -281,15 +281,12 @@ def plot_route( fig, ax, size, nest, targets, route, route_type, subtitle):
     ax.set_xlim(0,size)
     ax.set_ylim(0,size)
 
-    nest_x, nest_y = map_index_to_coord(size, nest)
-    # sns.scatterplot([nest_x],[nest_y], s=100, marker='^', ax=ax)  #origin
-    
+    nest_x, nest_y = map_index_to_coord(size, nest)    
     ax.scatter(nest_x,nest_y, c='brown', s=100, marker='^') #origin
 
     xs_target = [coord[0] for coord in target_coords]
     ys_target = [coord[1] for coord in target_coords]
     ax.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
-    #sns.scatterplot(xs_target,ys_target, s=100, marker='o', ax=ax) #goal
     
     if route_type == RouteType.Optimal:
         color = 'g' 

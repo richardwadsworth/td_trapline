@@ -7,7 +7,7 @@ import tempfile
 from mlflow.tracking import MlflowClient
 import json
 
-def get_experiment_runs_data(experiment_name, plot_rate=5):
+def get_experiment_runs_data(experiment_name):
 
     experiment = mlflow.get_experiment_by_name(experiment_name)
     if experiment == None:
@@ -21,6 +21,7 @@ def get_experiment_runs_data(experiment_name, plot_rate=5):
     all_observations = []
     all_performances = []
     all_runs = []
+    all_metrics = []
 
     client = MlflowClient()
             
@@ -39,7 +40,9 @@ def get_experiment_runs_data(experiment_name, plot_rate=5):
                 observations = result["observations"]
                 performance = result["performance"]
                 done = result["done"]
-                plot_rate = plot_rate # TODO.  read this from the run's parameters
+                plot_rate = int(run.data.params["plot_rate"])
+                metrics = run.data.metrics
+                all_metrics.append(metrics)
                 all_observations.append(observations)
                 all_performances.append(performance)
                 all_runs.append(done)
@@ -49,7 +52,8 @@ def get_experiment_runs_data(experiment_name, plot_rate=5):
     data = {"observations": np.array(all_observations,dtype=object),
             "performance": np.array(all_performances),
             "done": np.array(all_runs),
-            "MDP": MDP
+            "MDP": MDP,
+            "metrics" : np.array(all_metrics,dtype=object)
         }
 
 

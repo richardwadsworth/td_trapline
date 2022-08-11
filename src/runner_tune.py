@@ -8,6 +8,7 @@ from mdp import *
 
 # parameters for sarsa(lambda)
 size, MDP, experiment_name = get_10_medium_negative_array_chittka()
+experiment_name = experiment_name + '_hyperparameter_gridsearch'
 
 episodes = [200]
 steps = [100]

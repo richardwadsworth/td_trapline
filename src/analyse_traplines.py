@@ -6,8 +6,6 @@
     #traverse graph until C < threshold
     #find modal target sequence from that point
 
-
-from cProfile import label
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
@@ -143,11 +141,11 @@ import seaborn as sns
 def plot_c_Scores(experiment_name, smoothed):
     fig, ax = plt.subplots(1,1)
     sns.set_theme(style="whitegrid")
-    
+
     for route in smoothed:
         xs = np.arange(0, len(route)) * 5
        
-        alpha = 0.9
+        alpha = 0.7
         ax.plot(xs, route, alpha=alpha)
 
     
