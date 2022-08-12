@@ -162,10 +162,10 @@ def plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_
     plt.pause(0.0000000001)
 
 
-def plot_performance(fig1, ax, episodes, steps, performance, plot_rate):
+def plot_performance(fig1, ax, episodes, steps, performance, sample_rate):
 
     
-    ax.plot(plot_rate*np.arange(episodes//plot_rate), performance)
+    ax.plot(sample_rate*np.arange(episodes//sample_rate), performance)
     ax.set_xlabel("Episodes")
     ax.set_title("Learning progress for SARSA")
     ax.set_ylabel("Average reward of an Episode")
@@ -411,7 +411,7 @@ def plot_trapline_distribution(experiment_name, num_runs_in_experiment, MDP, rou
     fig2, axs = plt.subplots(plot_size, plot_size, figsize=(plot_size*3, plot_size*3))
     sns.set_theme(style="whitegrid")
     
-    fig2.suptitle("Route Lookup for Trapline Distribution by Route\n" + experiment_name)
+    fig2.suptitle("Trapline Lookup for Trapline Distribution by ID\n" + experiment_name)
 
 
     axs = np.array(axs).reshape(-1)
@@ -432,13 +432,13 @@ def plot_trapline_distribution(experiment_name, num_runs_in_experiment, MDP, rou
     plt.subplots_adjust(left=0.1, right=0.9, top=0.86, bottom=0.15)
     plt.pause(0.00000000001)
 
-def plot_c_Scores(experiment_name, plot_rate, smoothed):
+def plot_c_Scores(experiment_name, sample_rate, c_score_indexes, c_score_indexes_rate_of_change):
     fig, (ax1, ax2) = plt.subplots(1,2, figsize=(15, 5))
     sns.set_theme(style="whitegrid")
 
-    for c_score, c_score_prime in smoothed:
+    for c_score, c_score_prime in zip(c_score_indexes, c_score_indexes_rate_of_change):
 
-        xs = np.arange(0, len(c_score)) * plot_rate
+        xs = np.arange(0, len(c_score)) * sample_rate
        
         alpha = 0.7
         ax1.plot(xs, c_score, alpha=alpha)
@@ -446,18 +446,18 @@ def plot_c_Scores(experiment_name, plot_rate, smoothed):
 
     
     # calculate the mean C score across all runs
-    df = pd.DataFrame([x[0] for x in smoothed])
+    df = pd.DataFrame([x for x in c_score_indexes])
     c_score_mean = df.mean() 
-    xs = np.arange(0, len(c_score_mean)) * plot_rate
+    xs = np.arange(0, len(c_score_mean)) * sample_rate
     alpha = 1
     ax1.plot(xs, c_score_mean, alpha=alpha, lw=2, color='black', label="Mean C score")
     ax1.legend(loc='upper right')
 
-    df = pd.DataFrame([x[1] for x in smoothed])
-    c_score_prime_primt_mean = df.mean() 
-    xs = np.arange(0, len(c_score_prime_primt_mean)) * plot_rate
+    df = pd.DataFrame([x for x in c_score_indexes_rate_of_change])
+    c_score_prime_mean = df.mean() 
+    xs = np.arange(0, len(c_score_prime_mean)) * sample_rate
     alpha = 1
-    ax2.plot(xs, c_score_prime_primt_mean, alpha=alpha, lw=2, color='black', label="Mean C score rate of change")
+    ax2.plot(xs, c_score_prime_mean, alpha=alpha, lw=2, color='black', label="Mean C score rate of change")
     ax2.legend(loc='upper right')
 
     ax1.set_xlabel('Episode')
@@ -474,12 +474,12 @@ def plot_c_Scores(experiment_name, plot_rate, smoothed):
     plt.subplots_adjust(left=0.1, right=0.9, top=0.83, bottom=0.15)
     plt.pause(0.00000000001)
 
-def plot_c_score_distribution(experiment_name, plot_rate, stability_threshold, c_score_indexes):
+def plot_c_score_stability_distribution(experiment_name, sample_rate, stability_threshold, c_score_indexes):
 
     fig, ax = plt.subplots()
     sns.set_theme(style="whitegrid")
 
-    c_score_indexes = np.array(c_score_indexes) * plot_rate # scale up from the plot (sample) rate
+    c_score_indexes = np.array(c_score_indexes) * sample_rate # scale up from the plot (sample) rate
 
     sns.histplot(c_score_indexes, bins=20, ax=ax)
     

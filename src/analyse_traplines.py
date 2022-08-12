@@ -10,23 +10,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 import pandas as pd
+import os
 
 from mlflow_utils import get_experiment_runs_data
 from utils import get_sliding_window_sequence
 from trapline import get_optimal_trapline_for_diamond_array, get_routes_similarity, get_valid_target_sequence_from_route, RouteType
-from plots import plot_route, plot_trapline_distribution, plot_c_Scores, plot_c_score_distribution
+from plots import plot_route, plot_trapline_distribution, plot_c_Scores, plot_c_score_stability_distribution
 from c_score import get_c_score_prime
  
-
-
+artifact_path = "sussex/Dissertation/artifacts"
 
 #experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka_100_runs" #best 10 positive chittka, 200 episodes, 100 runs
-#experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka_100_runs" #best 10 negative chittka, 200 episodes, 100 runs
+experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka_100_runs" #best 10 negative chittka, 200 episodes, 100 runs
 
 #experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka_1000_runs" #best 10 positive chittka, 200 episodes, 1000 runs
-experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka_1000_runs" #best 10 negative chittka, 200 episodes, 1000 runs
+#experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka_1000_runs" #best 10 negative chittka, 200 episodes, 1000 runs
 
-data, plot_rate = get_experiment_runs_data(experiment_name) 
+data, sample_rate = get_experiment_runs_data(experiment_name) 
 all_run_sample_episodes_in_experiment = data["observations"]
 all_run_sample_done_in_experiment = data["done"]
 MDP = data["MDP"]
@@ -116,15 +116,16 @@ num_sample_episodes_per_run = all_run_sample_episodes_in_experiment.shape[1]
 # get the optimal trapline and its reverse from the MDP.  
 optimal_trapline_master, optimal_trapline_reversed_master = get_optimal_trapline_for_diamond_array(MDP["targets"])
 
+SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_C_SCORE =5
+SLIDING_WINDOW_SIZE_USED_FOR_COMPARING_ROUTE_SIMILARITY = 2
+C_SCORE_STABILITY_THRESHOLD = 0
+
 # initalise result arrays
 results = pd.DataFrame()
 results["route"] = np.empty((num_runs_in_experiment,), dtype=object) # one entry for each run
 results["count"] = np.zeros(num_runs_in_experiment, dtype=int)
-results["c_score_index"] = np.zeros(num_runs_in_experiment, dtype=int)
+results["c_score_stability_index"] = np.zeros(num_runs_in_experiment, dtype=int)
             
-SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_C_SCORE =5
-SLIDING_WINDOW_SIZE_USED_FOR_COMPARING_ROUTE_SIMILARITY = 2
-C_SCORE_STABILITY_THRESHOLD = 0
 # get the sliding widow to use in determining if there is a stable trapline
 sliding_sequence_used_for_route_similarity = get_sliding_window_sequence(SLIDING_WINDOW_SIZE_USED_FOR_COMPARING_ROUTE_SIMILARITY, num_sample_episodes_per_run)
 
@@ -139,14 +140,16 @@ for run_index in range(num_runs_in_experiment):
     
     # save the index value and smoothed  scores
     route_c_scores.append((run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted))
-    results.loc[run_index, 'c_score_index'] = C_score_index
+    results.loc[run_index, 'c_score_stability_index'] = C_score_index
 
     route, count = get_modal_target_sequence_for_run(optimal_trapline_master, C_score_index, run_episodes_routes)
     
     results.loc[run_index, 'route'] = route #only save the route if a stable trapline was found
     results.loc[run_index, 'count'] = count
     
-    
+results["c_score_indexes"] = [x[0] for x in route_c_scores]
+results["c_score_indexes_rate_of_change"] = [x[1] for x in route_c_scores]
+
 # get a count of all the different routes of the traplines from each run
 route_count_for_experiment = pd.Series(results["route"]).value_counts().sort_values(ascending=False)
 #print(route_count_for_experiment)
@@ -155,9 +158,9 @@ import json
 import seaborn as sns
 from c_score import get_c_score_prime
 
-plot_c_Scores(experiment_name, plot_rate, route_c_scores)
+plot_c_Scores(experiment_name, sample_rate, results["c_score_indexes"], results["c_score_indexes_rate_of_change"])
 
-plot_c_score_distribution(experiment_name, plot_rate, C_SCORE_STABILITY_THRESHOLD, list(results['c_score_index']))
+plot_c_score_stability_distribution(experiment_name, sample_rate, C_SCORE_STABILITY_THRESHOLD, list(results['c_score_stability_index']))
 
 plot_trapline_distribution(experiment_name, num_runs_in_experiment, MDP, route_count_for_experiment, optimal_trapline_master, optimal_trapline_reversed_master)
 
