@@ -22,9 +22,7 @@ class PlotType(Enum):
     Partial = 2 # display plot at end of training
     Full = 3 # display and update plot throughout trainingx
 
-def initialise_plots(env):
-
-    def remove_axis_ticks(ax):
+def remove_axis_ticks(ax):
         ax.tick_params(
             axis='both',       # changes apply to the x-axis
             which='both',      # both major and minor ticks are affected
@@ -34,8 +32,9 @@ def initialise_plots(env):
             right=False,        # ticks along the right edge are off
             labelbottom=False,
             labelleft=False) # labels along the bottom edge are off
-    
-    
+
+def initialise_plots(env):
+
     # set up the subplots for visualisation
     fig1, axs = plt.subplots(2,3, figsize=(11,7))
     sns.set_theme(style="whitegrid")
@@ -270,7 +269,8 @@ def plot_traffic_greyscale(env, fig, ax, xs_target, ys_target, data, title):
     plt.pause(0.0000000001)
 
 def plot_route( fig, ax, size, nest, targets, route, route_type, subtitle):
-    # coords = []
+    
+    remove_axis_ticks(ax)
 
     route_coords = [map_index_to_coord(size, index) for index in route]
     target_coords = [map_index_to_coord(size, index) for index in targets]
@@ -322,7 +322,7 @@ def plot_route( fig, ax, size, nest, targets, route, route_type, subtitle):
     plt.pause(0.0000000001)
 
 
-def plot_trapline_distribution(experiment_name, MDP, route_count_for_experiment, optimal_trapline, optimal_trapline_reversed):
+def plot_trapline_distribution(experiment_name, num_runs_in_experiment, MDP, route_count_for_experiment, optimal_trapline, optimal_trapline_reversed):
 
     LABEL_NO_ROUTE_FOUND = 'Invalid Route'
 
@@ -361,7 +361,15 @@ def plot_trapline_distribution(experiment_name, MDP, route_count_for_experiment,
     bar_list = ax.bar(df['x-axis'], df['count']) # plot the bar chart
     
     ax.set_xlabel('Routes')
-    ax.set_ylabel('Count of Routes')
+
+    ax.set_yscale('log')
+    ax.set_ylim(0, num_runs_in_experiment)
+    ax.set_ylabel('Logarithmic Count of Routes')
+
+
+
+    ax.grid()
+    #ax.set_ylabel('Count of Routes')
     fig1.suptitle("Trapline Distribution by Route")
     ax.set_title(experiment_name, fontsize=10)
 
@@ -384,6 +392,21 @@ def plot_trapline_distribution(experiment_name, MDP, route_count_for_experiment,
     # drop the route count with no discernable target based route found
     df = df.drop(df[df['x-axis'] == LABEL_NO_ROUTE_FOUND].index)
 
+    # if there are more than 9 routes, choose the optimal and 7 random
+    MAX_NUM_ROUTE_PLOTS = 9
+    if len(df)>MAX_NUM_ROUTE_PLOTS:
+        #find index of optimal routes
+        df_optimal = df.drop(df[df['route_type'] != RouteType.Optimal].index)
+        
+        remaining = MAX_NUM_ROUTE_PLOTS - len(df_optimal)
+
+        # get suboptimal routes and select a random selection for display
+        df_suboptimal = df.drop(df[df['route_type'] != RouteType.SubOptimal].index)
+        suboptimal_indexes_for_plot = np.random.choice(df_suboptimal.index, size=remaining, replace=False)
+        df_suboptimal_for_plot= df_suboptimal.loc[suboptimal_indexes_for_plot]
+        df = pd.concat([df_optimal, df_suboptimal_for_plot])
+        df = df.sort_index()
+     
     plot_size = int(np.ceil(np.sqrt(len(df))))
     fig2, axs = plt.subplots(plot_size, plot_size, figsize=(plot_size*3, plot_size*3))
     sns.set_theme(style="whitegrid")
@@ -402,7 +425,68 @@ def plot_trapline_distribution(experiment_name, MDP, route_count_for_experiment,
         label= df['x-axis'][df.index[i]]
         route_type= df['route_type'][df.index[i]]
 
+        
+        
         plot_route(fig2, ax, MDP["size"],MDP["nest"], optimal_trapline, route, route_type, str(label))
 
-    plt.subplots_adjust(left=0.1, right=0.9, top=0.93, bottom=0.1)
-    plt.show()
+    plt.subplots_adjust(left=0.1, right=0.9, top=0.86, bottom=0.15)
+    plt.pause(0.00000000001)
+
+def plot_c_Scores(experiment_name, plot_rate, smoothed):
+    fig, (ax1, ax2) = plt.subplots(1,2, figsize=(15, 5))
+    sns.set_theme(style="whitegrid")
+
+    for c_score, c_score_prime in smoothed:
+
+        xs = np.arange(0, len(c_score)) * plot_rate
+       
+        alpha = 0.7
+        ax1.plot(xs, c_score, alpha=alpha)
+        ax2.plot(xs, c_score_prime, alpha=alpha)
+
+    
+    # calculate the mean C score across all runs
+    df = pd.DataFrame([x[0] for x in smoothed])
+    c_score_mean = df.mean() 
+    xs = np.arange(0, len(c_score_mean)) * plot_rate
+    alpha = 1
+    ax1.plot(xs, c_score_mean, alpha=alpha, lw=2, color='black', label="Mean C score")
+    ax1.legend(loc='upper right')
+
+    df = pd.DataFrame([x[1] for x in smoothed])
+    c_score_prime_primt_mean = df.mean() 
+    xs = np.arange(0, len(c_score_prime_primt_mean)) * plot_rate
+    alpha = 1
+    ax2.plot(xs, c_score_prime_primt_mean, alpha=alpha, lw=2, color='black', label="Mean C score rate of change")
+    ax2.legend(loc='upper right')
+
+    ax1.set_xlabel('Episode')
+    ax1.set_ylabel('Rate of change of C Score')
+    ax1.set_title("C Score per episode for all runs", fontsize=10)
+
+    ax2.set_xlabel('Episode')
+    ax2.set_ylabel('(Smoothed) C Score')
+    ax2.set_title("Rate of change of C Score per episode for all runs", fontsize=10)
+
+
+    fig.suptitle("Route C Score by Episode\n" + experiment_name, fontsize=12)
+
+    plt.subplots_adjust(left=0.1, right=0.9, top=0.83, bottom=0.15)
+    plt.pause(0.00000000001)
+
+def plot_c_score_distribution(experiment_name, plot_rate, stability_threshold, c_score_indexes):
+
+    fig, ax = plt.subplots()
+    sns.set_theme(style="whitegrid")
+
+    c_score_indexes = np.array(c_score_indexes) * plot_rate # scale up from the plot (sample) rate
+
+    sns.histplot(c_score_indexes, bins=20, ax=ax)
+    
+    ax.set_xlabel('Episode That C Score Stabilises')
+    ax.set_ylabel('Frequency')
+    fig.suptitle("C Score Stability Histogram\n(Stability Threshold {})".format(stability_threshold))
+    ax.set_title(experiment_name, fontsize=10)
+
+    plt.subplots_adjust(left=0.1, right=0.9, top=0.83, bottom=0.15)
+    plt.pause(0.00000000001)

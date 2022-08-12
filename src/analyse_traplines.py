@@ -14,12 +14,17 @@ import pandas as pd
 from mlflow_utils import get_experiment_runs_data
 from utils import get_sliding_window_sequence
 from trapline import get_optimal_trapline_for_diamond_array, get_routes_similarity, get_valid_target_sequence_from_route, RouteType
-from plots import plot_route, plot_trapline_distribution
+from plots import plot_route, plot_trapline_distribution, plot_c_Scores, plot_c_score_distribution
+from c_score import get_c_score_prime
  
 
-experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka" #best 10 positive chittka, 200 episodes
-#experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka" #best 10 negative chittka, 200 episodes
 
+
+#experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka_100_runs" #best 10 positive chittka, 200 episodes, 100 runs
+#experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka_100_runs" #best 10 negative chittka, 200 episodes, 100 runs
+
+#experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka_1000_runs" #best 10 positive chittka, 200 episodes, 1000 runs
+experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka_1000_runs" #best 10 negative chittka, 200 episodes, 1000 runs
 
 data, plot_rate = get_experiment_runs_data(experiment_name) 
 all_run_sample_episodes_in_experiment = data["observations"]
@@ -43,33 +48,43 @@ def get_route_index_from_observation(route_observations):
 def moving_average(x, w):
         return np.convolve(x, np.ones(w), 'valid') / w
 
-def get_C_scores_index_for_run(size, sliding_window_sequence, routes):
+def get_C_scores_index_for_run(size, sliding_window_sequence, routes, threshold=2):
 
     run_episodes_route_similarity_raw = get_routes_similarity(size, sliding_window_sequence, routes)
 
     run_episodes_route_similarity_smoothed = list(moving_average(run_episodes_route_similarity_raw,SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_C_SCORE))
-    run_episodes_route_similarity_adjusted  =[np.nan, np.nan] + run_episodes_route_similarity_smoothed + [np.nan, np.nan]
 
+    run_episodes_route_similarity_prime =  get_c_score_prime(run_episodes_route_similarity_smoothed)
+    
+    # run_episodes_route_similarity_smoothed
+
+    
     #look for the last index where the smoothed C score has dropped below the threshold
-    reversed_routes = run_episodes_route_similarity_adjusted.copy()
-    reversed_routes.reverse()
+    reversed_graph = run_episodes_route_similarity_prime.copy()
+    reversed_graph.reverse()
 
     try:
-        temp_index = list(map(lambda i: i>200, reversed_routes)).index(True)
+        # rate of change in similarity threshold 
+        temp_index = list(map(lambda i: i>threshold or i<-threshold, reversed_graph)).index(True)
     except ValueError as e:
-        if e.args[0] == "True is not in list": # all values are below the threshold
+        if e.args[0] == "True is not in list": # no values are within the threshold
             temp_index=-1
         else:
             raise e
 
-    if temp_index == 0: # no value below threshold
+    if temp_index == 0: # the last value (first value in the reverse list) in the list is outside the threshold
         index = -1
-    elif temp_index == -1: # all values below threshold
+    elif temp_index == -1: # all values are within the threshold
         index = 0
     else:
-        index = len(run_episodes_route_similarity_adjusted) - temp_index
+        index = len(run_episodes_route_similarity_prime) - temp_index
+        index = index - 2 # to account for the 2 nans added below
 
-    return index, run_episodes_route_similarity_adjusted
+    run_episodes_route_similarity_adjusted  = [np.nan, np.nan] + run_episodes_route_similarity_smoothed + [np.nan, np.nan]
+    run_episodes_route_similarity_prime_adjusted = [np.nan, np.nan] +  run_episodes_route_similarity_prime + [np.nan, np.nan]
+
+    return index, run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted
+
 
 def get_modal_target_sequence_for_run(optimal_trapline, C_score_index, routes): 
 
@@ -109,6 +124,7 @@ results["c_score_index"] = np.zeros(num_runs_in_experiment, dtype=int)
             
 SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_C_SCORE =5
 SLIDING_WINDOW_SIZE_USED_FOR_COMPARING_ROUTE_SIMILARITY = 2
+C_SCORE_STABILITY_THRESHOLD = 0
 # get the sliding widow to use in determining if there is a stable trapline
 sliding_sequence_used_for_route_similarity = get_sliding_window_sequence(SLIDING_WINDOW_SIZE_USED_FOR_COMPARING_ROUTE_SIMILARITY, num_sample_episodes_per_run)
 
@@ -119,10 +135,10 @@ for run_index in range(num_runs_in_experiment):
     run_episodes_routes = get_route_index_from_observation(run_episodes_route_observations) #extract the route indexes from the route observations
 
     # get thw C score index for this run
-    C_score_index, run_episodes_route_similarity_adjusted = get_C_scores_index_for_run(MDP["size"], sliding_sequence_used_for_route_similarity, run_episodes_routes)
+    C_score_index, run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted = get_C_scores_index_for_run(MDP["size"], sliding_sequence_used_for_route_similarity, run_episodes_routes, C_SCORE_STABILITY_THRESHOLD)
     
     # save the index value and smoothed  scores
-    route_c_scores.append(run_episodes_route_similarity_adjusted)
+    route_c_scores.append((run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted))
     results.loc[run_index, 'c_score_index'] = C_score_index
 
     route, count = get_modal_target_sequence_for_run(optimal_trapline_master, C_score_index, run_episodes_routes)
@@ -137,33 +153,12 @@ route_count_for_experiment = pd.Series(results["route"]).value_counts().sort_val
 
 import json
 import seaborn as sns
+from c_score import get_c_score_prime
 
-def plot_c_Scores(experiment_name, smoothed):
-    fig, ax = plt.subplots(1,1)
-    sns.set_theme(style="whitegrid")
+plot_c_Scores(experiment_name, plot_rate, route_c_scores)
 
-    for route in smoothed:
-        xs = np.arange(0, len(route)) * 5
-       
-        alpha = 0.7
-        ax.plot(xs, route, alpha=alpha)
+plot_c_score_distribution(experiment_name, plot_rate, C_SCORE_STABILITY_THRESHOLD, list(results['c_score_index']))
 
-    
-    # calculate the mean C score across all runs
-    df = pd.DataFrame(smoothed)
-    mean = df.mean() 
-    xs = np.arange(0, len(mean)) * 5
-    alpha = 1
-    ax.plot(xs, mean, alpha=alpha, lw=2, color='black', label="Mean C score")
-    ax.legend(loc='upper right')
+plot_trapline_distribution(experiment_name, num_runs_in_experiment, MDP, route_count_for_experiment, optimal_trapline_master, optimal_trapline_reversed_master)
 
-    ax.set_xlabel('Episode')
-    ax.set_ylabel('(Smoothed) C Score')
-    fig.suptitle("Route C Score by Episode")
-    ax.set_title(experiment_name, fontsize=10)
-
-    plt.pause(0.00000000001)
-
-plot_c_Scores(experiment_name, route_c_scores)
-
-plot_trapline_distribution(experiment_name, MDP, route_count_for_experiment, optimal_trapline_master, optimal_trapline_reversed_master)
+plt.show()
