@@ -150,18 +150,45 @@ for run_index in range(num_runs_in_experiment):
 results["c_score_indexes"] = [x[0] for x in route_c_scores]
 results["c_score_indexes_rate_of_change"] = [x[1] for x in route_c_scores]
 
+results.to_csv("sussex/Dissertation/artifacts/" + experiment_name + "_results")
+
 # get a count of all the different routes of the traplines from each run
 route_count_for_experiment = pd.Series(results["route"]).value_counts().sort_values(ascending=False)
 #print(route_count_for_experiment)
 
-import json
-import seaborn as sns
+# reformat data frame for plotting
+from json import loads
+df_route_count_for_experiment = pd.DataFrame(route_count_for_experiment)
+df_route_count_for_experiment['count'] = df_route_count_for_experiment['route']
+df_route_count_for_experiment['route'] = [loads(d) for d in df_route_count_for_experiment.index.to_list()]
+df_route_count_for_experiment.index = np.arange(0, len(df_route_count_for_experiment))
+
+from  manhattan import get_manhattan_distance, get_euclidean_distance
+distances = []
+for i in range (len(df_route_count_for_experiment)):
+    row = df_route_count_for_experiment.iloc[i]
+    #calculate the manhattan length of this target sequence
+    distance = get_manhattan_distance(17, row['route'])
+    distances.append(distance)
+
+df_route_count_for_experiment['sequence_manhattan_length'] = distances
+
+distances = []
+for i in range (len(df_route_count_for_experiment)):
+    row = df_route_count_for_experiment.iloc[i]
+    #calculate the manhattan length of this target sequence
+    distance = get_euclidean_distance(17, row['route'])
+    distances.append(distance)
+
+df_route_count_for_experiment['sequence_euclidean_length'] = distances
+
+
 from c_score import get_c_score_prime
 
 plot_c_Scores(experiment_name, sample_rate, results["c_score_indexes"], results["c_score_indexes_rate_of_change"])
 
 plot_c_score_stability_distribution(experiment_name, sample_rate, C_SCORE_STABILITY_THRESHOLD, list(results['c_score_stability_index']))
 
-plot_trapline_distribution(experiment_name, num_runs_in_experiment, MDP, route_count_for_experiment, optimal_trapline_master, optimal_trapline_reversed_master)
+plot_trapline_distribution(experiment_name, num_runs_in_experiment, MDP, df_route_count_for_experiment, optimal_trapline_master, optimal_trapline_reversed_master)
 
 plt.show()

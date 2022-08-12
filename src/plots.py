@@ -326,12 +326,7 @@ def plot_trapline_distribution(experiment_name, num_runs_in_experiment, MDP, rou
 
     LABEL_NO_ROUTE_FOUND = 'Invalid Route'
 
-    # reformat data frame for plotting
-    df = pd.DataFrame(route_count_for_experiment)
-    df['count'] = df['route']
-    df['route'] = [loads(d) for d in df.index.to_list()]
-    df.index = np.arange(0, len(df))
-
+    df = route_count_for_experiment
     # build x-axis labels
     counter = 1
     x_axis = []

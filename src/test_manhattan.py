@@ -1,4 +1,5 @@
 import unittest
+from utils import map_coord_to_index
 from manhattan import get_manhattan_similarity, get_manhattan_distance
 
 class Test_Map(unittest.TestCase):
@@ -49,7 +50,44 @@ class Test_Distance(unittest.TestCase):
             route = [10,4,7,12]
             distance = get_manhattan_distance(size, route)
             self.assertEqual(distance, 11)
-            
 
+            
+    def test_get_manhattan_distance_opposites(self):
+            # opposite routes
+
+            size =4
+        
+            route1 = [1,7]
+            route2 = [7,1]
+            distance1 = get_manhattan_distance(size, route1)
+            distance2 = get_manhattan_distance(size, route2)
+            self.assertEqual(distance1, distance2)
+
+            route1 = [0,3,15]
+            route2 = [15,3,0]
+            distance1 = get_manhattan_distance(size, route1)
+            distance2 = get_manhattan_distance(size, route2)
+            self.assertEqual(distance1, distance2)
+
+            route1 = [2,5,9,14,11,7]
+            route2 = [2,7,11,14,9,5]
+            distance1 = get_manhattan_distance(size, route1)
+            distance2 = get_manhattan_distance(size, route2)
+            self.assertEqual(distance1, distance2)
+
+
+            size =17
+            route1 = [76, 111,  213, 109]
+            route2 = [76, 109,  213, 111]
+            distance1 = get_manhattan_distance(size, route1)
+            distance2 = get_manhattan_distance(size, route2)
+            self.assertEqual(distance1, distance2)
+
+            size =17
+            route1 = [76, 111, 145, 179, 213, 246, 211, 177, 143, 109]
+            route2 = [76, 109, 143, 177, 211, 246, 213, 179, 145, 111] 
+            distance1 = get_manhattan_distance(size, route1)
+            distance2 = get_manhattan_distance(size, route2)
+            self.assertEqual(distance1, distance2)
 
 unittest.main('test_manhattan', argv=[''], verbosity=2, exit=False)
