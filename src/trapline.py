@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from enum import Enum
 from utils import sliding_window
-from manhattan import get_manhattan_distance
+from manhattan import get_manhattan_similarity
 
 class RouteType(Enum):
     Incomplete = 0 # not all targets found
@@ -140,7 +140,7 @@ def get_routes_similarity(arena_size, sliding_sequence, routes):
         for i, segment1 in enumerate(route1_segments):
             segment2 = route2_segments[i]
             
-            distance = get_manhattan_distance(arena_size, segment1, segment2)
+            distance = get_manhattan_similarity(arena_size, segment1, segment2)
             total_segmented_manhattan_distance += distance
 
         manhattan_distances.append(total_segmented_manhattan_distance)

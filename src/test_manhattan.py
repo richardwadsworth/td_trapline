@@ -1,5 +1,5 @@
 import unittest
-from manhattan import get_manhattan_distance
+from manhattan import get_manhattan_similarity
 
 class Test_Map(unittest.TestCase):
 
@@ -9,7 +9,7 @@ class Test_Map(unittest.TestCase):
         route_1_index = [0,1,5,6]
         route_2_index = [0,4,8,9,5,6]
 
-        distance = get_manhattan_distance(size, route_1_index, route_2_index)
+        distance = get_manhattan_similarity(size, route_1_index, route_2_index)
         
         self.assertEqual(distance, 8)
 
@@ -19,7 +19,7 @@ class Test_Map(unittest.TestCase):
         route_1_index = [0,4,8,9,5,6]
         route_2_index = [0,4,8,9,5,6]
 
-        distance = get_manhattan_distance(size, route_1_index, route_2_index)
+        distance = get_manhattan_similarity(size, route_1_index, route_2_index)
         
         self.assertEqual(distance, 0)
 
@@ -29,7 +29,7 @@ class Test_Map(unittest.TestCase):
         route_1_index = [0,1,5,6,10,11,15]
         route_2_index = [0,4,5,6,10,11,15]
 
-        distance = get_manhattan_distance(size, route_1_index, route_2_index)
+        distance = get_manhattan_similarity(size, route_1_index, route_2_index)
         
         self.assertEqual(distance, 2)
 

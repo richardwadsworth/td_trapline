@@ -1,7 +1,10 @@
 from utils import map_index_to_coord
 import numpy as np
 
-def get_manhattan_distance(size, route_index1, route_index2):
+def get_manhattan_similarity(size, route_index1, route_index2):
+    '''
+    distance of zero indicates identical routes
+    '''
 
     # work out which route is shorter
     if len(route_index1)<len(route_index2):
