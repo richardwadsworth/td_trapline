@@ -9,7 +9,7 @@ from plots import PlotType
 from mdp import *
 
 # parameters for sarsa(lambda)
-size, MDP, _ = get_10_medium_positive_array_chittka()
+size, MDP, _ = get_10_medium_negative_array_chittka()
 rng = np.random.default_rng() # random number generator
 
 episodes = 200

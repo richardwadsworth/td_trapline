@@ -20,8 +20,10 @@ from c_score import get_c_score_prime
  
 artifact_path = "sussex/Dissertation/artifacts"
 
-#experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka_100_runs" #best 10 positive chittka, 200 episodes, 100 runs
-experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka_100_runs" #best 10 negative chittka, 200 episodes, 100 runs
+experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka_100_runs" #best 10 positive chittka, 200 episodes, 100 runs
+#experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka_100_runs" #best 10 negative chittka, 200 episodes, 100 runs invalid
+#experiment_name = "analyse_e38d5bf241274c9483e7c536a87a40a2_10_medium_negative_array_chittka_gs_100_runs" #best 10 negative chittka, 200 episodes, 100 runs
+
 
 #experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka_1000_runs" #best 10 positive chittka, 200 episodes, 1000 runs
 #experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka_1000_runs" #best 10 negative chittka, 200 episodes, 1000 runs
@@ -173,14 +175,14 @@ for i in range (len(df_route_count_for_experiment)):
 
 df_route_count_for_experiment['sequence_manhattan_length'] = distances
 
-distances = []
-for i in range (len(df_route_count_for_experiment)):
-    row = df_route_count_for_experiment.iloc[i]
-    #calculate the manhattan length of this target sequence
-    distance = get_euclidean_distance(17, row['route'])
-    distances.append(distance)
+# distances = []
+# for i in range (len(df_route_count_for_experiment)):
+#     row = df_route_count_for_experiment.iloc[i]
+#     #calculate the manhattan length of this target sequence
+#     distance = get_euclidean_distance(17, row['route'])
+#     distances.append(distance)
 
-df_route_count_for_experiment['sequence_euclidean_length'] = distances
+# df_route_count_for_experiment['sequence_euclidean_length'] = distances
 
 
 from c_score import get_c_score_prime

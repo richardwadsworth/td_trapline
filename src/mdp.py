@@ -170,20 +170,20 @@ def get_10_medium_positive_array_chittka():
 def get_10_medium_negative_array_chittka():
     # medium negative array, offest nest, based on chitka et al 2013
     name = "10_medium_negative_array_chittka"
-    size = 17
+    size = 20
     MDP = {"size": size,
-            "nest":map_coord_to_index(size, 8, 2),
+            "nest":map_coord_to_index(size, 9, 2),
             "targets": [
-                    (map_coord_to_index(size, 8, 4),1.0), 
-                    (map_coord_to_index(size, 9, 6),1.0),
-                    (map_coord_to_index(size, 9, 8),1.0),
-                    (map_coord_to_index(size, 9, 10),1.0),
-                    (map_coord_to_index(size, 9, 12),1.0),
-                    (map_coord_to_index(size, 8, 14),1.0),
-                    (map_coord_to_index(size, 7, 12),1.0),
-                    (map_coord_to_index(size, 7, 10),1.0),
-                    (map_coord_to_index(size, 7, 8),1.0),
-                    (map_coord_to_index(size, 7, 6),1.0)
+                    (map_coord_to_index(size, 9, 4),1.0), 
+                    (map_coord_to_index(size, 10, 6),1.0),
+                    (map_coord_to_index(size, 10, 9),1.0),
+                    (map_coord_to_index(size, 10, 12),1.0),
+                    (map_coord_to_index(size, 10, 15),1.0),
+                    (map_coord_to_index(size, 9, 18),1.0),
+                    (map_coord_to_index(size, 8, 15),1.0),
+                    (map_coord_to_index(size, 8, 12),1.0),
+                    (map_coord_to_index(size, 8, 9),1.0),
+                    (map_coord_to_index(size, 8, 6),1.0)
                     ]
         }
     return size, dump_mdp(MDP), name
