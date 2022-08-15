@@ -356,7 +356,7 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
     df['route_type'] = [get_route_type(route) for route in df['route']]
 
     #plot bar chart
-    fig1, ax = plt.subplots(1,1)
+    fig1, ax = plt.subplots(1,1, figsize=(12,5))
     sns.set_theme(style="whitegrid")
 
     bar_list = ax.bar(df['x-axis'], df['count']) # plot the bar chart

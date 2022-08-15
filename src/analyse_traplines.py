@@ -23,7 +23,7 @@ from c_score import get_C_scores_index_for_run
 
 #experiment_name = "analyse_d7f2c7c777164160bd5ac6bbfefb0a71_10_medium_negative_array_ohashi_gs_1000_runs" #best 10 negative ohashi, 200 episodes, 1000 runs
 #experiment_name = "analyse_3cb6d9c1e8c646188668a059a9190d6c_10_medium_positive_array_ohashi_gs_1000_runs" #best 10 positive ohashi, 200 episodes, 1000 runs
-experiment_name = "analyse_d7f2c7c777164160bd5ac6bbfefb0a71_10_medium_negative_array_ohashi_gs_100_runs"
+experiment_name = "analyse_03b5a2052703466a9f88fa1f89dc44db_10_negative_array_ohashi_gs_1000_runs"
 
 artifact_path = "sussex/Dissertation/artifacts"
 
@@ -128,7 +128,7 @@ distances = []
 for i in range (len(df_route_count_for_experiment)):
     row = df_route_count_for_experiment.iloc[i]
     #calculate the manhattan length of this target sequence
-    distance = get_manhattan_distance(17, row['route'])
+    distance = get_manhattan_distance(MRP["size"], row['route'])
     distances.append(distance)
 
 df_route_count_for_experiment['sequence_manhattan_length'] = distances
