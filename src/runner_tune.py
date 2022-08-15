@@ -1,7 +1,7 @@
 from gym_utils import register_gym
 register_gym()
 from runner_utils import train_parallel
-from mdp import *
+from mrp import *
 
 ######################################################
 # hyper-parameters for Actor Critic TD(lambda) model
@@ -9,7 +9,7 @@ from mdp import *
 # START
 #
 ######################################################
-mdp_function = get_10_medium_negative_array_ohashi() # or get_10_medium_positive_array_ohashi()
+mrp_function = get_10_medium_negative_array_ohashi() # or get_10_medium_positive_array_ohashi()
 
 episodes = [200]
 steps = [200]
@@ -36,14 +36,14 @@ change_in_orientation_reward = [0]#-stationary_reward*0.5 #negative reward if or
 # hyper-parameters for Actor Critic TD(lambda) model
 ######################################################
 
-size, MDP, experiment_name = mdp_function
+size, MRP, experiment_name = mrp_function
 experiment_name = experiment_name + '_gs' # gs for grid search
 
 if __name__ == "__main__":
 
     train_parallel(10,
                     size, 
-                    MDP, 
+                    MRP, 
                     experiment_name, 
                     respiration_reward,
                     stationary_reward,

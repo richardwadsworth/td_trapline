@@ -6,10 +6,10 @@ register_gym(True)
 
 from runner_utils import train_fnn
 from plots import PlotType
-from mdp import *
+from mrp import *
 
 # parameters for sarsa(lambda)
-size, MDP, _ = get_10_medium_negative_array_ohashi()
+size, MRP, _ = get_10_medium_negative_array_ohashi()
 rng = np.random.default_rng() # random number generator
 
 episodes = 200
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     train_fnn(is_stochastic,
             size, 
-            MDP, 
+            MRP, 
             respiration_reward,
             stationary_reward,
             revisit_inactive_target_reward,

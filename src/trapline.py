@@ -9,13 +9,13 @@ class RouteType(Enum):
 
 def get_optimal_trapline_for_diamond_array(targets):
     '''
-    calculate the resevered MDP.  
+    calculate the resevered MRP.  
     Note:  Only works for diamonds where the first target is a corner
     '''
     #identify the optimal trapline
     optimal_trapline = [observation[0] for observation in targets]
 
-    # calculate the resevered MDP.
+    # calculate the resevered MRP.
     remaining = optimal_trapline[1:]
     remaining.reverse()
     optimal_trapline_reversed = [optimal_trapline[0]] + remaining #get the optimal trapline the other direction

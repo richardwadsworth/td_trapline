@@ -50,12 +50,12 @@ def get_experiment_runs_data(experiment_name):
                 all_performances.append(performance)
                 all_runs.append(done)
     
-    MDP = json.loads(run.data.params["MDP"]) # capture the MDP used the last run,  which will be the same for all runs in this experiment
+    MRP = json.loads(run.data.params["MRP"]) # capture the MRP used the last run,  which will be the same for all runs in this experiment
             
     data = {"observations": np.array(all_observations,dtype=object),
             "performance": np.array(all_performances),
             "done": np.array(all_runs),
-            "MDP": MDP,
+            "MRP": MRP,
             "metrics" : np.array(all_metrics,dtype=object),
             "params" : np.array(all_params,dtype=object),
             "run_ids" : np.array(all_run_ids , dtype=str)

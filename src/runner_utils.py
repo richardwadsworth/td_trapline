@@ -22,7 +22,7 @@ def train_fn(config):
 
     # each parallel run needs its own env instance
     env_local = initialise_gym(int(config["size"]), 
-        config["MDP"],
+        config["MRP"],
         is_stochastic, 
         float(config["respiration_reward"]), 
         float(config["stationary_reward"]), 
@@ -89,7 +89,7 @@ def train_fn(config):
 
 def train_parallel(num_samples,
                     size, 
-                    MDP, 
+                    MRP, 
                     experiment_name, 
                     respiration_reward,
                     stationary_reward,
@@ -112,7 +112,7 @@ def train_parallel(num_samples,
         config={
             # define search space here
             "size": size,
-            "MDP": MDP,
+            "MRP": MRP,
             "experiment_name": experiment_name,
             "respiration_reward": tune.grid_search(respiration_reward),
             "stationary_reward": tune.grid_search(stationary_reward),
@@ -159,7 +159,7 @@ import matplotlib.pyplot as plt
 
 def train_fnn(is_stochastic,
             size, 
-            MDP, 
+            MRP, 
             respiration_reward,
             stationary_reward,
             revisit_inactive_target_reward,
@@ -180,7 +180,7 @@ def train_fnn(is_stochastic,
             threshold=5):
 
     plot_data = None
-    env = initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, steps)
+    env = initialise_gym(size, MRP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, steps)
 
     print("Action space = ", env.action_space)
     print("Observation space = ", env.observation_space)

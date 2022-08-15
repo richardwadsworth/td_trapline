@@ -34,11 +34,11 @@ def register_gym(dev_mode=False):
             file.write(reg_text) # append missing data
 
     
-def initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, max_episode_steps=100):
+def initialise_gym(size, MRP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, max_episode_steps=100):
 
-    MDP = loads(MDP) #convert from string to json
-    nest_index = int(MDP['nest'])
-    target_indices = [int(x[0]) for x in MDP['targets']]
+    MRP = loads(MRP) #convert from string to json
+    nest_index = int(MRP['nest'])
+    target_indices = [int(x[0]) for x in MRP['targets']]
 
     import gym
 
@@ -55,7 +55,7 @@ def initialise_gym(size, MDP, is_stochastic, respiration_reward, stationary_rewa
 
     wrapped_env = AgentReward(env, size, nest_index, target_indices, max_episode_steps+1, respiration_reward=respiration_reward, stationary_reward=stationary_reward, revisit_inactive_target_reward=revisit_inactive_target_reward, change_in_orientation_reward=change_in_orientation_reward)
 
-    wrapped_env.update_probability_matrix(MDP)
+    wrapped_env.update_probability_matrix(MRP)
     
     return wrapped_env
 

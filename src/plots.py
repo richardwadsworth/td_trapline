@@ -328,7 +328,7 @@ def plot_route(experiment_name, artifact_path, fig, ax, size, nest, targets, rou
     plt.pause(0.0000000001)
 
 
-def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_experiment, MDP, route_count_for_experiment, optimal_trapline, optimal_trapline_reversed):
+def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_experiment, MRP, route_count_for_experiment, optimal_trapline, optimal_trapline_reversed):
 
     LABEL_NO_ROUTE_FOUND = 'Invalid Route'
 
@@ -430,7 +430,7 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
 
         
         
-        plot_route(experiment_name, artifact_path, fig2, ax, MDP["size"],MDP["nest"], optimal_trapline, route, route_type, str(label))
+        plot_route(experiment_name, artifact_path, fig2, ax, MRP["size"],MRP["nest"], optimal_trapline, route, route_type, str(label))
 
     plt.subplots_adjust(left=0.1, right=0.9, top=0.86, bottom=0.15)
     plt.pause(0.00000000001)

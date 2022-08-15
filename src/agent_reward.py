@@ -30,11 +30,11 @@ class AgentReward(gym.Wrapper):
         self.goal_rewards = {key: {'step_count':-1} for (key) in target_indices} # set default rewards
 
 
-    def update_probability_matrix(self, MDP):
+    def update_probability_matrix(self, MRP):
         """
         overwrite the default rewards
         """
-        for R in MDP['targets']:
+        for R in MRP['targets']:
             index, reward = R
             for i in range(self.env.observation_space[0].n):
                 for j in range(self.env.action_space.n):

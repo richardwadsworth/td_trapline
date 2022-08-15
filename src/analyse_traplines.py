@@ -30,15 +30,15 @@ artifact_path = "sussex/Dissertation/artifacts"
 data, sample_rate = get_experiment_runs_data(experiment_name) 
 all_run_sample_episodes_in_experiment = data["observations"]
 all_run_sample_done_in_experiment = data["done"]
-MDP = data["MDP"]
+MRP = data["MRP"]
 
 # pickle.dump( all_run_sample_episodes_in_experiment, open( "all_run_sample_episodes_in_experiment.p", "wb" ) )
 # pickle.dump( all_run_sample_done_in_experiment, open( "all_run_sample_done_in_experiment.p", "wb" ) )
-# pickle.dump( MDP, open( "all_MDP.p", "wb" ) )
+# pickle.dump( MRP, open( "all_MRP.p", "wb" ) )
 
 # all_run_sample_episodes_in_experiment = pickle.load( open( "all_run_sample_episodes_in_experiment.p", "rb" ) )
 # all_run_sample_done_in_experiment = pickle.load( open( "all_run_sample_done_in_experiment.p", "rb" ) )
-# MDP = pickle.load( open( "all_MDP.p", "rb" ) )
+# MRP = pickle.load( open( "all_MRP.p", "rb" ) )
 
 
 def get_route_index_from_observation(route_observations):
@@ -73,8 +73,8 @@ def get_modal_target_sequence_for_run(optimal_trapline, C_score_index, routes):
 num_runs_in_experiment = all_run_sample_episodes_in_experiment.shape[0]
 num_sample_episodes_per_run = all_run_sample_episodes_in_experiment.shape[1]
 
-# get the optimal trapline and its reverse from the MDP.  
-optimal_trapline_master, optimal_trapline_reversed_master = get_optimal_trapline_for_diamond_array(MDP["targets"])
+# get the optimal trapline and its reverse from the MRP.  
+optimal_trapline_master, optimal_trapline_reversed_master = get_optimal_trapline_for_diamond_array(MRP["targets"])
 
 SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_C_SCORE =5
 SLIDING_WINDOW_SIZE_USED_FOR_COMPARING_ROUTE_SIMILARITY = 2
@@ -96,7 +96,7 @@ for run_index in range(num_runs_in_experiment):
     run_episodes_routes = get_route_index_from_observation(run_episodes_route_observations) #extract the route indexes from the route observations
 
     # get thw C score index for this run
-    C_score_index, run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted = get_C_scores_index_for_run(MDP["size"], SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_C_SCORE, sliding_sequence_used_for_route_similarity, run_episodes_routes, C_SCORE_STABILITY_THRESHOLD)
+    C_score_index, run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted = get_C_scores_index_for_run(MRP["size"], SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_C_SCORE, sliding_sequence_used_for_route_similarity, run_episodes_routes, C_SCORE_STABILITY_THRESHOLD)
     
     # save the index value and smoothed  scores
     route_c_scores.append((run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted))
@@ -178,12 +178,12 @@ def plot_target_sequence_length_distribution(experiment_name, artifact_path, are
     plt.pause(0.00000000001)
 
   
-plot_target_sequence_length_distribution(experiment_name, artifact_path, MDP["size"], optimal_trapline_master, df_route_count_for_experiment)
+plot_target_sequence_length_distribution(experiment_name, artifact_path, MRP["size"], optimal_trapline_master, df_route_count_for_experiment)
 
 plot_c_Scores(experiment_name, artifact_path, sample_rate, results["c_score_indexes"], results["c_score_indexes_rate_of_change"])
 
 plot_c_score_stability_distribution(experiment_name, artifact_path, sample_rate, C_SCORE_STABILITY_THRESHOLD, list(results['c_score_stability_index']))
 
-plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_experiment, MDP, df_route_count_for_experiment, optimal_trapline_master, optimal_trapline_reversed_master)
+plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_experiment, MRP, df_route_count_for_experiment, optimal_trapline_master, optimal_trapline_reversed_master)
 
 plt.show()
