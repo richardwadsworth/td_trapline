@@ -90,21 +90,39 @@ class Test_Distance(unittest.TestCase):
             distance2 = get_manhattan_distance(size, route2)
             self.assertEqual(distance1, distance2)
 
+            # medium positive array
             size =20
             route1=[x[0] for x in [
-                    (map_coord_to_index(size, 9, 4),1.0), 
-                    (map_coord_to_index(size, 10, 6),1.0),
-                    (map_coord_to_index(size, 10, 9),1.0),
-                    (map_coord_to_index(size, 10, 12),1.0),
-                    (map_coord_to_index(size, 10, 15),1.0),
-                    (map_coord_to_index(size, 9, 18),1.0),
-                    (map_coord_to_index(size, 8, 15),1.0),
-                    (map_coord_to_index(size, 8, 12),1.0),
-                    (map_coord_to_index(size, 8, 9),1.0),
-                    (map_coord_to_index(size, 8, 6),1.0)
+                    (map_coord_to_index(size, 10, 4),1.0), 
+                    (map_coord_to_index(size, 13, 6),1.0),
+                    (map_coord_to_index(size, 13, 9),1.0),
+                    (map_coord_to_index(size, 13, 12),1.0),
+                    (map_coord_to_index(size, 13, 15),1.0),
+                    (map_coord_to_index(size, 10, 17),1.0),
+                    (map_coord_to_index(size, 7, 15),1.0),
+                    (map_coord_to_index(size, 7, 12),1.0),
+                    (map_coord_to_index(size, 7, 9),1.0),
+                    (map_coord_to_index(size, 7, 6),1.0)
                     ]]
             distance1 = get_manhattan_distance(size, route1)
-            1==1
+            self.assertEqual(33, distance1)
+
+            # medium negative array
+            size =20
+            route1=[x[0] for x in [
+                    (map_coord_to_index(size, 10, 4),1.0), 
+                    (map_coord_to_index(size, 11, 7),1.0),
+                    (map_coord_to_index(size, 11, 10),1.0),
+                    (map_coord_to_index(size, 11, 13),1.0),
+                    (map_coord_to_index(size, 11, 16),1.0),
+                    (map_coord_to_index(size, 10, 19),1.0),
+                    (map_coord_to_index(size, 9, 16),1.0),
+                    (map_coord_to_index(size, 9, 13),1.0),
+                    (map_coord_to_index(size, 9, 10),1.0),
+                    (map_coord_to_index(size, 9, 7),1.0)
+                    ]]
+            distance1 = get_manhattan_distance(size, route1)
+            self.assertEqual(30, distance1)
 
 
 unittest.main('test_manhattan', argv=[''], verbosity=2, exit=False)

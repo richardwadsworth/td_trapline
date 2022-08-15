@@ -41,7 +41,7 @@ score_softmax_20_mean = df.groupby(by=['params_hash'])['score_softmax_last_20'].
 
 #print out the best average score_softmax_20_mean
 
-def get_best_average(column, column_name):
+def get_best_average(df, column, column_name):
 
     mean_max =  column.max()
     param_hash_id_column_max =  column.idxmax()
@@ -55,9 +55,9 @@ def get_best_average(column, column_name):
 
     return param_hash_id_column_max, mean_max
 
-score_softmax_mean_param_set_hash, score_softmax_mean_param_set_score = get_best_average(score_softmax_mean, "score_softmax_mean")
-score_softmax_5_mean_param_set_hash, score_softmax_5_mean_param_set_score = get_best_average(score_softmax_5_mean, "score_softmax_5_mean")
-score_softmax_20_mean_param_set_hash, score_softmax_20_mean_param_set_score = get_best_average(score_softmax_20_mean, "score_softmax_20_mean")
+score_softmax_mean_param_set_hash, score_softmax_mean_param_set_score = get_best_average(df, score_softmax_mean, "score_softmax_mean")
+score_softmax_5_mean_param_set_hash, score_softmax_5_mean_param_set_score = get_best_average(df, score_softmax_5_mean, "score_softmax_5_mean")
+score_softmax_20_mean_param_set_hash, score_softmax_20_mean_param_set_score = get_best_average(df, score_softmax_20_mean, "score_softmax_20_mean")
 
 print("Do the param set hashes match.  If so one set of config generated the best overall scores.")
 

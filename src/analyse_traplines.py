@@ -22,14 +22,12 @@ from c_score import get_C_scores_index_for_run
  
 artifact_path = "sussex/Dissertation/artifacts"
 
-#experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka_100_runs" #best 10 positive chittka, 200 episodes, 100 runs
-#experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka_100_runs" #best 10 negative chittka, 200 episodes, 100 runs invalid
-experiment_name = "analyse_e38d5bf241274c9483e7c536a87a40a2_10_medium_negative_array_chittka_gs_100_runs" #best 10 negative chittka, 200 episodes, 100 runs
-#experiment_name = "analyse_e38d5bf241274c9483e7c536a87a40a2_10_medium_negative_array_chittka_gs_1000_runs" #best 10 negative chittka, 200 episodes, 1000 runs
 
+#experiment_name = "analyse_e38d5bf241274c9483e7c536a87a40a2_10_medium_negative_array_chittka_gs_100_runs" #best 10 negative chittka, 200 episodes, 100 runs
+experiment_name = "analyse_e38d5bf241274c9483e7c536a87a40a2_10_medium_negative_array_chittka_gs_1000_runs" #best 10 negative chittka, 200 episodes, 1000 runs
 
-#experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka_1000_runs" #best 10 positive chittka, 200 episodes, 1000 runs
-#experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka_1000_runs" #best 10 negative chittka, 200 episodes, 1000 runs
+#experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka_gs_100_runs" #best 10 positive chittka, 200 episodes, 100 runs
+#experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka_gs_1000_runs" #best 10 positive chittka, 200 episodes, 1000 runs
 
 data, sample_rate = get_experiment_runs_data(experiment_name) 
 all_run_sample_episodes_in_experiment = data["observations"]
@@ -138,22 +136,50 @@ for i in range (len(df_route_count_for_experiment)):
 
 df_route_count_for_experiment['sequence_manhattan_length'] = distances
 
-# distances = []
-# for i in range (len(df_route_count_for_experiment)):
-#     row = df_route_count_for_experiment.iloc[i]
-#     #calculate the manhattan length of this target sequence
-#     distance = get_euclidean_distance(17, row['route'])
-#     distances.append(distance)
+import seaborn as sns
 
-# df_route_count_for_experiment['sequence_euclidean_length'] = distances
+def plot_target_sequence_length_distribution(experiment_name, artifact_path, route_results):
 
+    df = route_results.groupby(['sequence_manhattan_length']).sum()
+    
+    filepath = os.path.join(artifact_path, experiment_name + '_sequence_manhattan_length')
+    df.to_csv(filepath)
+    
+    # bit of a hack as I can't work out how to plot a histogram of grouped data!
+    # reformatting for histogram
+    hist_list = []
+    for i in df.index:
+        if df.loc[i].name != 0:
+            hist_list = hist_list + [df.loc[i].name] * df.loc[i, 'count']
 
-from c_score import get_c_score_prime
+    fig, ax = plt.subplots()
+    sns.set_theme(style="whitegrid")
 
-plot_c_Scores(experiment_name, sample_rate, results["c_score_indexes"], results["c_score_indexes_rate_of_change"])
+    bins=np.arange(20, 100)
+    sns.histplot(hist_list, bins=bins, ax=ax)
+    
+    
+    ax.set_xlabel('Target Sequence Length')
+    ax.set_ylabel('Count')
+    ax.set_title(experiment_name, fontsize=10)
 
-plot_c_score_stability_distribution(experiment_name, sample_rate, C_SCORE_STABILITY_THRESHOLD, list(results['c_score_stability_index']))
+    ax.xaxis.get_ticklocs(minor=True)
+    ax.minorticks_on()
+    ax.grid()
 
-plot_trapline_distribution(experiment_name, num_runs_in_experiment, MDP, df_route_count_for_experiment, optimal_trapline_master, optimal_trapline_reversed_master)
+    fig.suptitle("Target Sequence Length Histogram")
+    fig.savefig(filepath + '.png')
+
+    #plt.subplots_adjust(left=0.1, right=0.9, top=0.83, bottom=0.15)
+    plt.pause(0.00000000001)
+
+  
+plot_target_sequence_length_distribution(experiment_name, artifact_path, df_route_count_for_experiment)
+
+# plot_c_Scores(experiment_name, sample_rate, results["c_score_indexes"], results["c_score_indexes_rate_of_change"])
+
+# plot_c_score_stability_distribution(experiment_name, sample_rate, C_SCORE_STABILITY_THRESHOLD, list(results['c_score_stability_index']))
+
+# plot_trapline_distribution(experiment_name, num_runs_in_experiment, MDP, df_route_count_for_experiment, optimal_trapline_master, optimal_trapline_reversed_master)
 
 plt.show()

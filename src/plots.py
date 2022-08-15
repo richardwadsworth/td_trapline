@@ -357,8 +357,10 @@ def plot_trapline_distribution(experiment_name, num_runs_in_experiment, MDP, rou
     
     ax.set_xlabel('Routes')
 
-    ax.set_yscale('log')
+    
     ax.set_ylim(0, num_runs_in_experiment)
+
+    ax.set_yscale('log')
     ax.set_ylabel('Logarithmic Count of Routes')
 
 

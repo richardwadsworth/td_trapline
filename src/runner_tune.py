@@ -7,7 +7,7 @@ from runner_utils import train_parallel
 from mdp import *
 
 # parameters for sarsa(lambda)
-size, MDP, experiment_name = get_10_medium_negative_array_chittka()
+size, MDP, experiment_name = get_10_medium_positive_array_chittka()
 experiment_name = experiment_name + '_gs'
 
 episodes = [200]
@@ -30,7 +30,7 @@ change_in_orientation_reward = [0]#-stationary_reward*0.5 #negative reward if or
     
 if __name__ == "__main__":
 
-    train_parallel(3,
+    train_parallel(10,
                     size, 
                     MDP, 
                     experiment_name, 
