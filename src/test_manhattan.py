@@ -90,4 +90,21 @@ class Test_Distance(unittest.TestCase):
             distance2 = get_manhattan_distance(size, route2)
             self.assertEqual(distance1, distance2)
 
+            size =20
+            route1=[x[0] for x in [
+                    (map_coord_to_index(size, 9, 4),1.0), 
+                    (map_coord_to_index(size, 10, 6),1.0),
+                    (map_coord_to_index(size, 10, 9),1.0),
+                    (map_coord_to_index(size, 10, 12),1.0),
+                    (map_coord_to_index(size, 10, 15),1.0),
+                    (map_coord_to_index(size, 9, 18),1.0),
+                    (map_coord_to_index(size, 8, 15),1.0),
+                    (map_coord_to_index(size, 8, 12),1.0),
+                    (map_coord_to_index(size, 8, 9),1.0),
+                    (map_coord_to_index(size, 8, 6),1.0)
+                    ]]
+            distance1 = get_manhattan_distance(size, route1)
+            1==1
+
+
 unittest.main('test_manhattan', argv=[''], verbosity=2, exit=False)
