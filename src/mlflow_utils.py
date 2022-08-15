@@ -22,6 +22,8 @@ def get_experiment_runs_data(experiment_name):
     all_performances = []
     all_runs = []
     all_metrics = []
+    all_params = []
+    all_run_ids = []
 
     client = MlflowClient()
             
@@ -41,8 +43,9 @@ def get_experiment_runs_data(experiment_name):
                 performance = result["performance"]
                 done = result["done"]
                 plot_rate = int(run.data.params["plot_rate"])
-                metrics = run.data.metrics
-                all_metrics.append(metrics)
+                all_run_ids.append(run.info.run_id)
+                all_params.append(run.data.params)
+                all_metrics.append(run.data.metrics)
                 all_observations.append(observations)
                 all_performances.append(performance)
                 all_runs.append(done)
@@ -53,7 +56,9 @@ def get_experiment_runs_data(experiment_name):
             "performance": np.array(all_performances),
             "done": np.array(all_runs),
             "MDP": MDP,
-            "metrics" : np.array(all_metrics,dtype=object)
+            "metrics" : np.array(all_metrics,dtype=object),
+            "params" : np.array(all_params,dtype=object),
+            "run_ids" : np.array(all_run_ids , dtype=str)
         }
 
 
