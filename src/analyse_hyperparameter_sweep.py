@@ -7,9 +7,8 @@ import seaborn as sns
 from mlflow_utils import get_experiment_runs_data
  
 
-#experiment_name = "10_medium_negative_array_chittka_gs" # 10 negative chittka
-experiment_name = "10_medium_positive_array_chittka_gs" #10 positive chittka
-
+experiment_name = "10_medium_negative_array_ohashi_gs" # 10 negative ohashi
+#experiment_name = "10_medium_positive_array_ohashi_gs" #10 positive ohashi
 
 data, plot_rate = get_experiment_runs_data(experiment_name) 
 

@@ -5,6 +5,7 @@ from matplotlib.collections import LineCollection
 import pandas as pd
 import seaborn as sns
 from json import loads
+import os
 
 from enum import Enum
 from IPython.display import display, clear_output
@@ -268,7 +269,7 @@ def plot_traffic_greyscale(env, fig, ax, xs_target, ys_target, data, title):
     clear_output(wait = True)
     plt.pause(0.0000000001)
 
-def plot_route( fig, ax, size, nest, targets, route, route_type, subtitle):
+def plot_route(experiment_name, artifact_path, fig, ax, size, nest, targets, route, route_type, subtitle):
     
     remove_axis_ticks(ax)
 
@@ -319,10 +320,15 @@ def plot_route( fig, ax, size, nest, targets, route, route_type, subtitle):
     with contextlib.redirect_stdout(None):
         display(fig)    
     clear_output(wait = True)
+
+    filepath = os.path.join(artifact_path, experiment_name + '_trapline_route_lookup')
+    fig.savefig(filepath + '.png')
+
+
     plt.pause(0.0000000001)
 
 
-def plot_trapline_distribution(experiment_name, num_runs_in_experiment, MDP, route_count_for_experiment, optimal_trapline, optimal_trapline_reversed):
+def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_experiment, MDP, route_count_for_experiment, optimal_trapline, optimal_trapline_reversed):
 
     LABEL_NO_ROUTE_FOUND = 'Invalid Route'
 
@@ -357,12 +363,9 @@ def plot_trapline_distribution(experiment_name, num_runs_in_experiment, MDP, rou
     
     ax.set_xlabel('Routes')
 
-    
-    ax.set_ylim(0, num_runs_in_experiment)
-
     ax.set_yscale('log')
+    ax.set_ylim(0, num_runs_in_experiment)
     ax.set_ylabel('Logarithmic Count of Routes')
-
 
 
     ax.grid()
@@ -383,8 +386,12 @@ def plot_trapline_distribution(experiment_name, num_runs_in_experiment, MDP, rou
             bar_list[i].set_color('b')
 
     ax.set_xticklabels(df['x-axis'], rotation = 90)
-    fig1.tight_layout()
     ax.grid()
+    fig1.tight_layout()
+    
+    filepath = os.path.join(artifact_path, experiment_name + '_trapline_routes')
+    fig1.savefig(filepath + '.png')
+
 
     # drop the route count with no discernable target based route found
     df = df.drop(df[df['x-axis'] == LABEL_NO_ROUTE_FOUND].index)
@@ -408,8 +415,7 @@ def plot_trapline_distribution(experiment_name, num_runs_in_experiment, MDP, rou
     fig2, axs = plt.subplots(plot_size, plot_size, figsize=(plot_size*3, plot_size*3))
     sns.set_theme(style="whitegrid")
     
-    fig2.suptitle("Trapline Lookup for Trapline Distribution by ID\n" + experiment_name)
-
+    fig2.suptitle("Trapline Lookup for Trapline Distribution by ID\n" + experiment_name, fontsize=10)
 
     axs = np.array(axs).reshape(-1)
 
@@ -424,12 +430,12 @@ def plot_trapline_distribution(experiment_name, num_runs_in_experiment, MDP, rou
 
         
         
-        plot_route(fig2, ax, MDP["size"],MDP["nest"], optimal_trapline, route, route_type, str(label))
+        plot_route(experiment_name, artifact_path, fig2, ax, MDP["size"],MDP["nest"], optimal_trapline, route, route_type, str(label))
 
     plt.subplots_adjust(left=0.1, right=0.9, top=0.86, bottom=0.15)
     plt.pause(0.00000000001)
 
-def plot_c_Scores(experiment_name, sample_rate, c_score_indexes, c_score_indexes_rate_of_change):
+def plot_c_Scores(experiment_name, artifact_path, sample_rate, c_score_indexes, c_score_indexes_rate_of_change):
     fig, (ax1, ax2) = plt.subplots(1,2, figsize=(15, 5))
     sns.set_theme(style="whitegrid")
 
@@ -469,9 +475,13 @@ def plot_c_Scores(experiment_name, sample_rate, c_score_indexes, c_score_indexes
     fig.suptitle("Route C Score by Episode\n" + experiment_name, fontsize=12)
 
     plt.subplots_adjust(left=0.1, right=0.9, top=0.83, bottom=0.15)
+
+    filepath = os.path.join(artifact_path, experiment_name + '_route_c_score')
+    fig.savefig(filepath + '.png')
+
     plt.pause(0.00000000001)
 
-def plot_c_score_stability_distribution(experiment_name, sample_rate, stability_threshold, c_score_indexes):
+def plot_c_score_stability_distribution(experiment_name, artifact_path, sample_rate, stability_threshold, c_score_indexes):
 
     fig, ax = plt.subplots()
     sns.set_theme(style="whitegrid")
@@ -486,4 +496,8 @@ def plot_c_score_stability_distribution(experiment_name, sample_rate, stability_
     ax.set_title(experiment_name, fontsize=10)
 
     plt.subplots_adjust(left=0.1, right=0.9, top=0.83, bottom=0.15)
+
+    filepath = os.path.join(artifact_path, experiment_name + '_c_score_stability')
+    fig.savefig(filepath + '.png')
+
     plt.pause(0.00000000001)

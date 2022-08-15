@@ -55,9 +55,9 @@ def get_3_medium_test_array():
     return size, dump_mdp(MDP), name
 
 
-def get_10_medium_positive_array_chittka():
+def get_10_medium_positive_array_ohashi():
     # medium positive array, offest nest, based on chitka et al 2013
-    name = "10_medium_positive_array_chittka"
+    name = "10_medium_positive_array_ohashi"
     size = 21
     MDP = {"size": size,
             "nest":map_coord_to_index(size, 10, 2),
@@ -77,9 +77,9 @@ def get_10_medium_positive_array_chittka():
     return size, dump_mdp(MDP), name
 
 
-def get_10_medium_negative_array_chittka():
+def get_10_medium_negative_array_ohashi():
     # medium negative array, offest nest, based on chitka et al 2013
-    name = "10_medium_negative_array_chittka"
+    name = "10_medium_negative_array_ohashi"
     size = 21
     MDP = {"size": size,
             "nest":map_coord_to_index(size, 10, 2),

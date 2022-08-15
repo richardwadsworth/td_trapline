@@ -12,10 +12,10 @@ import mlflow
 
 if __name__ == "__main__":
 
-    NUM_REPEAT_RUNS = 1000
+    NUM_REPEAT_RUNS = 100
     
-    run_id = "3cb6d9c1e8c646188668a059a9190d6c" # positive 10
-    #run_id = "" # negative 10
+    #run_id = "3cb6d9c1e8c646188668a059a9190d6c" # positive 10
+    run_id = "d7f2c7c777164160bd5ac6bbfefb0a71" # negative 10
     
     run = mlflow.get_run(run_id) #best 10 positive, 250 episodes
 

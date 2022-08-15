@@ -7,11 +7,8 @@ from mlflow_utils import get_experiment_runs_data
 import seaborn as sns
 sns.set_theme(style="whitegrid")
 
-experiment_name = "analyse_e38d5bf241274c9483e7c536a87a40a2_10_medium_negative_array_chittka_gs_100_runs" #best 10 negative chittka, 200 episodes, 100 runs
-#experiment_name = "analyse_e38d5bf241274c9483e7c536a87a40a2_10_medium_negative_array_chittka_gs_1000_runs" #best 10 negative chittka, 200 episodes, 1000 runs
-
-#experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka_gs_100_runs" #best 10 positive chittka, 200 episodes, 100 runs
-#experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka_gs_1000_runs" #best 10 positive chittka, 200 episodes, 1000 runs
+#experiment_name = "analyse_d7f2c7c777164160bd5ac6bbfefb0a71_10_medium_negative_array_ohashi_gs_1000_runs" #best 10 negative ohashi, 200 episodes, 1000 runs
+experiment_name = "analyse_3cb6d9c1e8c646188668a059a9190d6c_10_medium_positive_array_ohashi_gs_1000_runs" #best 10 positive ohashi, 200 episodes, 1000 runs
 
 
 data, plot_rate = get_experiment_runs_data(experiment_name) 

@@ -1,17 +1,18 @@
-import numpy as np
 from gym_utils import register_gym
-
 register_gym()
-
 from runner_utils import train_parallel
 from mdp import *
 
-# parameters for sarsa(lambda)
-size, MDP, experiment_name = get_10_medium_positive_array_chittka()
-experiment_name = experiment_name + '_gs'
+######################################################
+# hyper-parameters for Actor Critic TD(lambda) model
+#
+# START
+#
+######################################################
+mdp_function = get_10_medium_negative_array_ohashi() # or get_10_medium_positive_array_ohashi()
 
 episodes = [200]
-steps = [100]
+steps = [200]
 
 gamma =  [0.7, 0.8, 0.9] # discount factor
 alpha_actor = [0.7] # actor learning rate
@@ -27,7 +28,17 @@ respiration_reward = [-0.01] # -1/np.square(size) # -1/(steps+(steps*0.1)) # neg
 stationary_reward = [-0.01] # respiration_reward*2 # positive reward for moving, to discourage not moving
 revisit_inactive_target_reward = [-0.0] # negative reward for revisiting an inactive target (i.e. one that has already been visited)
 change_in_orientation_reward = [0]#-stationary_reward*0.5 #negative reward if orientation changes
-    
+
+######################################################
+#
+# END
+#
+# hyper-parameters for Actor Critic TD(lambda) model
+######################################################
+
+size, MDP, experiment_name = mdp_function
+experiment_name = experiment_name + '_gs' # gs for grid search
+
 if __name__ == "__main__":
 
     train_parallel(10,
