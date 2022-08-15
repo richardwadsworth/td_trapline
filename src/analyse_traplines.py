@@ -23,23 +23,20 @@ from c_score import get_C_scores_index_for_run
 
 #experiment_name = "analyse_d7f2c7c777164160bd5ac6bbfefb0a71_10_medium_negative_array_ohashi_gs_1000_runs" #best 10 negative ohashi, 200 episodes, 1000 runs
 #experiment_name = "analyse_3cb6d9c1e8c646188668a059a9190d6c_10_medium_positive_array_ohashi_gs_1000_runs" #best 10 positive ohashi, 200 episodes, 1000 runs
-experiment_name = "analyse_03b5a2052703466a9f88fa1f89dc44db_10_negative_array_ohashi_gs_1000_runs"
+experiment_name = "analyse_bc6e223900244462b7898b0b511a9a4b_mrp_10_negative_array_ohashi_gs_1000_runs"
 
 artifact_path = "sussex/Dissertation/artifacts"
 
-data, sample_rate = get_experiment_runs_data(experiment_name) 
+# data = get_experiment_runs_data(experiment_name) 
+
+# use pickle to cache data to speed up r&D
+# pickle.dump( data, open( experiment_name + "_data.p", "wb" ) )
+data = pickle.load( open( experiment_name + "_data.p", "rb" ) )
+
 all_run_sample_episodes_in_experiment = data["observations"]
 all_run_sample_done_in_experiment = data["done"]
 MRP = data["MRP"]
-
-# pickle.dump( all_run_sample_episodes_in_experiment, open( "all_run_sample_episodes_in_experiment.p", "wb" ) )
-# pickle.dump( all_run_sample_done_in_experiment, open( "all_run_sample_done_in_experiment.p", "wb" ) )
-# pickle.dump( MRP, open( "all_MRP.p", "wb" ) )
-
-# all_run_sample_episodes_in_experiment = pickle.load( open( "all_run_sample_episodes_in_experiment.p", "rb" ) )
-# all_run_sample_done_in_experiment = pickle.load( open( "all_run_sample_done_in_experiment.p", "rb" ) )
-# MRP = pickle.load( open( "all_MRP.p", "rb" ) )
-
+sample_rate = int(data["params"][0]["plot_rate"])
 
 def get_route_index_from_observation(route_observations):
     route_indexes = [[observation[0] for observation in observations] for observations in route_observations]

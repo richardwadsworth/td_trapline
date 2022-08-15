@@ -1,7 +1,8 @@
 import unittest
 from utils import map_coord_to_index
 from manhattan import get_manhattan_similarity, get_manhattan_distance
-
+from mrp import *
+from json import loads
 class Test_Map(unittest.TestCase):
 
     def test_manhattan_similarity_different_length(self):
@@ -89,40 +90,23 @@ class Test_Distance(unittest.TestCase):
             distance1 = get_manhattan_distance(size, route1)
             distance2 = get_manhattan_distance(size, route2)
             self.assertEqual(distance1, distance2)
-
-            # medium positive array
-            size =20
-            route1=[x[0] for x in [
-                    (map_coord_to_index(size, 10, 4),1.0), 
-                    (map_coord_to_index(size, 13, 6),1.0),
-                    (map_coord_to_index(size, 13, 9),1.0),
-                    (map_coord_to_index(size, 13, 12),1.0),
-                    (map_coord_to_index(size, 13, 15),1.0),
-                    (map_coord_to_index(size, 10, 17),1.0),
-                    (map_coord_to_index(size, 7, 15),1.0),
-                    (map_coord_to_index(size, 7, 12),1.0),
-                    (map_coord_to_index(size, 7, 9),1.0),
-                    (map_coord_to_index(size, 7, 6),1.0)
-                    ]]
-            distance1 = get_manhattan_distance(size, route1)
-            self.assertEqual(33, distance1)
-
-            # medium negative array
-            size =20
-            route1=[x[0] for x in [
-                    (map_coord_to_index(size, 10, 4),1.0), 
-                    (map_coord_to_index(size, 11, 7),1.0),
-                    (map_coord_to_index(size, 11, 10),1.0),
-                    (map_coord_to_index(size, 11, 13),1.0),
-                    (map_coord_to_index(size, 11, 16),1.0),
-                    (map_coord_to_index(size, 10, 19),1.0),
-                    (map_coord_to_index(size, 9, 16),1.0),
-                    (map_coord_to_index(size, 9, 13),1.0),
-                    (map_coord_to_index(size, 9, 10),1.0),
-                    (map_coord_to_index(size, 9, 7),1.0)
-                    ]]
-            distance1 = get_manhattan_distance(size, route1)
-            self.assertEqual(30, distance1)
-
+            
+    def test_get_manhattan_distance_positive(self):
+        
+        # positive array
+        mrp = loads(mrp_10_positive_array_ohashi())
+        size = mrp["size"]
+        route1=[x[0] for x in mrp["targets"]]
+        distance1 = get_manhattan_distance(size, route1)
+        self.assertEqual(distance1, mrp["optimal_sequence_length"])
+        
+    def test_get_manhattan_distance_negative(self):
+        
+        # negative array
+        mrp = loads(mrp_10_negative_array_ohashi())
+        size = mrp["size"]
+        route1=[x[0] for x in mrp["targets"]]
+        distance1 = get_manhattan_distance(size, route1)
+        self.assertEqual(27, mrp["optimal_sequence_length"])
 
 unittest.main('test_manhattan', argv=[''], verbosity=2, exit=False)

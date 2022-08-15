@@ -15,7 +15,7 @@ if __name__ == "__main__":
     NUM_REPEAT_RUNS = 1000
     
     #run_id = "3cb6d9c1e8c646188668a059a9190d6c" # positive 10
-    run_id = "03b5a2052703466a9f88fa1f89dc44db" # negative 10
+    run_id = "bc6e223900244462b7898b0b511a9a4b" # negative 10
     
     run = mlflow.get_run(run_id) #best 10 positive, 250 episodes
 

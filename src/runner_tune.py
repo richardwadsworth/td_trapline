@@ -12,6 +12,7 @@ from gym_utils import register_gym
 register_gym()
 from runner_utils import train_parallel
 from mrp import *
+from json import loads, dumps
 
 '''
 ######################################################
@@ -24,7 +25,7 @@ from mrp import *
 mrp_function = mrp_10_negative_array_ohashi() # or mrp_10_positive_array_ohashi()
 
 episodes = [200] # range of total number of episodes in training run
-steps = [200] # range of  episode lengths
+steps = [100] # range of  episode lengths
 
 gamma =  [0.7, 0.8, 0.9] # discount factor
 alpha_actor = [0.7] # actor learning rate
@@ -55,14 +56,14 @@ change_in_orientation_reward = [0]#-stationary_reward*0.5 #negative reward if or
 ######################################################
 '''
 
-size, MRP, experiment_name = mrp_function
-experiment_name = experiment_name + '_gs' # gs for grid search
+MRP = loads(mrp_function)
+experiment_name = MRP["name"] + '_gs' # gs for grid search
 
 if __name__ == "__main__":
 
     train_parallel(10,
-                    size, 
-                    MRP, 
+                    MRP["size"], 
+                    dumps(MRP), 
                     experiment_name, 
                     respiration_reward,
                     stationary_reward,

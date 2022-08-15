@@ -7,9 +7,10 @@ register_gym(True)
 from runner_utils import train_fnn
 from plots import PlotType
 from mrp import *
-
+from json import loads
 # parameters for sarsa(lambda)
-size, MRP, _ = get_10_medium_negative_array_ohashi()
+MRP = mrp_10_negative_array_ohashi()
+
 rng = np.random.default_rng() # random number generator
 
 episodes = 200
@@ -33,6 +34,8 @@ is_stochastic = False
 plot_rate = 5 # rate at which to plot predictions
 record_stats = True
 do_in_episode_plots=PlotType.Full 
+
+size = loads(MRP["size"])
 
 if __name__ == "__main__":
 

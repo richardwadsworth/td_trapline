@@ -42,7 +42,6 @@ def get_experiment_runs_data(experiment_name):
                 observations = result["observations"]
                 performance = result["performance"]
                 done = result["done"]
-                plot_rate = int(run.data.params["plot_rate"])
                 all_run_ids.append(run.info.run_id)
                 all_params.append(run.data.params)
                 all_metrics.append(run.data.metrics)
@@ -62,4 +61,4 @@ def get_experiment_runs_data(experiment_name):
         }
 
 
-    return data, plot_rate
+    return data
