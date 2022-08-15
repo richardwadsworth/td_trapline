@@ -140,7 +140,7 @@ class Test_Smoothing(unittest.TestCase):
         routes.append([0,1,5,6,10,15]) # route 7 = route 1
 
         similarity_sequence = get_sliding_window_sequence(2,len(routes))
-        raw_similarity = get_routes_similarity(16, similarity_sequence, routes)
+        raw_similarity = get_routes_similarity(16, 2, similarity_sequence, routes)
 
         smoothing_sequence = get_sliding_window_sequence(3,len(routes))
 

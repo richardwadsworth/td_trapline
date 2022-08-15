@@ -11,19 +11,21 @@ import matplotlib.pyplot as plt
 import pickle
 import pandas as pd
 import os
+from json import loads
 
+from  manhattan import get_manhattan_distance
 from mlflow_utils import get_experiment_runs_data
 from utils import get_sliding_window_sequence
-from trapline import get_optimal_trapline_for_diamond_array, get_routes_similarity, get_valid_target_sequence_from_route, RouteType
-from plots import plot_route, plot_trapline_distribution, plot_c_Scores, plot_c_score_stability_distribution
-from c_score import get_c_score_prime
+from trapline import get_optimal_trapline_for_diamond_array, get_valid_target_sequence_from_route, RouteType
+from plots import plot_trapline_distribution, plot_c_Scores, plot_c_score_stability_distribution
+from c_score import get_C_scores_index_for_run
  
 artifact_path = "sussex/Dissertation/artifacts"
 
 #experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka_100_runs" #best 10 positive chittka, 200 episodes, 100 runs
 #experiment_name = "analyse_dbe7b192cd70476dbd59e2e65153c1a5_10_medium_negative_array_chittka_100_runs" #best 10 negative chittka, 200 episodes, 100 runs invalid
-#experiment_name = "analyse_e38d5bf241274c9483e7c536a87a40a2_10_medium_negative_array_chittka_gs_100_runs" #best 10 negative chittka, 200 episodes, 100 runs
-experiment_name = "analyse_e38d5bf241274c9483e7c536a87a40a2_10_medium_negative_array_chittka_gs_1000_runs" #best 10 negative chittka, 200 episodes, 1000 runs
+experiment_name = "analyse_e38d5bf241274c9483e7c536a87a40a2_10_medium_negative_array_chittka_gs_100_runs" #best 10 negative chittka, 200 episodes, 100 runs
+#experiment_name = "analyse_e38d5bf241274c9483e7c536a87a40a2_10_medium_negative_array_chittka_gs_1000_runs" #best 10 negative chittka, 200 episodes, 1000 runs
 
 
 #experiment_name = "analyse_32bed68ecebc40849485df2ad8d5958f_10_medium_positive_array_chittka_1000_runs" #best 10 positive chittka, 200 episodes, 1000 runs
@@ -47,46 +49,6 @@ MDP = data["MDP"]
 def get_route_index_from_observation(route_observations):
     route_indexes = [[observation[0] for observation in observations] for observations in route_observations]
     return route_indexes
-
-def moving_average(x, w):
-        return np.convolve(x, np.ones(w), 'valid') / w
-
-def get_C_scores_index_for_run(size, sliding_window_sequence, routes, threshold=2):
-
-    run_episodes_route_similarity_raw = get_routes_similarity(size, sliding_window_sequence, routes)
-
-    run_episodes_route_similarity_smoothed = list(moving_average(run_episodes_route_similarity_raw,SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_C_SCORE))
-
-    run_episodes_route_similarity_prime =  get_c_score_prime(run_episodes_route_similarity_smoothed)
-    
-    # run_episodes_route_similarity_smoothed
-
-    
-    #look for the last index where the smoothed C score has dropped below the threshold
-    reversed_graph = run_episodes_route_similarity_prime.copy()
-    reversed_graph.reverse()
-
-    try:
-        # rate of change in similarity threshold 
-        temp_index = list(map(lambda i: i>threshold or i<-threshold, reversed_graph)).index(True)
-    except ValueError as e:
-        if e.args[0] == "True is not in list": # no values are within the threshold
-            temp_index=-1
-        else:
-            raise e
-
-    if temp_index == 0: # the last value (first value in the reverse list) in the list is outside the threshold
-        index = -1
-    elif temp_index == -1: # all values are within the threshold
-        index = 0
-    else:
-        index = len(run_episodes_route_similarity_prime) - temp_index
-        index = index - 2 # to account for the 2 nans added below
-
-    run_episodes_route_similarity_adjusted  = [np.nan, np.nan] + run_episodes_route_similarity_smoothed + [np.nan, np.nan]
-    run_episodes_route_similarity_prime_adjusted = [np.nan, np.nan] +  run_episodes_route_similarity_prime + [np.nan, np.nan]
-
-    return index, run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted
 
 
 def get_modal_target_sequence_for_run(optimal_trapline, C_score_index, routes): 
@@ -139,7 +101,7 @@ for run_index in range(num_runs_in_experiment):
     run_episodes_routes = get_route_index_from_observation(run_episodes_route_observations) #extract the route indexes from the route observations
 
     # get thw C score index for this run
-    C_score_index, run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted = get_C_scores_index_for_run(MDP["size"], sliding_sequence_used_for_route_similarity, run_episodes_routes, C_SCORE_STABILITY_THRESHOLD)
+    C_score_index, run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted = get_C_scores_index_for_run(MDP["size"], SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_C_SCORE, sliding_sequence_used_for_route_similarity, run_episodes_routes, C_SCORE_STABILITY_THRESHOLD)
     
     # save the index value and smoothed  scores
     route_c_scores.append((run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted))
@@ -160,13 +122,13 @@ route_count_for_experiment = pd.Series(results["route"]).value_counts().sort_val
 #print(route_count_for_experiment)
 
 # reformat data frame for plotting
-from json import loads
+
 df_route_count_for_experiment = pd.DataFrame(route_count_for_experiment)
 df_route_count_for_experiment['count'] = df_route_count_for_experiment['route']
 df_route_count_for_experiment['route'] = [loads(d) for d in df_route_count_for_experiment.index.to_list()]
 df_route_count_for_experiment.index = np.arange(0, len(df_route_count_for_experiment))
 
-from  manhattan import get_manhattan_distance, get_euclidean_distance
+
 distances = []
 for i in range (len(df_route_count_for_experiment)):
     row = df_route_count_for_experiment.iloc[i]

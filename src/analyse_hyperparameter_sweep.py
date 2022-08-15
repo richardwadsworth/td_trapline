@@ -5,9 +5,6 @@ import pandas as pd
 import seaborn as sns
 
 from mlflow_utils import get_experiment_runs_data
-from utils import get_sliding_window_sequence
-from trapline import get_optimal_trapline_for_diamond_array, get_routes_similarity, get_valid_target_sequence_from_route, RouteType
-from plots import plot_route, plot_trapline_distribution
  
 
 #experiment_name = "10_medium_positive_array_chittka_hyperparameter_gridsearch" # 10 positive chittka

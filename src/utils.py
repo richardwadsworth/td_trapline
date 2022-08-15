@@ -8,6 +8,9 @@ def map_index_to_coord(size, index):
         y= int(np.floor(index/size))
         return [x, y]
 
+def moving_average(x, w):
+        return np.convolve(x, np.ones(w), 'valid') / w
+
 def sliding_window(window_size, sequence):
     sliding_sequence = []
     for i in range(len(sequence) - window_size + 1):

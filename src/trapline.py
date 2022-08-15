@@ -1,8 +1,4 @@
-import numpy as np
-import pandas as pd
 from enum import Enum
-from utils import sliding_window
-from manhattan import get_manhattan_similarity
 
 class RouteType(Enum):
     Incomplete = 0 # not all targets found
@@ -117,33 +113,5 @@ def cluster_common_route_segments(route_1, route_2):
     return route_1_segments, route_2_segments
 
 
-def get_routes_similarity(arena_size, sliding_sequence, routes):
-    '''
-    determine the similarity of adjacent routes using the manhattan distance 
-    (L1 norm) between each adjacent clusters of common steps in each routes
-    '''
 
-    manhattan_distances = []
-    for window in sliding_sequence:
-        route_index1, route_index2 = window
-        route_1 = routes[route_index1]
-        route_2 = routes[route_index2]
-
-        #break routes up in clusters of commonality
-        route1_segments, route2_segments = cluster_common_route_segments(route_1, route_2)
-
-        # validate resultant clusters
-        if len(route1_segments) != len(route2_segments):
-            raise ValueError("Cluster segments are not the same length.  Route 1: {}.  Route 2:{}".format(route_1, route_2))
-
-        total_segmented_manhattan_distance = 0
-        for i, segment1 in enumerate(route1_segments):
-            segment2 = route2_segments[i]
-            
-            distance = get_manhattan_similarity(arena_size, segment1, segment2)
-            total_segmented_manhattan_distance += distance
-
-        manhattan_distances.append(total_segmented_manhattan_distance)
-
-    return manhattan_distances
 
