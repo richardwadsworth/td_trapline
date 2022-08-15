@@ -7,7 +7,7 @@ import seaborn as sns
 from mlflow_utils import get_experiment_runs_data
  
 
-experiment_name = "10_medium_negative_array_ohashi_gs" # 10 negative ohashi
+experiment_name = "10_negative_array_ohashi_gs" # 10 negative ohashi
 #experiment_name = "10_medium_positive_array_ohashi_gs" #10 positive ohashi
 
 data, plot_rate = get_experiment_runs_data(experiment_name) 
@@ -52,18 +52,18 @@ def get_best_average(df, column, column_name):
     print('Param Hash: {}'.format(param_hash_id_column_max))
     print('Param set: {}'.format(param_set))
 
-    return param_hash_id_column_max, mean_max
+    return run_id, mean_max
 
-score_softmax_mean_param_set_hash, score_softmax_mean_param_set_score = get_best_average(df, score_softmax_mean, "score_softmax_mean")
-score_softmax_5_mean_param_set_hash, score_softmax_5_mean_param_set_score = get_best_average(df, score_softmax_5_mean, "score_softmax_5_mean")
-score_softmax_20_mean_param_set_hash, score_softmax_20_mean_param_set_score = get_best_average(df, score_softmax_20_mean, "score_softmax_20_mean")
+score_softmax_mean_param_set_run_id, score_softmax_mean_param_set_score = get_best_average(df, score_softmax_mean, "score_softmax_mean")
+score_softmax_5_mean_param_set_run_id, score_softmax_5_mean_param_set_score = get_best_average(df, score_softmax_5_mean, "score_softmax_5_mean")
+score_softmax_20_mean_param_set_run_id, score_softmax_20_mean_param_set_score = get_best_average(df, score_softmax_20_mean, "score_softmax_20_mean")
 
 print("Do the param set hashes match.  If so one set of config generated the best overall scores.")
 
 print("Summary")
-print("score_softmax_mean: {}. Score: {}".format(score_softmax_mean_param_set_hash, score_softmax_mean_param_set_score))
-print("score_softmax_5_mean: {}. Score: {}".format(score_softmax_5_mean_param_set_hash, score_softmax_5_mean_param_set_score))
-print("score_softmax_20_mean: {}. Score: {}".format(score_softmax_20_mean_param_set_hash, score_softmax_20_mean_param_set_score))
+print("score_softmax_mean: Run ID: {} Score: {}".format(score_softmax_mean_param_set_run_id, score_softmax_mean_param_set_score))
+print("score_softmax_5_mean: Run ID: {} Score: {}".format(score_softmax_5_mean_param_set_run_id, score_softmax_5_mean_param_set_score))
+print("score_softmax_20_mean: Run ID: {} Score: {}".format(score_softmax_20_mean_param_set_run_id, score_softmax_20_mean_param_set_score))
 
 import seaborn as sns
 import numpy as np

@@ -9,7 +9,7 @@ dump_mrp  = lambda x : dumps(x)
 #       trapline (which can also be reversed).
 ##########################################################################
 
-def get_1_small_test_array():
+def mrp_1_small_test_array():
     # small neutral array, offest nest
     name = "1_small_test_array"
     size = 4
@@ -20,7 +20,7 @@ def get_1_small_test_array():
     return size, dump_mrp(MRP), name
 
 
-def get_1_medium_test_array():
+def mrp_1_medium_test_array():
     # small neutral array, offest nest
     name = "1_medium_test_array"
     size = 8
@@ -30,7 +30,7 @@ def get_1_medium_test_array():
         }
     return size, dump_mrp(MRP), name
 
-def get_2_medium_test_array():
+def mrp_2_medium_test_array():
     # small neutral array, offest nest
     name = "2_medium_test_array"
     size = 8
@@ -42,7 +42,7 @@ def get_2_medium_test_array():
     return size, dump_mrp(MRP), name
 
 
-def get_3_medium_test_array():
+def mrp_3_medium_test_array():
     # small neutral array, offest nest
     name = "3_medium_test_array"
     size = 8
@@ -55,9 +55,9 @@ def get_3_medium_test_array():
     return size, dump_mrp(MRP), name
 
 
-def get_10_medium_positive_array_ohashi():
-    # medium positive array, offest nest, based on chitka et al 2013
-    name = "10_medium_positive_array_ohashi"
+def mrp_10_positive_array_ohashi():
+    # positive array, offest nest, based on chitka et al 2013
+    name = "10_positive_array_ohashi"
     size = 21
     MRP = {"size": size,
             "nest":map_coord_to_index(size, 10, 2),
@@ -77,9 +77,9 @@ def get_10_medium_positive_array_ohashi():
     return size, dump_mrp(MRP), name
 
 
-def get_10_medium_negative_array_ohashi():
-    # medium negative array, offest nest, based on chitka et al 2013
-    name = "10_medium_negative_array_ohashi"
+def mrp_10_negative_array_ohashi():
+    # negative array, offest nest, based on chitka et al 2013
+    name = "10_negative_array_ohashi"
     size = 21
     MRP = {"size": size,
             "nest":map_coord_to_index(size, 10, 2),
