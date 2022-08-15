@@ -328,15 +328,16 @@ def plot_route(experiment_name, artifact_path, fig, ax, size, nest, targets, rou
     plt.pause(0.0000000001)
 
 
-def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_experiment, MRP, route_count_for_experiment, optimal_trapline, optimal_trapline_reversed):
+def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_experiment, MRP, df_target_sequence_data, optimal_trapline, optimal_trapline_reversed):
 
     LABEL_NO_ROUTE_FOUND = 'Invalid Route'
 
-    df = route_count_for_experiment
+    df = df_target_sequence_data # alias for ease of reading
+
     # build x-axis labels
     counter = 1
     x_axis = []
-    for i, r in enumerate(df['route']):
+    for i, r in enumerate(df["target_sequence"]):
         if r == []:
             x_axis.append(LABEL_NO_ROUTE_FOUND)
         else:
@@ -353,13 +354,13 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
         else:
             return RouteType.Incomplete
 
-    df['route_type'] = [get_route_type(route) for route in df['route']]
+    df['route_type'] = [get_route_type(route) for route in df["target_sequence"]]
 
     #plot bar chart
     fig1, ax = plt.subplots(1,1, figsize=(12,5))
     sns.set_theme(style="whitegrid")
 
-    bar_list = ax.bar(df['x-axis'], df['count']) # plot the bar chart
+    bar_list = ax.bar(df['x-axis'], df["target_sequence_count"]) # plot the bar chart
     
     ax.set_xlabel('Routes')
 
@@ -376,7 +377,7 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
     # highlight the optimal traplines if present in the results
     for i in range(len(df)):
         label = df['x-axis'][i]
-        route = df['route'][i]
+        route = df["target_sequence"][i]
         route_type = df['route_type'][i]
         if route_type == RouteType.Incomplete:
             bar_list[i].set_color('grey')
@@ -424,7 +425,7 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
         if i >= len(df):
             break
         # Convert string representation of route to list using json
-        route = df['route'][df.index[i]]
+        route = df["target_sequence"][df.index[i]]
         label= df['x-axis'][df.index[i]]
         route_type= df['route_type'][df.index[i]]
 

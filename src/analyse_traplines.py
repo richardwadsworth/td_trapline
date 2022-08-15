@@ -61,14 +61,14 @@ def get_modal_target_sequence_for_run(optimal_trapline, C_score_index, routes):
         # get a count of al routes in the final sequence
         count = pd.Series(run_episodes_targets_sequence).value_counts().sort_values(ascending=False) 
 
-        route = str(count.index[0])
-        count = count[0]
+        target_sequence = str(count.index[0])
+        target_sequence_count = count[0]
     
     else:
-        route = '[]'
-        count = 0
+        target_sequence = '[]'
+        target_sequence_count = 0
 
-    return route, count
+    return target_sequence, target_sequence_count
     
 num_runs_in_experiment = all_run_sample_episodes_in_experiment.shape[0]
 num_sample_episodes_per_run = all_run_sample_episodes_in_experiment.shape[1]
@@ -82,8 +82,8 @@ C_SCORE_STABILITY_THRESHOLD = 0
 
 # initalise result arrays
 results = pd.DataFrame()
-results["route"] = np.empty((num_runs_in_experiment,), dtype=object) # one entry for each run
-results["count"] = np.zeros(num_runs_in_experiment, dtype=int)
+results["target_sequence"] = np.empty((num_runs_in_experiment,), dtype=object) # one entry for each run
+results["target_sequence_count"] = np.zeros(num_runs_in_experiment, dtype=int)
 results["c_score_stability_index"] = np.zeros(num_runs_in_experiment, dtype=int)
             
 # get the sliding widow to use in determining if there is a stable trapline
@@ -102,10 +102,10 @@ for run_index in range(num_runs_in_experiment):
     route_c_scores.append((run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted))
     results.loc[run_index, 'c_score_stability_index'] = C_score_index
 
-    route, count = get_modal_target_sequence_for_run(optimal_trapline_master, C_score_index, run_episodes_routes)
+    target_sequence, target_sequence_count = get_modal_target_sequence_for_run(optimal_trapline_master, C_score_index, run_episodes_routes)
     
-    results.loc[run_index, 'route'] = route #only save the route if a stable trapline was found
-    results.loc[run_index, 'count'] = count
+    results.loc[run_index, "target_sequence"] = target_sequence #only save the target_sequence if a stable trapline was found
+    results.loc[run_index, "target_sequence_count"] = target_sequence_count
     
 results["c_score_indexes"] = [x[0] for x in route_c_scores]
 results["c_score_indexes_rate_of_change"] = [x[1] for x in route_c_scores]
@@ -114,37 +114,37 @@ results["c_score_indexes_rate_of_change"] = [x[1] for x in route_c_scores]
 results.to_csv("sussex/Dissertation/artifacts/" + experiment_name + "_results")
 
 # get a count of all the different routes of the traplines from each run
-route_count_for_experiment = pd.Series(results["route"]).value_counts().sort_values(ascending=False)
+route_count_for_experiment = pd.Series(results["target_sequence"]).value_counts().sort_values(ascending=False)
 #print(route_count_for_experiment)
 
 # reformat data frame for plotting
-df_route_count_for_experiment = pd.DataFrame(route_count_for_experiment)
-df_route_count_for_experiment['count'] = df_route_count_for_experiment['route']
-df_route_count_for_experiment['route'] = [loads(d) for d in df_route_count_for_experiment.index.to_list()]
-df_route_count_for_experiment.index = np.arange(0, len(df_route_count_for_experiment))
+df_target_sequence_data_for_experiment = pd.DataFrame(route_count_for_experiment)
+df_target_sequence_data_for_experiment["target_sequence_count"] = df_target_sequence_data_for_experiment["target_sequence"]
+df_target_sequence_data_for_experiment["target_sequence"] = [loads(d) for d in df_target_sequence_data_for_experiment.index.to_list()]
+df_target_sequence_data_for_experiment.index = np.arange(0, len(df_target_sequence_data_for_experiment))
 
 
 distances = []
-for i in range (len(df_route_count_for_experiment)):
-    row = df_route_count_for_experiment.iloc[i]
+for i in range (len(df_target_sequence_data_for_experiment)):
+    row = df_target_sequence_data_for_experiment.iloc[i]
     #calculate the manhattan length of this target sequence
-    distance = get_manhattan_distance(MRP["size"], row['route'])
+    distance = get_manhattan_distance(MRP["size"], row["target_sequence"])
     distances.append(distance)
 
-df_route_count_for_experiment['sequence_manhattan_length'] = distances
+df_target_sequence_data_for_experiment['sequence_manhattan_length'] = distances
 
 import seaborn as sns
 
-def plot_target_sequence_length_distribution(experiment_name, artifact_path, arena_size, optimal_trapline, route_results):
+def plot_target_sequence_length_distribution(experiment_name, artifact_path, arena_size, optimal_trapline, df_target_sequence_data):
 
 
     # get the sequence length of the optimal trapline.  used to normalise the result set
     optimal_sequence_length = get_manhattan_distance(arena_size, optimal_trapline)
 
     #normalise the result set
-    route_results['sequence_manhattan_length'] = route_results['sequence_manhattan_length']/optimal_sequence_length
+    df_target_sequence_data['sequence_manhattan_length'] = df_target_sequence_data['sequence_manhattan_length']/optimal_sequence_length
 
-    df = route_results.groupby(['sequence_manhattan_length']).sum()
+    df = df_target_sequence_data.groupby(['sequence_manhattan_length']).sum()
     
     filepath = os.path.join(artifact_path, experiment_name + '_sequence_manhattan_length')
     df.to_csv(filepath + '.csv')
@@ -154,7 +154,7 @@ def plot_target_sequence_length_distribution(experiment_name, artifact_path, are
     hist_list = []
     for i in df.index:
         if df.loc[i].name != 0:
-            hist_list = hist_list + [df.loc[i].name] * df.loc[i, 'count']
+            hist_list = hist_list + [df.loc[i].name] * df.loc[i, "target_sequence_count"]
 
     fig, ax = plt.subplots()
     sns.set_theme(style="whitegrid")
@@ -178,12 +178,12 @@ def plot_target_sequence_length_distribution(experiment_name, artifact_path, are
     plt.pause(0.00000000001)
 
   
-plot_target_sequence_length_distribution(experiment_name, artifact_path, MRP["size"], optimal_trapline_master, df_route_count_for_experiment)
+plot_target_sequence_length_distribution(experiment_name, artifact_path, MRP["size"], optimal_trapline_master, df_target_sequence_data_for_experiment)
 
 plot_c_Scores(experiment_name, artifact_path, sample_rate, results["c_score_indexes"], results["c_score_indexes_rate_of_change"])
 
 plot_c_score_stability_distribution(experiment_name, artifact_path, sample_rate, C_SCORE_STABILITY_THRESHOLD, list(results['c_score_stability_index']))
 
-plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_experiment, MRP, df_route_count_for_experiment, optimal_trapline_master, optimal_trapline_reversed_master)
+plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_experiment, MRP, df_target_sequence_data_for_experiment, optimal_trapline_master, optimal_trapline_reversed_master)
 
 plt.show()
