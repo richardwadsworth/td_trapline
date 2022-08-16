@@ -387,7 +387,7 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
     ax.set_xticklabels(df['x-axis'], rotation = 90)
     ax.xaxis.get_ticklocs(minor=True)
     ax.minorticks_on()
-    ax.grid()
+    ax.grid(b=True)
     
     fig1.tight_layout()
     
@@ -435,7 +435,7 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
         route = df["target_sequence"][df.index[i]]
         label= df['x-axis'][df.index[i]]
         route_type= df['route_type'][df.index[i]]
-
+        ax.grid() # turn off the grid
         plot_target_sequence(experiment_name, artifact_path, fig2, ax, int(MRP["size"]),MRP["nest"], optimal_trapline, route, route_type, str(label))
 
     plt.subplots_adjust(left=0.1, right=0.9, top=0.86, bottom=0.15)
@@ -471,10 +471,12 @@ def plot_c_Scores(experiment_name, artifact_path, sample_rate, c_score_indexes, 
 
     ax1.set_xlabel('Episode')
     ax1.set_ylabel('Rate of change of C Score')
+    ax1.set_ylim(0, 1600)
     ax1.set_title("C Score per episode for all runs", fontsize=10)
 
     ax2.set_xlabel('Episode')
     ax2.set_ylabel('(Smoothed) C Score')
+    ax2.set_ylim(-400, 400)
     ax2.set_title("Rate of change of C Score per episode for all runs", fontsize=10)
 
 
@@ -498,8 +500,18 @@ def plot_c_score_stability_distribution(experiment_name, artifact_path, sample_r
     
     ax.set_xlabel('Episode That C Score Stabilises')
     ax.set_ylabel('Frequency')
+    
+    ax.set_yscale('log')
+    ax.set_ylim(0, 600)
+    ax.set_ylabel('Logarithmic Count of Routes')
+
     fig.suptitle("C Score Stability Histogram\n(Stability Threshold {})".format(stability_threshold))
     ax.set_title(experiment_name, fontsize=10)
+
+    ax.xaxis.get_ticklocs(minor=True)
+    ax.minorticks_on()
+    ax.grid(b=True)
+
 
     plt.subplots_adjust(left=0.1, right=0.9, top=0.83, bottom=0.15)
 
@@ -529,7 +541,7 @@ def plot_target_sequence_length_distribution(experiment_name, artifact_path, num
     bins=np.arange(0.475, 1.575, 0.05) # 1 is the optimal length.
     sns.histplot(hist_list, bins=bins, ax=ax, edgecolor = "black")
     
-    
+
     ax.set_xlabel('Normalised Target Sequence Length')
     ax.set_title(experiment_name, fontsize=10)
 
@@ -539,8 +551,8 @@ def plot_target_sequence_length_distribution(experiment_name, artifact_path, num
 
     ax.xaxis.get_ticklocs(minor=True)
     ax.minorticks_on()
-    ax.grid()
-
+    ax.grid(b=True)
+    
     fig.suptitle("Target Sequence Length Histogram")
     fig.savefig(filepath + '.png')
 

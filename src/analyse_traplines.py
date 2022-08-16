@@ -36,6 +36,7 @@ def main():
 
     artifact_path = "artifacts"
     
+    print("Loading data from mlflow.  This can take a few minutes ...")
     data = get_experiment_runs_data(experiment_name) 
 
     #use pickle to cache data to speed up r&D
@@ -94,6 +95,8 @@ def main():
                 
     # get the sliding widow to use in determining if there is a stable trapline
     sliding_sequence_used_for_route_similarity = get_sliding_window_sequence(SLIDING_WINDOW_SIZE_USED_FOR_COMPARING_ROUTE_SIMILARITY, num_sample_episodes_per_run)
+
+    print("Analysing data.  This can take a few minutes ...")
 
     route_c_scores = []
     for run_index in range(num_runs_in_experiment):
