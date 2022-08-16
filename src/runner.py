@@ -7,17 +7,24 @@
 
  Run this script using the command line python ./src/runner.py
 '''
-import numpy as np
-
 from gym_utils import register_gym
 register_gym(True) # note we are running in DEVELOPMENT MODE here and the code will use the gym src in ./modules NOT the gym installed by your package manager!
 
-
+import numpy as np
 from runner_utils import train_fnn
 from plots import PlotType
 from mrp import *
 from json import loads
-# parameters for sarsa(lambda)
+
+'''
+###########################################
+ Parameters for td learning model
+
+ Start
+ ###########################################
+'''
+# 
+
 MRP = mrp_10_positive_array_ohashi()
 
 rng = np.random.default_rng() # random number generator
@@ -40,6 +47,14 @@ revisit_inactive_target_reward = -0.0 # negative reward for revisiting an inacti
 change_in_orientation_reward = 0#-stationary_reward*0.5 #negative reward if orientation changes
 
 threshold = 9 # the cumulative reward needed to stop the simulation loop kicked off by this script
+
+'''
+###########################################
+ Parameters for td learning model
+
+ End
+ ###########################################
+'''
 
 is_stochastic = False
 plot_rate = 5 # rate at which to plot predictions

@@ -1,5 +1,5 @@
 import gym
-class AgentReward(gym.Wrapper):
+class ForagingAgentRewards(gym.Wrapper):
     def __init__(self, env, size, nest_index, target_indices, reward_delay=50, respiration_reward=0, stationary_reward=0, revisit_inactive_target_reward = 0, change_in_orientation_reward=0):
         """
 
