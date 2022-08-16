@@ -255,7 +255,7 @@ def train_fnn(is_stochastic,
 
             import os   
             from statistics_utils import save_stats         
-            artifact_dir = "./sussex/Dissertation/output"
+            artifact_dir = "./artifacts"
             filename = '{}'.format(hash(os.times()))
             stats_filepath = os.path.join(artifact_dir, filename + '.dat')
             if not os.path.exists(artifact_dir):

@@ -12,7 +12,7 @@ def register_gym(dev_mode=False):
     source = "src/foraging_agent.py"
     if dev_mode:
         
-        root = "./gym/"    
+        root = "./modules/gym/"    
         sys.path.insert(1, root)
     else:
         root = site.getsitepackages()[0]

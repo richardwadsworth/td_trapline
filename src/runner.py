@@ -1,7 +1,16 @@
+'''
+ Python script to run the td learning model using a specific arena and parameter set.  
+ 
+ Both sets of variable are set in the script.
+
+ The script will repeat in a loop until the cumulative reward of the sumulation is greater than
+
+ Run this script using the command line python ./src/runner.py
+'''
 import numpy as np
 
 from gym_utils import register_gym
-register_gym(True)
+register_gym(True) # note we are running in DEVELOPMENT MODE here and the code will use the gym src in ./modules NOT the gym installed by your package manager!
 
 
 from runner_utils import train_fnn
@@ -9,7 +18,7 @@ from plots import PlotType
 from mrp import *
 from json import loads
 # parameters for sarsa(lambda)
-MRP = mrp_10_positive_array_ohashi_2()
+MRP = mrp_10_positive_array_ohashi()
 
 rng = np.random.default_rng() # random number generator
 
@@ -29,6 +38,8 @@ respiration_reward = -0.01 # -1/np.square(size) # -1/(steps+(steps*0.1)) # negat
 stationary_reward = -0.01 # respiration_reward*2 # positive reward for moving, to discourage not moving
 revisit_inactive_target_reward = -0.0 # negative reward for revisiting an inactive target (i.e. one that has already been visited)
 change_in_orientation_reward = 0#-stationary_reward*0.5 #negative reward if orientation changes
+
+threshold = 9 # the cumulative reward needed to stop the simulation loop kicked off by this script
 
 is_stochastic = False
 plot_rate = 5 # rate at which to plot predictions
@@ -59,7 +70,7 @@ if __name__ == "__main__":
             do_in_episode_plots,
             record_stats,
             rng,
-            threshold=9)
+            threshold=threshold)
 
         
 
