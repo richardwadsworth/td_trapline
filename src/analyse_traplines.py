@@ -36,7 +36,7 @@ def main():
 
     artifact_path = "artifacts"
     
-    print("Loading data from mlflow.  This can take a few minutes ...")
+
     data = get_experiment_runs_data(experiment_name) 
 
     #use pickle to cache data to speed up r&D

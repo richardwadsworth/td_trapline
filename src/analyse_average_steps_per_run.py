@@ -14,10 +14,11 @@ def main():
     args = parser.parse_args()
     experiment_name = args.experiment_name
 
-    data, plot_rate = get_experiment_runs_data(experiment_name) 
+    data = get_experiment_runs_data(experiment_name) 
 
     all_runs_in_experiment = data["observations"]
     all_runs_done = data["done"]
+    sample_rate = int(data["params"][0]["plot_rate"])
 
 
     total_num_samples = all_runs_in_experiment.shape[0]
@@ -43,10 +44,10 @@ def main():
 
     num_samples_per_episode = runs_completed_target_sequence.shape[1]
 
-    def plot_errors(num_samples, num_samples_per_episode, plot_rate, data):
+    def plot_errors(num_samples, num_samples_per_episode, sample_rate, data):
         xs, ys, zs = np.zeros(num_samples_per_episode), np.zeros(num_samples_per_episode), np.zeros(num_samples_per_episode)
         for i in range(num_samples_per_episode):
-            xs[i] = i * plot_rate
+            xs[i] = i * sample_rate
             ys[i] = np.mean(data[:,i]) #mean performance for this episode
             stdev=np.std(data[:,i])
             zs[i]=stdev/(num_samples**0.5)
@@ -55,10 +56,10 @@ def main():
         
 
     #get data for where agent returned to nest after visiting all targets
-    xs1, ys1, zs1 = plot_errors(runs_completed_target_sequence.shape[0], num_samples_per_episode, plot_rate, runs_completed_target_sequence) 
+    xs1, ys1, zs1 = plot_errors(runs_completed_target_sequence.shape[0], num_samples_per_episode, sample_rate, runs_completed_target_sequence) 
 
     #get data for all training runs
-    xs2, ys2, zs2 = plot_errors(runs_routes.shape[0], num_samples_per_episode, plot_rate, runs_routes)
+    xs2, ys2, zs2 = plot_errors(runs_routes.shape[0], num_samples_per_episode, sample_rate, runs_routes)
 
     # plot the data
     fig, ax = plt.subplots()

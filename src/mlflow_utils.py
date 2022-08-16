@@ -9,29 +9,30 @@ import json
 
 def get_experiment_runs_data(experiment_name):
 
+    print("Loading data from mlflow.  This can take a few minutes ...")
+
     experiment = mlflow.get_experiment_by_name(experiment_name)
     if experiment == None:
         raise ValueError("MlFlow experiment '{}' not found.".format(experiment_name))
     print("Experiment name {}.".format(experiment.name))
 
-    experiment_artifact_location = experiment.artifact_location
+    client = MlflowClient()
 
-    p = urlparse(experiment_artifact_location)
-    files = [f for f in os.listdir(p.path) if not f=="meta.yaml" and not f==".DS_Store"] # get a list of all files in the dir
+    run_infos = client.list_run_infos(experiment.experiment_id)
+
     all_observations = []
     all_performances = []
     all_runs = []
     all_metrics = []
     all_params = []
     all_run_ids = []
-
-    client = MlflowClient()
-            
+        
     with tempfile.TemporaryDirectory() as tmpdirname:
-        for filename in files:
+        
+        for run_info in run_infos:
 
             #read file name
-            run = mlflow.get_run(filename)
+            run = mlflow.get_run(run_info.run_id)
             
             # Download artifacts
             local_path = client.download_artifacts(run.info.run_id, "result.json", tmpdirname)
