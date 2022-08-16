@@ -23,14 +23,15 @@ from c_score import get_C_scores_index_for_run
 
 #experiment_name = "analyse_d7f2c7c777164160bd5ac6bbfefb0a71_10_medium_negative_array_ohashi_gs_1000_runs" #best 10 negative ohashi, 200 episodes, 1000 runs
 #experiment_name = "analyse_3cb6d9c1e8c646188668a059a9190d6c_10_medium_positive_array_ohashi_gs_1000_runs" #best 10 positive ohashi, 200 episodes, 1000 runs
-experiment_name = "analyse_bc6e223900244462b7898b0b511a9a4b_mrp_10_negative_array_ohashi_gs_1000_runs"
+experiment_name = "analyse_bc6e223900244462b7898b0b511a9a4b_mrp_10_negative_array_ohashi_gs_1000_runs" #best 10 negative ohashi, 200 episodes, 1000 runs
+#experiment_name = "analyse_cb41737061ea435e8b43abfddc0258cf_mrp_10_positive_array_ohashi_gs_1000_runs" #best 10 positive ohashi, 200 episodes, 1000 runs
 
 artifact_path = "sussex/Dissertation/artifacts"
 
-# data = get_experiment_runs_data(experiment_name) 
+#data = get_experiment_runs_data(experiment_name) 
 
-# use pickle to cache data to speed up r&D
-# pickle.dump( data, open( experiment_name + "_data.p", "wb" ) )
+#use pickle to cache data to speed up r&D
+#pickle.dump( data, open( experiment_name + "_data.p", "wb" ) )
 data = pickle.load( open( experiment_name + "_data.p", "rb" ) )
 
 all_run_sample_episodes_in_experiment = data["observations"]
@@ -129,17 +130,13 @@ for i in range (len(df_target_sequence_data_for_experiment)):
     distances.append(distance)
 
 df_target_sequence_data_for_experiment['sequence_manhattan_length'] = distances
+#normalise the sequence_manhattan_length using the optimal sequence length to allow for comparison with other target arrays
+optimal_target_sequence_length = get_manhattan_distance(MRP["size"], optimal_trapline_master) # we can use either optimal route, clockwise or anti clockwise to determine the optimal length
+df_target_sequence_data_for_experiment['sequence_manhattan_length'] = df_target_sequence_data_for_experiment['sequence_manhattan_length']/optimal_target_sequence_length
 
 import seaborn as sns
 
-def plot_target_sequence_length_distribution(experiment_name, artifact_path, arena_size, optimal_trapline, df_target_sequence_data):
-
-
-    # get the sequence length of the optimal trapline.  used to normalise the result set
-    optimal_sequence_length = get_manhattan_distance(arena_size, optimal_trapline)
-
-    #normalise the result set
-    df_target_sequence_data['sequence_manhattan_length'] = df_target_sequence_data['sequence_manhattan_length']/optimal_sequence_length
+def plot_target_sequence_length_distribution(experiment_name, artifact_path, num_runs_in_experiment, df_target_sequence_data):
 
     df = df_target_sequence_data.groupby(['sequence_manhattan_length']).sum()
     
@@ -156,13 +153,16 @@ def plot_target_sequence_length_distribution(experiment_name, artifact_path, are
     fig, ax = plt.subplots()
     sns.set_theme(style="whitegrid")
 
-    bins=np.arange(0, 3, 0.1)
-    sns.histplot(hist_list, bins=bins, ax=ax)
+    bins=np.arange(0.475, 1.575, 0.05) # 1 is the optimal length.
+    sns.histplot(hist_list, bins=bins, ax=ax, edgecolor = "black")
     
     
     ax.set_xlabel('Normalised Target Sequence Length')
-    ax.set_ylabel('Count')
     ax.set_title(experiment_name, fontsize=10)
+
+    ax.set_yscale('log')
+    ax.set_ylim(0, num_runs_in_experiment)
+    ax.set_ylabel('Logarithmic Count of Target Sequences')
 
     ax.xaxis.get_ticklocs(minor=True)
     ax.minorticks_on()
@@ -175,7 +175,7 @@ def plot_target_sequence_length_distribution(experiment_name, artifact_path, are
     plt.pause(0.00000000001)
 
   
-plot_target_sequence_length_distribution(experiment_name, artifact_path, MRP["size"], optimal_trapline_master, df_target_sequence_data_for_experiment)
+plot_target_sequence_length_distribution(experiment_name, artifact_path, num_runs_in_experiment, df_target_sequence_data_for_experiment)
 
 plot_c_Scores(experiment_name, artifact_path, sample_rate, results["c_score_indexes"], results["c_score_indexes_rate_of_change"])
 

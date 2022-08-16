@@ -24,7 +24,7 @@ def get_optimal_trapline_for_diamond_array(targets):
 
 def get_valid_target_sequence_from_route(optimal_trapline, route):
 
-    MIN_NUM_TARGETS_FOUND_TO_CONSIDER_AS_TRAPLINE = len(optimal_trapline) # the minimum number of targets that must be found in an episode to be considered a trapline
+    min_number_of_targets_to_be_considered_a_trapline = len(optimal_trapline) # the minimum number of targets that must be found in an episode to be considered a trapline
 
     trapline_lookup = optimal_trapline.copy()
 
@@ -37,7 +37,7 @@ def get_valid_target_sequence_from_route(optimal_trapline, route):
 
     #if this episode found the minimum number of targets AND then found the nest, then this episode should be considered
     # for further trapline analysis
-    if len(episode_target_list) >= MIN_NUM_TARGETS_FOUND_TO_CONSIDER_AS_TRAPLINE:
+    if len(episode_target_list) >= min_number_of_targets_to_be_considered_a_trapline:
         # a valid route was found in this episode
 
         # record the ordered list of targets discovered for this episode

@@ -7,10 +7,10 @@ import seaborn as sns
 from mlflow_utils import get_experiment_runs_data
  
 
-experiment_name = "mrp_10_negative_array_ohashi_gs" # 10 negative ohashi
-#experiment_name = "10_medium_positive_array_ohashi_gs" #10 positive ohashi
+#experiment_name = "mrp_10_negative_array_ohashi_gs" # 10 negative ohashi
+experiment_name = "mrp_10_positive_array_ohashi_gs" #10 positive ohashi
 
-data, plot_rate = get_experiment_runs_data(experiment_name) 
+data = get_experiment_runs_data(experiment_name) 
 
 metrics = data['metrics']
 params = data['params']

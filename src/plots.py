@@ -330,7 +330,7 @@ def plot_route(experiment_name, artifact_path, fig, ax, size, nest, targets, rou
 
 def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_experiment, MRP, df_target_sequence_data, optimal_trapline, optimal_trapline_reversed):
 
-    LABEL_NO_ROUTE_FOUND = 'Invalid Route'
+    LABEL_INVALID_ROUTE = 'Invalid Route'
 
     df = df_target_sequence_data # alias for ease of reading
 
@@ -339,7 +339,7 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
     x_axis = []
     for i, r in enumerate(df["target_sequence"]):
         if r == []:
-            x_axis.append(LABEL_NO_ROUTE_FOUND)
+            x_axis.append(LABEL_INVALID_ROUTE)
         else:
             x_axis.append(str(counter))
             counter += 1
@@ -350,7 +350,7 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
         if (target_sequence == optimal_trapline) or (target_sequence == optimal_trapline_reversed):
             return RouteType.Optimal
         elif len(target_sequence) == len(optimal_trapline):
-            return RouteType.SubOptimal
+            return RouteType.SubOptimal # all targets found, but not in the optimal order
         else:
             return RouteType.Incomplete
 
@@ -368,8 +368,6 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
     ax.set_ylim(0, num_runs_in_experiment)
     ax.set_ylabel('Logarithmic Count of Routes')
 
-
-    ax.grid()
     #ax.set_ylabel('Count of Routes')
     fig1.suptitle("Trapline Distribution by Route")
     ax.set_title(experiment_name, fontsize=10)
@@ -387,7 +385,10 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
             bar_list[i].set_color('b')
 
     ax.set_xticklabels(df['x-axis'], rotation = 90)
+    ax.xaxis.get_ticklocs(minor=True)
+    ax.minorticks_on()
     ax.grid()
+    
     fig1.tight_layout()
     
     filepath = os.path.join(artifact_path, experiment_name + '_trapline_routes')
@@ -395,7 +396,7 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
 
 
     # drop the route count with no discernable target based route found
-    df = df.drop(df[df['x-axis'] == LABEL_NO_ROUTE_FOUND].index)
+    df = df.drop(df[df['x-axis'] == LABEL_INVALID_ROUTE].index)
 
     # if there are more than 9 routes, choose the optimal and 7 random
     MAX_NUM_ROUTE_PLOTS = 9
@@ -429,8 +430,6 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
         label= df['x-axis'][df.index[i]]
         route_type= df['route_type'][df.index[i]]
 
-        
-        
         plot_route(experiment_name, artifact_path, fig2, ax, MRP["size"],MRP["nest"], optimal_trapline, route, route_type, str(label))
 
     plt.subplots_adjust(left=0.1, right=0.9, top=0.86, bottom=0.15)

@@ -22,7 +22,7 @@ from json import loads, dumps
 #
 ######################################################
 '''
-mrp_function = mrp_10_negative_array_ohashi() # or mrp_10_positive_array_ohashi()
+mrp_function = mrp_10_positive_array_ohashi() # or mrp_10_positive_array_ohashi()
 
 episodes = [200] # range of total number of episodes in training run
 steps = [100] # range of  episode lengths

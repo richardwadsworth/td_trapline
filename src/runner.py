@@ -9,7 +9,7 @@ from plots import PlotType
 from mrp import *
 from json import loads
 # parameters for sarsa(lambda)
-MRP = mrp_10_negative_array_ohashi()
+MRP = mrp_10_positive_array_ohashi()
 
 rng = np.random.default_rng() # random number generator
 
@@ -35,7 +35,7 @@ plot_rate = 5 # rate at which to plot predictions
 record_stats = True
 do_in_episode_plots=PlotType.Full 
 
-size = loads(MRP["size"])
+size = int(loads(MRP)["size"])
 
 if __name__ == "__main__":
 
