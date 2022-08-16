@@ -17,22 +17,22 @@ from  manhattan import get_manhattan_distance
 from mlflow_utils import get_experiment_runs_data
 from utils import get_sliding_window_sequence
 from trapline import get_optimal_trapline_for_diamond_array, get_valid_target_sequence_from_route, RouteType
-from plots import plot_trapline_distribution, plot_c_Scores, plot_c_score_stability_distribution
+from plots import plot_trapline_distribution, plot_c_Scores, plot_c_score_stability_distribution, plot_target_sequence_length_distribution
 from c_score import get_C_scores_index_for_run
  
 
 #experiment_name = "analyse_d7f2c7c777164160bd5ac6bbfefb0a71_10_medium_negative_array_ohashi_gs_1000_runs" #best 10 negative ohashi, 200 episodes, 1000 runs
 #experiment_name = "analyse_3cb6d9c1e8c646188668a059a9190d6c_10_medium_positive_array_ohashi_gs_1000_runs" #best 10 positive ohashi, 200 episodes, 1000 runs
-experiment_name = "analyse_bc6e223900244462b7898b0b511a9a4b_mrp_10_negative_array_ohashi_gs_1000_runs" #best 10 negative ohashi, 200 episodes, 1000 runs
-#experiment_name = "analyse_cb41737061ea435e8b43abfddc0258cf_mrp_10_positive_array_ohashi_gs_1000_runs" #best 10 positive ohashi, 200 episodes, 1000 runs
+#experiment_name = "analyse_bc6e223900244462b7898b0b511a9a4b_mrp_10_negative_array_ohashi_gs_1000_runs" #best 10 negative ohashi, 200 episodes, 1000 runs
+experiment_name = "analyse_cb41737061ea435e8b43abfddc0258cf_mrp_10_positive_array_ohashi_gs_1000_runs" #best 10 positive ohashi, 200 episodes, 1000 runs
 
 artifact_path = "sussex/Dissertation/artifacts"
 
-#data = get_experiment_runs_data(experiment_name) 
+data = get_experiment_runs_data(experiment_name) 
 
 #use pickle to cache data to speed up r&D
 #pickle.dump( data, open( experiment_name + "_data.p", "wb" ) )
-data = pickle.load( open( experiment_name + "_data.p", "rb" ) )
+#data = pickle.load( open( experiment_name + "_data.p", "rb" ) )
 
 all_run_sample_episodes_in_experiment = data["observations"]
 all_run_sample_done_in_experiment = data["done"]
@@ -94,7 +94,7 @@ for run_index in range(num_runs_in_experiment):
     run_episodes_routes = get_route_index_from_observation(run_episodes_route_observations) #extract the route indexes from the route observations
 
     # get thw C score index for this run
-    C_score_index, run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted = get_C_scores_index_for_run(MRP["size"], SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_C_SCORE, sliding_sequence_used_for_route_similarity, run_episodes_routes, C_SCORE_STABILITY_THRESHOLD)
+    C_score_index, run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted = get_C_scores_index_for_run(int(MRP["size"]), SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_C_SCORE, sliding_sequence_used_for_route_similarity, run_episodes_routes, C_SCORE_STABILITY_THRESHOLD)
     
     # save the index value and smoothed  scores
     route_c_scores.append((run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted))
@@ -126,55 +126,14 @@ distances = []
 for i in range (len(df_target_sequence_data_for_experiment)):
     row = df_target_sequence_data_for_experiment.iloc[i]
     #calculate the manhattan length of this target sequence
-    distance = get_manhattan_distance(MRP["size"], row["target_sequence"])
+    distance = get_manhattan_distance(int(MRP["size"]), row["target_sequence"])
     distances.append(distance)
 
 df_target_sequence_data_for_experiment['sequence_manhattan_length'] = distances
 #normalise the sequence_manhattan_length using the optimal sequence length to allow for comparison with other target arrays
-optimal_target_sequence_length = get_manhattan_distance(MRP["size"], optimal_trapline_master) # we can use either optimal route, clockwise or anti clockwise to determine the optimal length
+optimal_target_sequence_length = get_manhattan_distance(int(MRP["size"]), optimal_trapline_master) # we can use either optimal route, clockwise or anti clockwise to determine the optimal length
 df_target_sequence_data_for_experiment['sequence_manhattan_length'] = df_target_sequence_data_for_experiment['sequence_manhattan_length']/optimal_target_sequence_length
 
-import seaborn as sns
-
-def plot_target_sequence_length_distribution(experiment_name, artifact_path, num_runs_in_experiment, df_target_sequence_data):
-
-    df = df_target_sequence_data.groupby(['sequence_manhattan_length']).sum()
-    
-    filepath = os.path.join(artifact_path, experiment_name + '_sequence_manhattan_length')
-    df.to_csv(filepath + '.csv')
-    
-    # bit of a hack as I can't work out how to plot a histogram of grouped data!
-    # reformatting for histogram
-    hist_list = []
-    for i in df.index:
-        if df.loc[i].name != 0:
-            hist_list = hist_list + [df.loc[i].name] * df.loc[i, "target_sequence_count"]
-
-    fig, ax = plt.subplots()
-    sns.set_theme(style="whitegrid")
-
-    bins=np.arange(0.475, 1.575, 0.05) # 1 is the optimal length.
-    sns.histplot(hist_list, bins=bins, ax=ax, edgecolor = "black")
-    
-    
-    ax.set_xlabel('Normalised Target Sequence Length')
-    ax.set_title(experiment_name, fontsize=10)
-
-    ax.set_yscale('log')
-    ax.set_ylim(0, num_runs_in_experiment)
-    ax.set_ylabel('Logarithmic Count of Target Sequences')
-
-    ax.xaxis.get_ticklocs(minor=True)
-    ax.minorticks_on()
-    ax.grid()
-
-    fig.suptitle("Target Sequence Length Histogram")
-    fig.savefig(filepath + '.png')
-
-    #plt.subplots_adjust(left=0.1, right=0.9, top=0.83, bottom=0.15)
-    plt.pause(0.00000000001)
-
-  
 plot_target_sequence_length_distribution(experiment_name, artifact_path, num_runs_in_experiment, df_target_sequence_data_for_experiment)
 
 plot_c_Scores(experiment_name, artifact_path, sample_rate, results["c_score_indexes"], results["c_score_indexes_rate_of_change"])

@@ -269,7 +269,7 @@ def plot_traffic_greyscale(env, fig, ax, xs_target, ys_target, data, title):
     clear_output(wait = True)
     plt.pause(0.0000000001)
 
-def plot_route(experiment_name, artifact_path, fig, ax, size, nest, targets, route, route_type, subtitle):
+def plot_target_sequence(experiment_name, artifact_path, fig, ax, size, nest, targets, route, route_type, subtitle):
     
     remove_axis_ticks(ax)
 
@@ -360,7 +360,7 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
     fig1, ax = plt.subplots(1,1, figsize=(12,5))
     sns.set_theme(style="whitegrid")
 
-    bar_list = ax.bar(df['x-axis'], df["target_sequence_count"]) # plot the bar chart
+    bar_list = ax.bar(df['x-axis'], df["target_sequence_count"], edgecolor = "black") # plot the bar chart
     
     ax.set_xlabel('Routes')
 
@@ -401,16 +401,22 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
     # if there are more than 9 routes, choose the optimal and 7 random
     MAX_NUM_ROUTE_PLOTS = 9
     if len(df)>MAX_NUM_ROUTE_PLOTS:
+
+        df_first_two_in_list = df.iloc[[0,1]]
+
         #find index of optimal routes
         df_optimal = df.drop(df[df['route_type'] != RouteType.Optimal].index)
         
-        remaining = MAX_NUM_ROUTE_PLOTS - len(df_optimal)
+        #drop from the first two if they are in fact the optimal routes
+        df_first_two_in_list = df_first_two_in_list.drop(df_optimal.index)
+
+        remaining = MAX_NUM_ROUTE_PLOTS - (len(df_first_two_in_list) + len(df_optimal))
 
         # get suboptimal routes and select a random selection for display
         df_suboptimal = df.drop(df[df['route_type'] != RouteType.SubOptimal].index)
         suboptimal_indexes_for_plot = np.random.choice(df_suboptimal.index, size=remaining, replace=False)
         df_suboptimal_for_plot= df_suboptimal.loc[suboptimal_indexes_for_plot]
-        df = pd.concat([df_optimal, df_suboptimal_for_plot])
+        df = pd.concat([df_first_two_in_list, df_optimal, df_suboptimal_for_plot])
         df = df.sort_index()
      
     plot_size = int(np.ceil(np.sqrt(len(df))))
@@ -430,7 +436,7 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
         label= df['x-axis'][df.index[i]]
         route_type= df['route_type'][df.index[i]]
 
-        plot_route(experiment_name, artifact_path, fig2, ax, MRP["size"],MRP["nest"], optimal_trapline, route, route_type, str(label))
+        plot_target_sequence(experiment_name, artifact_path, fig2, ax, int(MRP["size"]),MRP["nest"], optimal_trapline, route, route_type, str(label))
 
     plt.subplots_adjust(left=0.1, right=0.9, top=0.86, bottom=0.15)
     plt.pause(0.00000000001)
@@ -488,7 +494,7 @@ def plot_c_score_stability_distribution(experiment_name, artifact_path, sample_r
 
     c_score_indexes = np.array(c_score_indexes) * sample_rate # scale up from the plot (sample) rate
 
-    sns.histplot(c_score_indexes, bins=20, ax=ax)
+    sns.histplot(c_score_indexes, bins=20, ax=ax, edgecolor = "black")
     
     ax.set_xlabel('Episode That C Score Stabilises')
     ax.set_ylabel('Frequency')
@@ -500,4 +506,43 @@ def plot_c_score_stability_distribution(experiment_name, artifact_path, sample_r
     filepath = os.path.join(artifact_path, experiment_name + '_c_score_stability')
     fig.savefig(filepath + '.png')
 
+    plt.pause(0.00000000001)
+
+
+def plot_target_sequence_length_distribution(experiment_name, artifact_path, num_runs_in_experiment, df_target_sequence_data):
+
+    df = df_target_sequence_data.groupby(['sequence_manhattan_length']).sum()
+    
+    filepath = os.path.join(artifact_path, experiment_name + '_sequence_manhattan_length')
+    df.to_csv(filepath + '.csv')
+    
+    # bit of a hack as I can't work out how to plot a histogram of grouped data!
+    # reformatting for histogram
+    hist_list = []
+    for i in df.index:
+        if df.loc[i].name != 0:
+            hist_list = hist_list + [df.loc[i].name] * df.loc[i, "target_sequence_count"]
+
+    fig, ax = plt.subplots()
+    sns.set_theme(style="whitegrid")
+
+    bins=np.arange(0.475, 1.575, 0.05) # 1 is the optimal length.
+    sns.histplot(hist_list, bins=bins, ax=ax, edgecolor = "black")
+    
+    
+    ax.set_xlabel('Normalised Target Sequence Length')
+    ax.set_title(experiment_name, fontsize=10)
+
+    ax.set_yscale('log')
+    ax.set_ylim(0, num_runs_in_experiment)
+    ax.set_ylabel('Logarithmic Count of Target Sequences')
+
+    ax.xaxis.get_ticklocs(minor=True)
+    ax.minorticks_on()
+    ax.grid()
+
+    fig.suptitle("Target Sequence Length Histogram")
+    fig.savefig(filepath + '.png')
+
+    #plt.subplots_adjust(left=0.1, right=0.9, top=0.83, bottom=0.15)
     plt.pause(0.00000000001)
