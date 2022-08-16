@@ -26,7 +26,7 @@ from c_score import get_C_scores_index_for_run
 #experiment_name = "analyse_bc6e223900244462b7898b0b511a9a4b_mrp_10_negative_array_ohashi_gs_1000_runs" #best 10 negative ohashi, 200 episodes, 1000 runs
 experiment_name = "analyse_cb41737061ea435e8b43abfddc0258cf_mrp_10_positive_array_ohashi_gs_1000_runs" #best 10 positive ohashi, 200 episodes, 1000 runs
 
-artifact_path = "sussex/Dissertation/artifacts"
+artifact_path = "artifacts"
 
 data = get_experiment_runs_data(experiment_name) 
 
@@ -109,7 +109,7 @@ results["c_score_indexes"] = [x[0] for x in route_c_scores]
 results["c_score_indexes_rate_of_change"] = [x[1] for x in route_c_scores]
 
 #save results to file
-results.to_csv("sussex/Dissertation/artifacts/" + experiment_name + "_results")
+results.to_csv("artifacts/" + experiment_name + "_results")
 
 # get a count of all the different routes of the traplines from each run
 route_count_for_experiment = pd.Series(results["target_sequence"]).value_counts().sort_values(ascending=False)

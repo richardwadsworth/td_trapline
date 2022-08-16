@@ -9,10 +9,10 @@ def register_gym(dev_mode=False):
     import os
     import shutil
 
-    source = "sussex/Dissertation/src/foraging_agent.py"
+    source = "src/foraging_agent.py"
     if dev_mode:
         
-        root = "./sussex/Dissertation/gym/"    
+        root = "./gym/"    
         sys.path.insert(1, root)
     else:
         root = site.getsitepackages()[0]

@@ -16,7 +16,6 @@ def mrp_2_test_array():
     MRP = { 
         "name": "mrp_2_test_array",
         "size":  size,
-        "optimal_sequence_length": 6,
         "nest":map_coord_to_index(size, 1, 1),
         "targets": [(map_coord_to_index(size, 4, 4),1.0),
                     (map_coord_to_index(size, 7, 7),1.0)
@@ -31,7 +30,6 @@ def mrp_3_test_array():
     MRP = { 
         "name": "mrp_3_test_array",
         "size":  size,
-        "optimal_sequence_length": 15,
         "nest":map_coord_to_index(size, 1, 1),
             "targets": [(map_coord_to_index(size, 2, 4),1.0),
                         (map_coord_to_index(size, 7, 7),1.0),
@@ -43,27 +41,25 @@ def mrp_3_test_array():
 
 def mrp_10_positive_array_ohashi():
     # positive array, offest nest, based on ohashi et al 2006
-    size = 15
+    size = 19
     MRP = {
             "name": "mrp_10_positive_array_ohashi",
             "size":  size,
-            "optimal_sequence_length": 21,
-            "nest":map_coord_to_index(size, 7, 2),
+            "nest":map_coord_to_index(size, 9, 2),
             "targets": [
-                    (map_coord_to_index(size, 7, 4),1.0), 
-                    (map_coord_to_index(size, 9, 5),1.0),
-                    (map_coord_to_index(size, 9, 7),1.0),
-                    (map_coord_to_index(size, 9, 9),1.0),
-                    (map_coord_to_index(size, 9, 11),1.0),
-                    (map_coord_to_index(size, 7, 12),1.0),
-                    (map_coord_to_index(size, 5, 11),1.0),
-                    (map_coord_to_index(size, 5, 9),1.0),
-                    (map_coord_to_index(size, 5, 7),1.0),
-                    (map_coord_to_index(size, 5, 5),1.0)
+                    (map_coord_to_index(size, 9, 4),1.0), 
+                    (map_coord_to_index(size, 12, 6),1.0),
+                    (map_coord_to_index(size, 12, 8),1.0),
+                    (map_coord_to_index(size, 12, 10),1.0),
+                    (map_coord_to_index(size, 12, 12),1.0),
+                    (map_coord_to_index(size, 9, 14),1.0),
+                    (map_coord_to_index(size, 6, 12),1.0),
+                    (map_coord_to_index(size, 6, 10),1.0),
+                    (map_coord_to_index(size, 6, 8),1.0),
+                    (map_coord_to_index(size, 6, 6),1.0)
                     ]
         }
     return dump_mrp(MRP)
-
 
 def mrp_10_negative_array_ohashi():
     # negative array, offest nest, based on ohashi et al 2006
@@ -71,7 +67,6 @@ def mrp_10_negative_array_ohashi():
     MRP = {
             "name": "mrp_10_negative_array_ohashi",
             "size":  size,
-            "optimal_sequence_length": 23,
             "nest":map_coord_to_index(size, 9, 2),
             "targets": [
                     (map_coord_to_index(size, 9, 4),1.0), 

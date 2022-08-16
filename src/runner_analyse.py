@@ -14,9 +14,20 @@ if __name__ == "__main__":
 
     NUM_REPEAT_RUNS = 1000
     
-    run_id = "cb41737061ea435e8b43abfddc0258cf" # positive 10
-    
+    '''
+    ######################################################
+     EDIT THE run_id value to change which hyper-parameter set is used in the simulations
+    ######################################################
+    '''
+    #run_id = "cb41737061ea435e8b43abfddc0258cf" # positive 10
     run_id = "bc6e223900244462b7898b0b511a9a4b" # negative 10
+    '''
+    ######################################################
+     END
+
+     run_id
+    ######################################################
+    '''
     
     run = mlflow.get_run(run_id) #best 10 positive, 250 episodes
 

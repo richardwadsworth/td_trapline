@@ -14,16 +14,30 @@ from runner_utils import train_parallel
 from mrp import *
 from json import loads, dumps
 
-'''
-######################################################
-# hyper-parameters for Actor Critic TD(lambda) model
-#
-# EDIT the Parameter set below and then run the script.
-#
-######################################################
-'''
-mrp_function = mrp_10_positive_array_ohashi() # or mrp_10_positive_array_ohashi()
 
+
+'''
+######################################################
+ EDIT THE mrp_function value to change the arena (target spatial arrangement)
+######################################################
+ '''
+mrp_function = mrp_10_positive_array_ohashi() # or mrp_10_positive_array_ohashi()
+'''
+######################################################
+ END
+
+ mrp_function
+######################################################
+'''
+
+'''
+######################################################
+ hyper-parameters for Actor Critic TD(lambda) model
+
+ EDIT the Parameter set below and then run the script.
+
+######################################################
+'''
 episodes = [200] # range of total number of episodes in training run
 steps = [100] # range of  episode lengths
 
@@ -49,10 +63,10 @@ change_in_orientation_reward = [0]#-stationary_reward*0.5 #negative reward if or
 
 '''
 ######################################################
-#
-# END
-#
-# hyper-parameters for Actor Critic TD(lambda) model
+
+ END
+
+ hyper-parameters for Actor Critic TD(lambda) model
 ######################################################
 '''
 

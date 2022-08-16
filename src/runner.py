@@ -9,7 +9,7 @@ from plots import PlotType
 from mrp import *
 from json import loads
 # parameters for sarsa(lambda)
-MRP = mrp_10_positive_array_ohashi()
+MRP = mrp_10_positive_array_ohashi_2()
 
 rng = np.random.default_rng() # random number generator
 

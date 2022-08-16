@@ -7,8 +7,20 @@ import seaborn as sns
 from mlflow_utils import get_experiment_runs_data
  
 
+'''
+######################################################
+ EDIT THE experiment_name value to change which hyper-parameter grid search results are parsed
+######################################################
+ '''
 #experiment_name = "mrp_10_negative_array_ohashi_gs" # 10 negative ohashi
 experiment_name = "mrp_10_positive_array_ohashi_gs" #10 positive ohashi
+'''
+######################################################
+ END
+
+ experiment_name
+######################################################
+'''
 
 data = get_experiment_runs_data(experiment_name) 
 
