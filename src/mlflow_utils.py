@@ -11,7 +11,7 @@ def get_experiment_runs_data(experiment_name):
 
     experiment = mlflow.get_experiment_by_name(experiment_name)
     if experiment == None:
-        raise ValueError("MlFlow experiment not found. {}.".format(experiment_name))
+        raise ValueError("MlFlow experiment '{}' not found.".format(experiment_name))
     print("Experiment name {}.".format(experiment.name))
 
     experiment_artifact_location = experiment.artifact_location

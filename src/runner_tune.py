@@ -34,8 +34,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("mrp_function_name")
     args = parser.parse_args()
-    args.mrp_function_name
-
+    
     mrp_function  = funcdict.get(args.mrp_function_name, None)
     if mrp_function == None:
         parser.error("Argument mrp_function_name {} is not valid.".format(args.mrp_function_name))
