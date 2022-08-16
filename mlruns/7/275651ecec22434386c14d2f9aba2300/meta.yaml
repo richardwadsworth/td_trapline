@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/richard/Documents/projects/py_learning/mlruns/7/275651ecec22434386c14d2f9aba2300/artifacts
+end_time: 1660594128763
+entry_point_name: ''
+experiment_id: '7'
+lifecycle_stage: active
+name: ''
+run_id: 275651ecec22434386c14d2f9aba2300
+run_uuid: 275651ecec22434386c14d2f9aba2300
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1660594116984
+status: 3
+tags: []
+user_id: unknown

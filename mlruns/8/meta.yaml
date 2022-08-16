@@ -1,0 +1,4 @@
+artifact_location: file:///Users/richard/Documents/projects/py_learning/mlruns/8
+experiment_id: '8'
+lifecycle_stage: active
+name: analyse_bc6e223900244462b7898b0b511a9a4b_mrp_10_negative_array_ohashi_gs_1000_runs

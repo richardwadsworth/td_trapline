@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/richard/Documents/projects/py_learning/sussex/Dissertation/mlruns/9/361fc2a1b8184aa18bcc88c91e5a4ff0/artifacts
+end_time: 1660643195443
+entry_point_name: ''
+experiment_id: '9'
+lifecycle_stage: active
+name: ''
+run_id: 361fc2a1b8184aa18bcc88c91e5a4ff0
+run_uuid: 361fc2a1b8184aa18bcc88c91e5a4ff0
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1660643185942
+status: 3
+tags: []
+user_id: unknown
