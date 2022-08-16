@@ -408,7 +408,7 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
         df_optimal = df.drop(df[df['route_type'] != RouteType.Optimal].index)
         
         #drop from the first two if they are in fact the optimal routes
-        df_first_two_in_list = df_first_two_in_list.drop(df_optimal.index)
+        df_first_two_in_list = df_first_two_in_list.drop(df_optimal.index, errors='ignore')
 
         remaining = MAX_NUM_ROUTE_PLOTS - (len(df_first_two_in_list) + len(df_optimal))
 

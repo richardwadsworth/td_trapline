@@ -16,11 +16,8 @@ def get_experiment_runs_data(experiment_name):
 
     experiment_artifact_location = experiment.artifact_location
 
-    wd = os.path.abspath(os.getcwd())
-    
     p = urlparse(experiment_artifact_location)
-    experiment_dir = os.path.join(wd, p.path)
-    files = [f for f in os.listdir(experiment_dir) if not f=="meta.yaml"] # get a list of all files in the dir
+    files = [f for f in os.listdir(p.path) if not f=="meta.yaml" and not f==".DS_Store"] # get a list of all files in the dir
     all_observations = []
     all_performances = []
     all_runs = []
