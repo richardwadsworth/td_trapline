@@ -11,14 +11,14 @@
  Call this script passing the in the mrp function name as the argument.
 
  e.g. 
- python ./runner_tune.py mrp_10_positive_array_ohashi
+ python ./src/runner_tune.py mrp_10_positive_array_ohashi
  or
- python ./runner_tune.py mrp_10_negative_array_ohashi
+ python ./src/runner_tune.py mrp_10_negative_array_ohashi
 
 '''
-import argparse
 from gym_utils import register_gym
 register_gym()
+import argparse
 from runner_utils import train_parallel
 from mrp import *
 from json import loads, dumps

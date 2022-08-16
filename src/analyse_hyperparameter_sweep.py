@@ -5,7 +5,7 @@
  Call this script by passing the in the grid search experiment name as the argument.
 
  e.g. 
- python ./analyse_hyperparameter_sweep.py mrp_10_positive_array_ohashi_gs
+  python ./src/analyse_hyperparameter_sweep.py mrp_10_positive_array_ohashi_gs
  
 '''
 import argparse
