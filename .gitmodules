@@ -1,3 +1,4 @@
 [submodule "submodules/gym"]
 	path = submodules/gym
 	url = git@github.com:openai/gym.git
+	ignore = dirty
