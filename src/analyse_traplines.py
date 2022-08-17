@@ -120,7 +120,7 @@ def main():
     results["c_score_indexes_rate_of_change"] = [x[1] for x in route_c_scores]
 
     #save results to file
-    results.to_csv("artifacts/" + experiment_name + "_results")
+    results.to_csv("artifacts/" + experiment_name + "_results.csv")
 
     # get a count of all the different routes of the traplines from each run
     route_count_for_experiment = pd.Series(results["target_sequence"]).value_counts().sort_values(ascending=False)

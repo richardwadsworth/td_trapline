@@ -94,11 +94,11 @@ class Test_Distance(unittest.TestCase):
     def test_get_manhattan_distance_positive(self):
         
         # positive array
-        mrp = loads(mrp_10_positive_array_ohashi_2())
+        mrp = loads(mrp_10_positive_array_ohashi())
         size = mrp["size"]
         route1=[x[0] for x in mrp["targets"]]
         distance1 = get_manhattan_distance(size, route1)
-        self.assertEqual(distance1, 21)
+        self.assertEqual(distance1, 27)
         
     def test_get_manhattan_distance_negative(self):
         

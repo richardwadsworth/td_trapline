@@ -2,13 +2,13 @@ from json import loads
 import site
 import sys
 from utils import map_index_to_coord
+from os.path import exists
+import os
+import shutil
 
 def register_gym(dev_mode=False):
 
-    from os.path import exists
-    import os
-    import shutil
-
+    
     source = "src/foraging_agent.py"
     if dev_mode:
         

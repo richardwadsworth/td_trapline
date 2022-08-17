@@ -2,6 +2,7 @@
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 from mlflow_utils import get_experiment_runs_data
 import seaborn as sns
 sns.set_theme(style="whitegrid")
@@ -20,6 +21,7 @@ def main():
     all_runs_done = data["done"]
     sample_rate = int(data["params"][0]["plot_rate"])
 
+    artifact_path = "artifacts"
 
     total_num_samples = all_runs_in_experiment.shape[0]
 
@@ -72,6 +74,10 @@ def main():
     ax.legend(loc='upper left')
     ax.set_xlabel('Episode')
     ax.set_ylabel('Number of steps')
+
+    filepath = os.path.join(artifact_path, args.experiment_name + '_mean_steps.png')
+    plt.savefig(filepath, bbox_inches='tight', format='png')
+
     plt.show()
 
 if __name__ == "__main__":

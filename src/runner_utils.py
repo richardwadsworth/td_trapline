@@ -4,6 +4,8 @@ from rl_td import train
 from q_function import initialise_actor, initialise_critic, get_q_pretty_print, get_optimal_q_policy_pretty_print
 from policies import GreedyDirectionalPolicy, SoftmaxDirectionalPolicy
 from plots import plotAgentPath, plotActionStateQuiver, PlotType
+from plots import plot_performance, initialise_plots, plot_traffic_noise
+import matplotlib.pyplot as plt
 
 from ray.tune.integration.mlflow import MLflowLoggerCallback
 from ray import tune
@@ -152,10 +154,6 @@ def train_parallel_with_config(num_samples,
             save_artifact=True)])
 
     return analysis
-
-
-from plots import plot_performance, initialise_plots, plot_traffic_greyscale, plot_traffic_noise, PlotType
-import matplotlib.pyplot as plt
 
 def train_fnn(is_stochastic,
             size, 

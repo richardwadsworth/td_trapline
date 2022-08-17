@@ -63,7 +63,7 @@ do_in_episode_plots=PlotType.Full
 
 size = int(loads(MRP)["size"])
 
-if __name__ == "__main__":
+def main():
 
     train_fnn(is_stochastic,
             size, 
@@ -87,6 +87,7 @@ if __name__ == "__main__":
             rng,
             threshold=threshold)
 
-        
+if __name__ == "__main__":
+   main()
 
 
