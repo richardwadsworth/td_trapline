@@ -15,14 +15,14 @@ def main():
 
     config = run.data.params
 
-    threshold = 9.7 # the cumulative reward needed to stop the simulation loop kicked off by this script
+    threshold = 9.72 # the cumulative reward needed to stop the simulation loop kicked off by this script
 
     rng = np.random.default_rng() # random number generator
 
     is_stochastic = False
     plot_rate = 5 # rate at which to plot predictions
     record_stats = True
-    do_in_episode_plots=PlotType.Full 
+    do_in_episode_plots=PlotType.Minimal 
 
     size = int(loads(config["MRP"])["size"])
 

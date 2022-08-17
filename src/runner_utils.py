@@ -11,7 +11,6 @@ from ray.tune.integration.mlflow import MLflowLoggerCallback
 from ray import tune
 import mlflow
 
-
 def train_fn(config):
 
     is_stochastic = False

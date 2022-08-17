@@ -107,7 +107,7 @@ def plotActionStateQuiver(env, q, fig1, ax1, ax2, xs_target, ys_target):
     QP = ax1.quiver(ii,jj, U_norm, V_norm, scale=10)
     ax1.set_aspect('equal')
     ax1.invert_yaxis()
-    ax1.title.set_text('Normalised and scaled')
+    ax1.title.set_text('Normalised Quiverplot')
 
 
     QP = ax2.quiver(ii,jj, U, V)
@@ -148,7 +148,7 @@ def plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_
 
     ts = np.arange(0, len(xs))
 
-    doColourVaryingPlot2d(xs, ys, ts, fig1, ax3, map='plasma', showBar=showbar)  # only draw colorbar once
+    doColourVaryingPlot2d(xs, ys, ts, fig1, ax3, map='plasma', showBar=showbar, barlabel='episode')  # only draw colorbar once
     
     # fix plot axis proportions to equal
     ax3.set_aspect('equal')
