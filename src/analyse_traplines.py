@@ -21,7 +21,7 @@ from json import loads
 from  manhattan import get_manhattan_distance
 from mlflow_utils import get_experiment_runs_data
 from utils import get_sliding_window_sequence
-from trapline import get_optimal_trapline_for_diamond_array, get_valid_target_sequence_from_route, RouteType
+from trapline import get_optimal_trapline_for_diamond_array, get_valid_target_sequence_from_route, TargetSequenceType
 from plots import plot_trapline_distribution, plot_c_Scores, plot_c_score_stability_distribution, plot_target_sequence_length_distribution
 from c_score import get_C_scores_index_for_run
  

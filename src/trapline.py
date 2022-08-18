@@ -1,6 +1,6 @@
 from enum import Enum
 
-class RouteType(Enum):
+class TargetSequenceType(Enum):
     Incomplete = 0 # not all targets found
     SubOptimal = 1 # all targets found but not optimal, TSP route
     Optimal = 2 # all targets found using optimal route

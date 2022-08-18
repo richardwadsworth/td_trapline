@@ -11,7 +11,7 @@ from enum import Enum
 from IPython.display import display, clear_output
 from sklearn.preprocessing import Normalizer
 from timeColouredPlots import doColourVaryingPlot2d
-from trapline import RouteType
+from trapline import TargetSequenceType
 from utils import map_index_to_coord
 from foraging_agent import ActionType
 from utils import map_index_to_coord
@@ -269,15 +269,15 @@ def plot_traffic_greyscale(env, fig, ax, xs_target, ys_target, data, title):
     clear_output(wait = True)
     plt.pause(0.0000000001)
 
-def plot_target_sequence(experiment_name, artifact_path, fig, ax, size, nest, targets, route, route_type, subtitle):
+def plot_target_sequence(experiment_name, artifact_path, fig, ax, size, nest, targets, target_sequence, target_sequence_type, subtitle):
     
     remove_axis_ticks(ax)
 
-    route_coords = [map_index_to_coord(size, index) for index in route]
+    target_sequence_coords = [map_index_to_coord(size, index) for index in target_sequence]
     target_coords = [map_index_to_coord(size, index) for index in targets]
     
     from utils import get_sliding_window_sequence
-    sequence = get_sliding_window_sequence(2,len(route_coords))
+    sequence = get_sliding_window_sequence(2,len(target_sequence_coords))
 
     ax.set_xlim(0,size)
     ax.set_ylim(0,size)
@@ -289,12 +289,12 @@ def plot_target_sequence(experiment_name, artifact_path, fig, ax, size, nest, ta
     ys_target = [coord[1] for coord in target_coords]
     ax.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
     
-    if route_type == RouteType.Optimal:
+    if target_sequence_type == TargetSequenceType.Optimal:
         color = 'g' 
         linestyle = 'solid' 
         label= 'Optimal' 
     
-    elif route_type == RouteType.SubOptimal:
+    elif target_sequence_type == TargetSequenceType.SubOptimal:
 
         color = 'b' 
         linestyle = 'dashed'
@@ -305,8 +305,8 @@ def plot_target_sequence(experiment_name, artifact_path, fig, ax, size, nest, ta
         label= 'Incomplete'
 
     for window in sequence:
-        xy1 = route_coords[window[0]]
-        xy2 = route_coords[window[1]]
+        xy1 = target_sequence_coords[window[0]]
+        xy2 = target_sequence_coords[window[1]]
         t = ax.annotate("", xy=xy2, xytext=xy1,
                 arrowprops=dict(color=color, arrowstyle="->", lw=2.5, linestyle=linestyle))
     
@@ -330,7 +330,7 @@ def plot_target_sequence(experiment_name, artifact_path, fig, ax, size, nest, ta
 
 def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_experiment, MRP, df_target_sequence_data, optimal_trapline, optimal_trapline_reversed):
 
-    LABEL_INVALID_ROUTE = 'Invalid Route'
+    LABEL_INVALID_TRAPLINE = 'Invalid Trapline'
 
     df = df_target_sequence_data # alias for ease of reading
 
@@ -339,22 +339,22 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
     x_axis = []
     for i, r in enumerate(df["target_sequence"]):
         if r == []:
-            x_axis.append(LABEL_INVALID_ROUTE)
+            x_axis.append(LABEL_INVALID_TRAPLINE)
         else:
             x_axis.append(str(counter))
             counter += 1
     df['x-axis'] = x_axis
 
-    # determine the optimality of each route
-    def get_route_type(target_sequence):
+    # determine the optimality of each target sequence
+    def get_target_sequence_type(target_sequence):
         if (target_sequence == optimal_trapline) or (target_sequence == optimal_trapline_reversed):
-            return RouteType.Optimal
+            return TargetSequenceType.Optimal
         elif len(target_sequence) == len(optimal_trapline):
-            return RouteType.SubOptimal # all targets found, but not in the optimal order
+            return TargetSequenceType.SubOptimal # all targets found, but not in the optimal order
         else:
-            return RouteType.Incomplete
+            return TargetSequenceType.Incomplete
 
-    df['route_type'] = [get_route_type(route) for route in df["target_sequence"]]
+    df['target_sequence_type'] = [get_target_sequence_type(target_sequence) for target_sequence in df["target_sequence"]]
 
     #plot bar chart
     fig1, ax = plt.subplots(1,1, figsize=(12,5))
@@ -368,20 +368,19 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
     ax.set_ylim(0, num_runs_in_experiment)
     ax.set_ylabel('Logarithmic Count of Trapline')
 
-    #ax.set_ylabel('Count of Routes')
     fig1.suptitle("Trapline Distribution")
     ax.set_title(experiment_name, fontsize=10)
 
-    # highlight the optimal traplines if present in the results
+    # highlight the optimal target sequences, if present in the results
     for i in range(len(df)):
         label = df['x-axis'][i]
         route = df["target_sequence"][i]
-        route_type = df['route_type'][i]
-        if route_type == RouteType.Incomplete:
+        target_sequence_type = df['target_sequence_type'][i]
+        if target_sequence_type == TargetSequenceType.Incomplete:
             bar_list[i].set_color('grey')
-        elif route_type == RouteType.Optimal:
+        elif target_sequence_type == TargetSequenceType.Optimal:
             bar_list[i].set_color('g')
-        elif route_type == RouteType.SubOptimal:
+        elif target_sequence_type == TargetSequenceType.SubOptimal:
             bar_list[i].set_color('b')
 
     ax.set_xticklabels(df['x-axis'], rotation = 90)
@@ -395,25 +394,25 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
     fig1.savefig(filepath + '.png')
 
 
-    # drop the route count with no discernable target based route found
-    df = df.drop(df[df['x-axis'] == LABEL_INVALID_ROUTE].index)
+    # drop the target sequence count with no discernable target based route found
+    df = df.drop(df[df['x-axis'] == LABEL_INVALID_TRAPLINE].index)
 
-    # if there are more than 9 routes, choose the optimal and 7 random
+    # if there are more than 9 target sequences, choose the optimal and 7 random
     MAX_NUM_ROUTE_PLOTS = 9
     if len(df)>MAX_NUM_ROUTE_PLOTS:
 
         df_first_two_in_list = df.iloc[[0,1]]
 
-        #find index of optimal routes
-        df_optimal = df.drop(df[df['route_type'] != RouteType.Optimal].index)
+        #find index of optimal target sequences
+        df_optimal = df.drop(df[df['target_sequence_type'] != TargetSequenceType.Optimal].index)
         
-        #drop from the first two if they are in fact the optimal routes
+        #drop from the first two if they are in fact the optimal target sequences
         df_first_two_in_list = df_first_two_in_list.drop(df_optimal.index, errors='ignore')
 
         remaining = MAX_NUM_ROUTE_PLOTS - (len(df_first_two_in_list) + len(df_optimal))
 
-        # get suboptimal routes and select a random selection for display
-        df_suboptimal = df.drop(df[df['route_type'] != RouteType.SubOptimal].index)
+        # get suboptimal target sequences and select a random selection for display
+        df_suboptimal = df.drop(df[df['target_sequence_type'] != TargetSequenceType.SubOptimal].index)
         suboptimal_indexes_for_plot = np.random.choice(df_suboptimal.index, size=remaining, replace=False)
         df_suboptimal_for_plot= df_suboptimal.loc[suboptimal_indexes_for_plot]
         df = pd.concat([df_first_two_in_list, df_optimal, df_suboptimal_for_plot])
@@ -431,12 +430,12 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
 
         if i >= len(df):
             break
-        # Convert string representation of route to list using json
-        route = df["target_sequence"][df.index[i]]
+        # Convert string representation of target sequence to list using json
+        target_sequence = df["target_sequence"][df.index[i]]
         label= df['x-axis'][df.index[i]]
-        route_type= df['route_type'][df.index[i]]
+        target_sequence_type= df['target_sequence_type'][df.index[i]]
         ax.grid() # turn off the grid
-        plot_target_sequence(experiment_name, artifact_path, fig2, ax, int(MRP["size"]),MRP["nest"], optimal_trapline, route, route_type, str(label))
+        plot_target_sequence(experiment_name, artifact_path, fig2, ax, int(MRP["size"]),MRP["nest"], optimal_trapline, target_sequence, target_sequence_type, str(label))
 
     plt.subplots_adjust(left=0.1, right=0.9, top=0.86, bottom=0.15)
     plt.pause(0.00000000001)
