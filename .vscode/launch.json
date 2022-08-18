@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
-            "args": ["600c1e7e101d401399cf25d789d84021"]
+            "args": ["analyse_600c1e7e101d401399cf25d789d84021_mrp_10_negative_array_ohashi_gs_1000_runs"]
         }
     ]
 }

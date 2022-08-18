@@ -313,7 +313,7 @@ def plot_target_sequence(experiment_name, artifact_path, fig, ax, size, nest, ta
     ax.plot([0],[0], label=label, color=color, lw=2.5, linestyle=linestyle)
     ax.legend(loc='upper left')
     
-    ax.set_title("Route " + subtitle)
+    ax.set_title("Trapline " + subtitle)
     fig.tight_layout()
     ax.invert_yaxis()
     
@@ -321,7 +321,7 @@ def plot_target_sequence(experiment_name, artifact_path, fig, ax, size, nest, ta
         display(fig)    
     clear_output(wait = True)
 
-    filepath = os.path.join(artifact_path, experiment_name + '_trapline_route_lookup')
+    filepath = os.path.join(artifact_path, experiment_name + '_trapline_id_lookup')
     fig.savefig(filepath + '.png')
 
 
@@ -362,14 +362,14 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
 
     bar_list = ax.bar(df['x-axis'], df["target_sequence_count"], edgecolor = "black") # plot the bar chart
     
-    ax.set_xlabel('Routes')
+    ax.set_xlabel('Trapline ID')
 
     ax.set_yscale('log')
     ax.set_ylim(0, num_runs_in_experiment)
-    ax.set_ylabel('Logarithmic Count of Routes')
+    ax.set_ylabel('Logarithmic Count of Trapline')
 
     #ax.set_ylabel('Count of Routes')
-    fig1.suptitle("Trapline Distribution by Route")
+    fig1.suptitle("Trapline Distribution")
     ax.set_title(experiment_name, fontsize=10)
 
     # highlight the optimal traplines if present in the results
@@ -391,7 +391,7 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
     
     fig1.tight_layout()
     
-    filepath = os.path.join(artifact_path, experiment_name + '_trapline_routes')
+    filepath = os.path.join(artifact_path, experiment_name + '_trapline_distribution')
     fig1.savefig(filepath + '.png')
 
 
@@ -423,7 +423,7 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
     fig2, axs = plt.subplots(plot_size, plot_size, figsize=(plot_size*3, plot_size*3))
     sns.set_theme(style="whitegrid")
     
-    fig2.suptitle("Trapline Lookup for Trapline Distribution by ID\n" + experiment_name, fontsize=10)
+    fig2.suptitle("Trapline ID Lookup for Trapline Distribution\n\n" + experiment_name, fontsize=10)
 
     axs = np.array(axs).reshape(-1)
 
@@ -542,18 +542,18 @@ def plot_target_sequence_length_distribution(experiment_name, artifact_path, num
     sns.histplot(hist_list, bins=bins, ax=ax, edgecolor = "black")
     
 
-    ax.set_xlabel('Normalised Target Sequence Length')
+    ax.set_xlabel('Normalised Trapline Length')
     ax.set_title(experiment_name, fontsize=10)
 
     ax.set_yscale('log')
     ax.set_ylim(0, num_runs_in_experiment)
-    ax.set_ylabel('Logarithmic Count of Target Sequences')
+    ax.set_ylabel('Logarithmic Count of Traplines')
 
     ax.xaxis.get_ticklocs(minor=True)
     ax.minorticks_on()
     ax.grid(b=True)
     
-    fig.suptitle("Target Sequence Length Histogram")
+    fig.suptitle("Trapline Length Histogram")
     fig.savefig(filepath + '.png')
 
     #plt.subplots_adjust(left=0.1, right=0.9, top=0.83, bottom=0.15)

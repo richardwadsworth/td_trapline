@@ -16,10 +16,12 @@ import json
 import os
 from os.path import exists
 import seaborn as sns
+sns.set_theme(style="whitegrid")
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.colors import ListedColormap
 from mlflow_utils import get_experiment_runs_data
+import seaborn as sns
  
 def main():
 
@@ -101,25 +103,18 @@ def main():
         output_results(file, results)
 
 
-    # axes instance
-    fig = plt.figure()
-    ax = plt.axes(projection='3d')
-    fig.add_axes(ax)
+    fig, ax  = plt.subplots()
+    
+    ax.scatter(score_softmax_5_mean, score_softmax_20_mean, marker='o', alpha=1)
 
-    # get colormap from seaborn
-    cmap = ListedColormap(sns.color_palette("crest", 256).as_hex())
-
-    # plot
-    sc = ax.scatter(score_softmax_mean, score_softmax_5_mean, score_softmax_20_mean, s=40, c=score_softmax_mean, cmap=cmap, marker='o', alpha=1)
-    ax.set_xlabel('Final Performance Score')
-    ax.set_ylabel('Mean Last 5 Performance Scores')
-    ax.set_zlabel('Mean Last 20 Performance Scores')
+    ax.set_xlabel('Mean Last 5 Performance Scores')
+    ax.set_ylabel('Mean Last 20 Performance Scores')
+    ax.set_ylim(8,10)
+    ax.set_xlim(8,10)
 
     fig.suptitle("Hyperparameter Gridsearch - Maximise Reward Performance")
     ax.set_title(args.experiment_name, fontsize=10)
 
-    plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
-    
     filepath = os.path.join(artifact_path, 'analyse_' + args.experiment_name + '_grid_search_scatter.png')
     plt.savefig(filepath, bbox_inches='tight', format='png')
 
