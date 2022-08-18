@@ -362,6 +362,9 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
 
     bar_list = ax.bar(df['x-axis'], df["target_sequence_count"], edgecolor = "black") # plot the bar chart
     
+    filepath = os.path.join(artifact_path, experiment_name + '_trapline_distribution')
+    df.to_csv(filepath + ".csv")
+
     ax.set_xlabel('Trapline ID')
 
     ax.set_yscale('log')
@@ -390,7 +393,7 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
     
     fig1.tight_layout()
     
-    filepath = os.path.join(artifact_path, experiment_name + '_trapline_distribution')
+    
     fig1.savefig(filepath + '.png')
 
 
@@ -469,12 +472,12 @@ def plot_c_Scores(experiment_name, artifact_path, sample_rate, c_score_indexes, 
     ax2.legend(loc='upper right')
 
     ax1.set_xlabel('Episode')
-    ax1.set_ylabel('Rate of change of C Score')
+    ax1.set_ylabel('(Smoothed) C Score')
     ax1.set_ylim(0, 1600)
     ax1.set_title("C Score per episode for all runs", fontsize=10)
 
     ax2.set_xlabel('Episode')
-    ax2.set_ylabel('(Smoothed) C Score')
+    ax2.set_ylabel('Rate of change of C Score')
     ax2.set_ylim(-400, 400)
     ax2.set_title("Rate of change of C Score per episode for all runs", fontsize=10)
 
@@ -493,22 +496,24 @@ def plot_c_score_stability_distribution(experiment_name, artifact_path, sample_r
     fig, ax = plt.subplots()
     sns.set_theme(style="whitegrid")
 
-    c_score_indexes = np.array(c_score_indexes) * sample_rate # scale up from the plot (sample) rate
+    c_score_indexes = np.array([index for index in c_score_indexes if index!=-1]) * sample_rate # scale up from the plot (sample) rate
 
     sns.histplot(c_score_indexes, bins=20, ax=ax, edgecolor = "black")
     
-    ax.set_xlabel('Episode That C Score Stabilises')
-    ax.set_ylabel('Frequency')
+    ax.xaxis.get_ticklocs(minor=True)
+    ax.minorticks_on()
+
+    ax.set_xlabel('C Score Stability Index')
+    ax.set_xlim(0, 200)
     
     ax.set_yscale('log')
     ax.set_ylim(0, 600)
-    ax.set_ylabel('Logarithmic Count of Routes')
+    ax.set_ylabel('Logarithmic Count of Index')
 
-    fig.suptitle("C Score Stability Histogram\n(Stability Threshold {})".format(stability_threshold))
+    fig.suptitle("C Score Stability Index Distribution")
     ax.set_title(experiment_name, fontsize=10)
 
-    ax.xaxis.get_ticklocs(minor=True)
-    ax.minorticks_on()
+    
     ax.grid(b=True)
 
 
