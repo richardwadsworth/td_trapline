@@ -51,6 +51,7 @@ class ForagingAgentRewards(gym.Wrapper):
         action: action to take
         stats:  whether to record stats about the current episode
         """
+        NEST_REWARD = 2
         obs, reward, done, truncated, info = self.env.step(action)
         index = obs[0]
 
@@ -62,9 +63,11 @@ class ForagingAgentRewards(gym.Wrapper):
             
             self.goal_rewards[index]['step_count'] = self.env._elapsed_steps #record when this goal was found
             self.targets_found_order.append(index) # record the id of the target
-            info["Target.found"] = True # update info to show an active target was found
+            info["Target.found"] = True # update info to show an active target was found 
 
-            done = (len(self.target_indices_local)==0)
+        elif index == self.nest_index and len(self.target_indices_local)==0: # all targets found and agent at nest
+            reward = NEST_REWARD
+            done=True
 
         else:
             # not done yet
