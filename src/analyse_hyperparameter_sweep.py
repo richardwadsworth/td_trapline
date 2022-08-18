@@ -49,39 +49,32 @@ def main():
     df['params'] = params
     df['run_ids'] = run_ids
     df['params_hash'] = np.array([hash_params(d) for d in params])
-    df['score_softmax'] = np.array(score_softmax)
+    #df['score_softmax'] = np.array(score_softmax)
     df['score_softmax_last_05'] = np.array(score_softmax_5)
     df['score_softmax_last_20'] = np.array(score_softmax_20)
 
     # get the mean scores for each set params
-    score_softmax_mean =df.groupby(by=['params_hash'])['score_softmax'].mean()
+    #score_softmax_mean =df.groupby(by=['params_hash'])['score_softmax'].mean()
     score_softmax_5_mean = df.groupby(by=['params_hash'])['score_softmax_last_05'].mean()
     score_softmax_20_mean = df.groupby(by=['params_hash'])['score_softmax_last_20'].mean()
 
-    #print out the best average score_softmax_20_mean
+    df_mean =  pd.DataFrame()
+    df_mean.index = score_softmax_5_mean.index
 
+    # find the first run_id in the set of parameters for the param hash
+    df_mean['run_id'] = [df.loc[df.params_hash==index]['run_ids'].iloc[0] for index in df_mean.index]
+    df_mean['score_softmax_5_mean'] = score_softmax_5_mean.values
+    df_mean['score_softmax_20_mean'] = score_softmax_20_mean.values
+
+    # remove params hash from output
+    df_mean = df_mean.reset_index().drop(['params_hash'], axis=1)
+
+    sort1 = df_mean.sort_values(['score_softmax_20_mean', 'score_softmax_5_mean'], ascending=[False, False])
+    sort2 = df_mean.sort_values(['score_softmax_5_mean', 'score_softmax_20_mean'], ascending=[False, False])
+    
     def output_results(f, r):
         print(r)
         f.write(r)
-
-    def get_best_average(file, df, column, column_name):
-
-        mean_max =  column.max()
-        param_hash_id_column_max =  column.idxmax()
-
-        #all param sets will be the same because we have grouped by the winning param set, so just take the last row
-        run_id = df.loc[df.params_hash==param_hash_id_column_max]['run_ids'].iloc[0] 
-        param_set = dict(df[df['run_ids']==run_id]['params'])
-        
-        results = ""
-        results += 'Best average {}: {}'.format(column_name, mean_max) + '\n'
-        results += 'Run ID: {}'.format(run_id) + '\n'
-        results += 'Param Hash: {}'.format(param_hash_id_column_max) + '\n'
-        results += 'Param set: {}'.format(param_set) + '\n'
-
-        output_results(file, results)
-
-        return run_id, mean_max
 
     #save results to file
     filepath = os.path.join(artifact_path, 'analyse_' + args.experiment_name + '_grid_search_results.csv')
@@ -90,18 +83,11 @@ def main():
 
     with open(filepath, "w+") as file:
 
-        score_softmax_mean_param_set_run_id, score_softmax_mean_param_set_score = get_best_average(file, df, score_softmax_mean, "score_softmax_mean")
-        score_softmax_5_mean_param_set_run_id, score_softmax_5_mean_param_set_score = get_best_average(file, df, score_softmax_5_mean, "score_softmax_5_mean")
-        score_softmax_20_mean_param_set_run_id, score_softmax_20_mean_param_set_score = get_best_average(file, df, score_softmax_20_mean, "score_softmax_20_mean")
-        
-        results=""
-        results+="Do the param set hashes match.  If so one set of config generated the best overall scores.\n"
-        results+="Summary\n"
-        results+="score_softmax_mean: Run ID: {} Score: {}".format(score_softmax_mean_param_set_run_id, score_softmax_mean_param_set_score) + "\n"
-        results+="score_softmax_5_mean: Run ID: {} Score: {}".format(score_softmax_5_mean_param_set_run_id, score_softmax_5_mean_param_set_score) + "\n"
-        results+="score_softmax_20_mean: Run ID: {} Score: {}".format(score_softmax_20_mean_param_set_run_id, score_softmax_20_mean_param_set_score)
-        output_results(file, results)
-
+        output_results(file, "Sorted by last 20 then last 5")
+        output_results(file, sort1.to_string())
+        output_results(file, "\n\n")
+        output_results(file, "Sorted by last 5 then last 20")
+        output_results(file, sort2.to_string())
 
     fig, ax  = plt.subplots()
     
@@ -109,8 +95,8 @@ def main():
 
     ax.set_xlabel('Mean Last 5 Performance Scores')
     ax.set_ylabel('Mean Last 20 Performance Scores')
-    ax.set_ylim(8,10)
-    ax.set_xlim(8,10)
+    ax.set_ylim(-7,10)
+    ax.set_xlim(-7,10)
 
     fig.suptitle("Hyperparameter Gridsearch - Maximise Reward Performance")
     ax.set_title(args.experiment_name, fontsize=10)
