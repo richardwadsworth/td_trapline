@@ -42,7 +42,7 @@ def train(env,
                + epsilon_end * inew) / epsilon_annealing_stop
 
         # initialise eligibility traces matrix to zero
-        E_critic = np.zeros((env.observation_space[1].n, env.observation_space[0].n, env.action_space.n))
+        E_critic = np.zeros((env.observation_space[1].n, env.observation_space[0].n))
         E_actor = np.zeros((env.observation_space[1].n, env.observation_space[0].n, env.action_space.n))
         
         # reset the environment
@@ -57,7 +57,7 @@ def train(env,
             E_critic = eligibility_decay * gamma * E_critic
             E_actor = eligibility_decay * gamma * E_actor
             
-            E_critic[observation[1], observation[0], action] = 1
+            E_critic[observation[1], observation[0]] = 1
             E_actor[observation[1], observation[0], action] = 1
             
             # step through the environment
@@ -73,7 +73,7 @@ def train(env,
             new_action = policy_train.action(actor, new_observation, epsilon)
 
             # Calculate the delta update and update the Q-table using the SARSA TD(lambda) rule:
-            td_error = reward + gamma * critic[new_observation[1], new_observation[0], new_action] - critic[observation[1], observation[0], action]
+            td_error = reward + gamma * critic[new_observation[1], new_observation[0]] - critic[observation[1], observation[0]]
             
             # update the actor and critic q learning tables
             critic = critic + alpha_critic * td_error * E_critic
