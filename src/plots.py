@@ -98,11 +98,11 @@ def plotActionStateQuiver(env, q, fig1, ax1, ax2, xs_target, ys_target):
     ax2.cla()
 
     nest_x, nest_y = map_index_to_coord(env.size, env.nest_index)
-    ax1.scatter(nest_x,nest_y, c='brown', s=100, marker='^') #origin
-    ax2.scatter(nest_x,nest_y, c='brown', s=100, marker='^') #origin
+    ax1.scatter(nest_x,nest_y, c='brown', s=50, marker='^') #origin
+    ax2.scatter(nest_x,nest_y, c='brown', s=50, marker='^') #origin
     
-    ax1.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
-    ax2.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
+    ax1.scatter(xs_target,ys_target, c='r', s=50, marker='o') #goal
+    ax2.scatter(xs_target,ys_target, c='r', s=50, marker='o') #goal
     
     QP = ax1.quiver(ii,jj, U_norm, V_norm, scale=10)
     ax1.set_aspect('equal')
@@ -135,9 +135,9 @@ def plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_
     ax3.cla()
 
     nest_x, nest_y = map_index_to_coord(env.size, env.nest_index)
-    ax3.scatter(nest_x,nest_y, c='brown', s=100, marker='^') #origin
+    ax3.scatter(nest_x,nest_y, c='brown', s=50, marker='^') #origin
     
-    ax3.scatter(xs_target,ys_target, c='brown', s=100, marker='o') #goal
+    ax3.scatter(xs_target,ys_target, c='brown', s=50, marker='o') #goal
     ax3.set_title("Agent path")
     ax3.grid()
 
@@ -194,8 +194,8 @@ def plot_traffic_noise(env, fig, ax, xs_coordinate_map, ys_coordinate_map, xs_ta
         plot(x, y)
 
     nest_x, nest_y = map_index_to_coord(env.size, env.nest_index)
-    ax.scatter(nest_x,nest_y, c='brown', s=100, marker='^') #origin
-    ax.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
+    ax.scatter(nest_x,nest_y, c='brown', s=50, marker='^') #origin
+    ax.scatter(xs_target,ys_target, c='r', s=50, marker='o') #goal
 
     ax.set_xlim(-1,env.size)
     ax.set_ylim(-1,env.size)
@@ -258,9 +258,9 @@ def plot_traffic_greyscale(env, fig, ax, xs_target, ys_target, data, title):
     # a.grid()
 
     nest_x, nest_y = map_index_to_coord(env.size, env.nest_index)
-    ax.scatter(nest_x,nest_y, c='brown', s=100, marker='^') #origin
+    ax.scatter(nest_x,nest_y, c='brown', s=50, marker='^') #origin
     
-    ax.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
+    ax.scatter(xs_target,ys_target, c='r', s=50, marker='o') #goal
     
     ax.invert_yaxis()
 
@@ -283,11 +283,11 @@ def plot_target_sequence(experiment_name, artifact_path, fig, ax, size, nest, ta
     ax.set_ylim(0,size)
 
     nest_x, nest_y = map_index_to_coord(size, nest)    
-    ax.scatter(nest_x,nest_y, c='brown', s=100, marker='^') #origin
+    ax.scatter(nest_x,nest_y, c='brown', s=50, marker='^') #origin
 
     xs_target = [coord[0] for coord in target_coords]
     ys_target = [coord[1] for coord in target_coords]
-    ax.scatter(xs_target,ys_target, c='r', s=100, marker='o') #goal
+    ax.scatter(xs_target,ys_target, c='r', s=50, marker='o') #goal
     
     if target_sequence_type == TargetSequenceType.Optimal:
         color = 'g' 
@@ -328,7 +328,7 @@ def plot_target_sequence(experiment_name, artifact_path, fig, ax, size, nest, ta
     plt.pause(0.0000000001)
 
 
-def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_experiment, MRP, df_target_sequence_data, optimal_trapline, optimal_trapline_reversed):
+def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_experiment, MRP, df_target_sequence_data, optimal_trapline):
 
     LABEL_INVALID_TRAPLINE = 'Invalid Trapline'
 
@@ -337,7 +337,7 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
     # build x-axis labels
     counter = 1
     x_axis = []
-    for i, r in enumerate(df["target_sequence"]):
+    for i, r in enumerate(df["target_sequence_including_nest"]):
         if r == []:
             x_axis.append(LABEL_INVALID_TRAPLINE)
         else:
@@ -346,15 +346,15 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
     df['x-axis'] = x_axis
 
     # determine the optimality of each target sequence
-    def get_target_sequence_type(target_sequence):
-        if (target_sequence == optimal_trapline) or (target_sequence == optimal_trapline_reversed):
+    def get_target_sequence_type(target_sequence_length):
+        if target_sequence_length == 1.0: # since the length is normalised we know the optimal length is 1
             return TargetSequenceType.Optimal
-        elif len(target_sequence) == len(optimal_trapline):
-            return TargetSequenceType.SubOptimal # all targets found, but not in the optimal order
-        else:
+        elif target_sequence_length == 0:
             return TargetSequenceType.Incomplete
+        else:
+            return TargetSequenceType.SubOptimal  # all targets found, but not in the optimal order
 
-    df['target_sequence_type'] = [get_target_sequence_type(target_sequence) for target_sequence in df["target_sequence"]]
+    df['target_sequence_type'] = [get_target_sequence_type(target_sequence) for target_sequence in df["sequence_manhattan_length"]]
 
     #plot bar chart
     fig1, ax = plt.subplots(1,1, figsize=(12,5))
@@ -377,7 +377,6 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
     # highlight the optimal target sequences, if present in the results
     for i in range(len(df)):
         label = df['x-axis'][i]
-        route = df["target_sequence"][i]
         target_sequence_type = df['target_sequence_type'][i]
         if target_sequence_type == TargetSequenceType.Incomplete:
             bar_list[i].set_color('grey')
@@ -434,7 +433,7 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
         if i >= len(df):
             break
         # Convert string representation of target sequence to list using json
-        target_sequence = df["target_sequence"][df.index[i]]
+        target_sequence = df["target_sequence_including_nest"][df.index[i]]
         label= df['x-axis'][df.index[i]]
         target_sequence_type= df['target_sequence_type'][df.index[i]]
         ax.grid() # turn off the grid

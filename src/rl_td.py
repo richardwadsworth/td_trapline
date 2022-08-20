@@ -1,7 +1,6 @@
 import numpy as np
 from plots import plotAgentPath, plotActionStateQuiver, PlotType
 
-
 def train(env, 
         episodes, 
         steps, 
@@ -15,13 +14,14 @@ def train(env,
         actor, 
         critic, 
         policy_train,
-        policy_predict,
+        policy_predict, # TODO remove
         plot_rate,
         plot_data, 
         sim_data,
         do_plot=PlotType.NoPlots,
         record_stats=True,
-        clip=False):
+        clip=False,
+        nectar_stomach_limit=10):
 
     abend=False
     performance_counter = 0
@@ -45,7 +45,9 @@ def train(env,
         E_critic = np.zeros((env.observation_space[1].n, env.observation_space[0].n))
         E_actor = np.zeros((env.observation_space[1].n, env.observation_space[0].n, env.action_space.n))
         
-        # reset the environment
+        nectar_stomach_level = 0 
+
+        # reset the environment.  always start from the nest
         observation = env.reset()
 
         # get the first action using the annealed softmax policy
@@ -63,14 +65,21 @@ def train(env,
             # step through the environment
             new_observation, reward, done, truncated, info = env.step(action)
 
+            if info.get("Target.found", False):
+                nectar_stomach_level = nectar_stomach_level + 1
+
             if clip:
+                # end this episode early as it is unlikely to meet the threshold.  Only used during developement
                 if episode == 75 and performance[performance_counter-1]  < 2.5 and not (done or truncated):
                     print("Abending.. poor performance ({})".format(str(performance[performance_counter-1])))
                     abend = True
                     # reward -= 1
+            
+            # the the agent's crop capacity is full then it's time to head home
+            homing_beacon_activated =  (nectar_stomach_level >= nectar_stomach_limit)
                 
             # get the next action using the annealed softmax policy
-            new_action = policy_train.action(actor, new_observation, epsilon)
+            new_action = policy_train.action(actor, new_observation, epsilon, homing_beacon_activated)
 
             # Calculate the delta update and update the Q-table using the SARSA TD(lambda) rule:
             td_error = reward + gamma * critic[new_observation[1], new_observation[0]] - critic[observation[1], observation[0]]
