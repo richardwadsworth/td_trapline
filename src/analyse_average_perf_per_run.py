@@ -57,7 +57,7 @@ def main():
     fig.suptitle("Mean Learning Performance per Episode")
     ax.set_title(experiment_name, fontsize=10)
 
-    ax.errorbar(xs1, ys1,yerr=zs1, label='All Targets Found')
+    #ax.errorbar(xs1, ys1,yerr=zs1, label='All Targets Found')  # uncomment this to see only valid runs
     ax.errorbar(xs2, ys2,yerr=zs2, label='All runs', alpha=0.7)
 
     ax.legend(loc='upper left')

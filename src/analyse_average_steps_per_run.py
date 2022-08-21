@@ -68,12 +68,14 @@ def main():
     fig.suptitle('Mean Num Steps per Episode')
     ax.set_title(experiment_name, fontsize=10)
 
-    ax.errorbar(xs1, ys1,yerr=zs1, label='All targets found')
+    # ax.errorbar(xs1, ys1,yerr=zs1, label='All targets found') # uncomment this to see only valid runs
     ax.errorbar(xs2, ys2,yerr=zs2, label='All runs', alpha=0.7)
 
-    ax.legend(loc='upper left')
+    ax.legend(loc='upper right')
     ax.set_xlabel('Episode')
-    ax.set_ylabel('Number of steps')
+    ax.set_ylabel('Number of steps') 
+
+    ax.set_ylim(20, 165)
 
     filepath = os.path.join(artifact_path, args.experiment_name + '_mean_steps.png')
     plt.savefig(filepath, bbox_inches='tight', format='png')
