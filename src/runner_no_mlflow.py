@@ -1,5 +1,5 @@
 '''
- Python script to run the td learning model using a specific arena and parameter set.  
+ Python script to run the td learning model using a specific arena and parameter set without mlflow.  
  
  Both sets of variable are set in the script.
 
@@ -15,7 +15,6 @@ from runner_utils import train_fnn
 from plots import PlotType
 from mrp import *
 from json import loads
-
 '''
 ###########################################
  Parameters for td learning model
@@ -25,7 +24,12 @@ from json import loads
 '''
 # 
 
-MRP = mrp_10_positive_array_ohashi()
+
+
+
+MRP = mrp_10_negative_array_ohashi()
+threshold = 7.3# the cumulative reward needed to stop the simulation loop kicked off by this script
+do_in_episode_plots=PlotType.Full # set the plot frequency
 
 rng = np.random.default_rng() # random number generator
 
@@ -41,12 +45,11 @@ epsilon_start = 1
 epsilon_end = 0.2
 epsilon_annealing_stop_ratio = 0.2
 
-respiration_reward = -0.01 # -1/np.square(size) # -1/(steps+(steps*0.1)) # negative reward for moving 1 step in an episode
+respiration_reward = -0.05 # -1/np.square(size) # -1/(steps+(steps*0.1)) # negative reward for moving 1 step in an episode
 stationary_reward = -0.01 # respiration_reward*2 # positive reward for moving, to discourage not moving
 revisit_inactive_target_reward = -0.0 # negative reward for revisiting an inactive target (i.e. one that has already been visited)
 change_in_orientation_reward = 0#-stationary_reward*0.5 #negative reward if orientation changes
 
-threshold = 9 # the cumulative reward needed to stop the simulation loop kicked off by this script
 
 '''
 ###########################################
@@ -59,7 +62,7 @@ threshold = 9 # the cumulative reward needed to stop the simulation loop kicked 
 is_stochastic = False
 plot_rate = 5 # rate at which to plot predictions
 record_stats = True
-do_in_episode_plots=PlotType.Full 
+
 
 size = int(loads(MRP)["size"])
 

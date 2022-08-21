@@ -1,3 +1,13 @@
+'''
+Script for running one set of hyper parameters in for further analysis
+
+The script will repeat in a loop until the cumulative reward of the sumulation is greater than
+
+ e.g. 
+ python ./src/runner_mlflow.py a628d5c7a59047629b7721ac09455aea
+ 
+'''
+
 import argparse
 from runner_tune import *
 from runner_utils import train_fnn
@@ -15,14 +25,14 @@ def main():
 
     config = run.data.params
 
-    threshold = 9.72 # the cumulative reward needed to stop the simulation loop kicked off by this script
+    threshold = 10 # the cumulative reward needed to stop the simulation loop kicked off by this script
 
     rng = np.random.default_rng() # random number generator
 
     is_stochastic = False
     plot_rate = 5 # rate at which to plot predictions
     record_stats = True
-    do_in_episode_plots=PlotType.Minimal 
+    do_in_episode_plots=PlotType.Minimal # change this to see more verbose plots
 
     size = int(loads(config["MRP"])["size"])
 
