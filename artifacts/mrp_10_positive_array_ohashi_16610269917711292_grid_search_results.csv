@@ -1,0 +1,11 @@
+Sorted by last 20 then last 5                             run_id  score_softmax_5_mean  score_softmax_20_mean
+2  7be8e09393384e72b500030292010960              10.03000               10.03000
+0  8521df28a32a44c98c6482fc2e763276              10.00286                9.91082
+1  9d5b35d7ef4746a09d5f614b7b3a84e4               8.77946                8.89890
+3  ae58c59e760744f8ac95ba0c50943cdc              10.13092                8.86954
+
+Sorted by last 5 then last 20                             run_id  score_softmax_5_mean  score_softmax_20_mean
+3  ae58c59e760744f8ac95ba0c50943cdc              10.13092                8.86954
+2  7be8e09393384e72b500030292010960              10.03000               10.03000
+0  8521df28a32a44c98c6482fc2e763276              10.00286                9.91082
+1  9d5b35d7ef4746a09d5f614b7b3a84e4               8.77946                8.89890
