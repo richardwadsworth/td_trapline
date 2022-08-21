@@ -34,6 +34,8 @@ def get_valid_target_sequence_from_route(optimal_trapline, route):
         if arena_grid_index in trapline_lookup: # is this arena_grid_index a target?
             episode_target_list.append(arena_grid_index) # record the order the target was found
             trapline_lookup.remove(arena_grid_index) #remove the target from the look up in case it was visited again
+            if len(trapline_lookup) == 0:
+                break
 
     #if this episode found the minimum number of targets AND then found the nest, then this episode should be considered
     # for further trapline analysis
