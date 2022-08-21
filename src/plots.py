@@ -91,7 +91,7 @@ def plotActionStateQuiver(env, q, fig1, ax1, ax2, xs_target, ys_target):
     V = np.reshape([i[1] for i in policyFound], (env.size, env.size))
 
     # Normalize the arrows:
-    U_norm = U/np.max(np.abs(U))
+    U_norm = U/np.max(np.abs(U)) 
     V_norm = V/np.max(np.abs(V))
 
     ax1.cla()
@@ -148,7 +148,7 @@ def plotAgentPath(env, fig1, ax3, ax4, xs_coordinate_map, ys_coordinate_map, xs_
 
     ts = np.arange(0, len(xs))
 
-    doColourVaryingPlot2d(xs, ys, ts, fig1, ax3, map='plasma', showBar=showbar, barlabel='episode')  # only draw colorbar once
+    doColourVaryingPlot2d(xs, ys, ts, fig1, ax3, map='plasma', showBar=showbar, barlabel='Step')  # only draw colorbar once
     
     # fix plot axis proportions to equal
     ax3.set_aspect('equal')
@@ -336,14 +336,22 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
 
     # build x-axis labels
     counter = 1
-    x_axis = []
+    x_axis_label = [] #used for labelling x-axis
+    target_sequence_id = [] # id assigned to target sequence to enable lookup of routing
     for i, r in enumerate(df["target_sequence_including_nest"]):
         if r == []:
-            x_axis.append(LABEL_INVALID_TRAPLINE)
+            x_axis_label.append(LABEL_INVALID_TRAPLINE)
+            target_sequence_id.append(LABEL_INVALID_TRAPLINE)
         else:
-            x_axis.append(str(counter))
+            if counter%2==0: # only display a label every 2 to avoid over crowding
+                x_axis_label.append(str(counter))
+            else:
+                x_axis_label.append('')
+
+            target_sequence_id.append(str(counter))
             counter += 1
-    df['x-axis'] = x_axis
+
+    df['target-sequence-id'] = target_sequence_id
 
     # determine the optimality of each target sequence
     def get_target_sequence_type(target_sequence_length):
@@ -360,13 +368,13 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
     fig1, ax = plt.subplots(1,1, figsize=(12,5))
     sns.set_theme(style="whitegrid")
 
-    bar_list = ax.bar(df['x-axis'], df["target_sequence_count"], edgecolor = "black") # plot the bar chart
-    
+    bar_list = ax.bar(df['target-sequence-id'], df["target_sequence_count"], edgecolor = "black") # plot the bar chart
+
     filepath = os.path.join(artifact_path, experiment_name + '_trapline_distribution')
     df.to_csv(filepath + ".csv")
 
     ax.set_xlabel('Trapline ID')
-
+    
     ax.set_yscale('log')
     ax.set_ylim(0, num_runs_in_experiment)
     ax.set_ylabel('Logarithmic Count of Trapline')
@@ -376,7 +384,6 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
 
     # highlight the optimal target sequences, if present in the results
     for i in range(len(df)):
-        label = df['x-axis'][i]
         target_sequence_type = df['target_sequence_type'][i]
         if target_sequence_type == TargetSequenceType.Incomplete:
             bar_list[i].set_color('grey')
@@ -385,10 +392,9 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
         elif target_sequence_type == TargetSequenceType.SubOptimal:
             bar_list[i].set_color('b')
 
-    ax.set_xticklabels(df['x-axis'], rotation = 90)
-    ax.xaxis.get_ticklocs(minor=True)
-    ax.minorticks_on()
-    ax.grid(b=True)
+    ax.set_xticklabels(x_axis_label, rotation = 90)
+
+    ax.grid(visible=True)
     
     fig1.tight_layout()
     
@@ -397,7 +403,7 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
 
 
     # drop the target sequence count with no discernable target based route found
-    df = df.drop(df[df['x-axis'] == LABEL_INVALID_TRAPLINE].index)
+    df = df.drop(df[df['target-sequence-id'] == LABEL_INVALID_TRAPLINE].index)
 
     # if there are more than 9 target sequences, choose the optimal and 7 random
     MAX_NUM_ROUTE_PLOTS = 9
@@ -434,10 +440,10 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
             break
         # Convert string representation of target sequence to list using json
         target_sequence = df["target_sequence_including_nest"][df.index[i]]
-        label= df['x-axis'][df.index[i]]
+        target_sequence_id= df['target-sequence-id'][df.index[i]]
         target_sequence_type= df['target_sequence_type'][df.index[i]]
         ax.grid() # turn off the grid
-        plot_target_sequence(experiment_name, artifact_path, fig2, ax, int(MRP["size"]),MRP["nest"], optimal_trapline, target_sequence, target_sequence_type, str(label))
+        plot_target_sequence(experiment_name, artifact_path, fig2, ax, int(MRP["size"]),MRP["nest"], optimal_trapline, target_sequence, target_sequence_type, str(target_sequence_id))
 
     plt.subplots_adjust(left=0.1, right=0.9, top=0.86, bottom=0.15)
     plt.pause(0.00000000001)
@@ -513,7 +519,7 @@ def plot_c_score_stability_distribution(experiment_name, artifact_path, sample_r
     ax.set_title(experiment_name, fontsize=10)
 
     
-    ax.grid(b=True)
+    ax.grid(visible=True)
 
 
     plt.subplots_adjust(left=0.1, right=0.9, top=0.83, bottom=0.15)
@@ -546,6 +552,8 @@ def plot_target_sequence_length_distribution(experiment_name, artifact_path, num
     
 
     ax.set_xlabel('Normalised Trapline Length')
+    ax.set_xlim(0.95, 1.6)
+
     ax.set_title(experiment_name, fontsize=10)
 
     ax.set_yscale('log')
@@ -554,7 +562,7 @@ def plot_target_sequence_length_distribution(experiment_name, artifact_path, num
 
     ax.xaxis.get_ticklocs(minor=True)
     ax.minorticks_on()
-    ax.grid(b=True)
+    ax.grid(visible=True)
     
     fig.suptitle("Trapline Length Histogram")
     fig.savefig(filepath + '.png')
