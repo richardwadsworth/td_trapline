@@ -77,7 +77,7 @@ def main():
         f.write(r)
 
     #save results to file
-    filepath = os.path.join(artifact_path, 'analyse_' + args.experiment_name + '_grid_search_results.csv')
+    filepath = os.path.join(artifact_path, args.experiment_name + '_grid_search_results.csv')
     if exists(filepath):
         os.remove(filepath)
 
@@ -95,13 +95,13 @@ def main():
 
     ax.set_xlabel('Mean Last 5 Performance Scores')
     ax.set_ylabel('Mean Last 20 Performance Scores')
-    ax.set_ylim(-7,10)
-    ax.set_xlim(-7,10)
+    ax.set_ylim(-7,12)
+    ax.set_xlim(-7,12)
 
     fig.suptitle("Hyperparameter Gridsearch - Maximise Reward Performance")
     ax.set_title(args.experiment_name, fontsize=10)
 
-    filepath = os.path.join(artifact_path, 'analyse_' + args.experiment_name + '_grid_search_scatter.png')
+    filepath = os.path.join(artifact_path, args.experiment_name + '_grid_search_scatter.png')
     plt.savefig(filepath, bbox_inches='tight', format='png')
 
     plt.show()

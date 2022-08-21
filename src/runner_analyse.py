@@ -14,6 +14,7 @@ import argparse
 import numpy as np
 from runner_utils import train_parallel_with_config
 import mlflow
+import time
 
 def main():
 
@@ -28,7 +29,9 @@ def main():
 
     config = run.data.params
 
-    experiment_name = "analyse_" + run.info.run_id + "_" + config["experiment_name"] + '_' + str(NUM_REPEAT_RUNS) + '_runs'
+    uniq_filename_suffix = str(time.time() * 1000).replace('.','')
+    experiment_name = str(run.info.run_id)[0:5] + "_" + config["experiment_name"] + '_' + uniq_filename_suffix
+
     analyse = train_parallel_with_config(NUM_REPEAT_RUNS,
                     experiment_name, 
                     config)

@@ -22,6 +22,7 @@ import argparse
 from runner_utils import train_parallel
 from mrp import *
 from json import loads, dumps
+import time
 
 def main():
 
@@ -37,15 +38,15 @@ def main():
     
     mrp_function  = funcdict.get(args.mrp_function_name, None)
     if mrp_function == None:
-        parser.error("Argument mrp_function_name {} is not valid.".format(args.mrp_function_name))
+        parser.error("Argument mrp_function_name {} is not in the function dictionary.".format(args.mrp_function_name))
 
     episodes = [200] # range of total number of episodes in training run
-    steps = [100] # range of  episode lengths
+    steps = [150] # range of  episode lengths
 
-    gamma =  [0.7, 0.8, 0.9] # discount factor
+    gamma =  [0.7, 0.9] # discount factor
     alpha_actor = [0.7] # actor learning rate
     alpha_critic = [0.3] # critic learning rate
-    eligibility_decay = [0.6, 0.7, 0.8] # eligibility trace decay
+    eligibility_decay = [0.6, 0.8] # eligibility trace decay
 
     #softmax temperature annealing
     epsilon_start = 1
@@ -54,9 +55,9 @@ def main():
     # epsilon_annealing_stop_ratio : As a percentage of the total number of episodes.  e.g if episodes=200 
     # and epsilon_annealing_stop_ratio=0.2, epsilon will anneal linearly from epsilon_start to epsilon_end
     # linearly over the first  0.2*200 steps.
-    epsilon_annealing_stop_ratio = [0.2, 0.5] # range.  
+    epsilon_annealing_stop_ratio = [0.2] # range.  
 
-    respiration_reward = [-0.01] # -1/np.square(size) # -1/(steps+(steps*0.1)) # negative reward for moving 1 step in an episode
+    respiration_reward = [-0.05] # -1/np.square(size) # -1/(steps+(steps*0.1)) # negative reward for moving 1 step in an episode
     stationary_reward = [-0.01] # respiration_reward*2 # positive reward for moving, to discourage not moving
     revisit_inactive_target_reward = [0.0] # negative reward for revisiting an inactive target (i.e. one that has already been visited)
     change_in_orientation_reward = [0]#-stationary_reward*0.5 #negative reward if orientation changes
@@ -71,8 +72,11 @@ def main():
     ######################################################
     '''
 
+    uniq_filename_suffix = str(time.time() * 1000).replace('.','')
+
     MRP = loads(mrp_function)
-    experiment_name = MRP["name"] + '_gs' # gs for grid search
+
+    experiment_name = MRP["name"] + '_' + uniq_filename_suffix # gs for grid search
 
     if __name__ == "__main__":
 
