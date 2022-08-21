@@ -36,11 +36,10 @@ def main():
 
     artifact_path = "artifacts"
     
-
     data = get_experiment_runs_data(experiment_name) 
 
-    #use pickle to cache data to speed up r&D
-    #pickle.dump( data, open( experiment_name + "_data.p", "wb" ) )
+    # #use pickle to cache data to speed up r&D
+    # pickle.dump( data, open( experiment_name + "_data.p", "wb" ) )
     #data = pickle.load( open( experiment_name + "_data.p", "rb" ) )
 
     all_run_sample_episodes_in_experiment = data["observations"]
@@ -58,7 +57,7 @@ def main():
         run_episodes_targets_sequence = [] #list of an ordered list of the order targets were discovered for each sample episode in this run
         
         if C_score_index != -1:
-            run_episode_routes_filtered = routes[C_score_index:]
+            run_episode_routes_filtered = routes[C_score_index:] # get all routes after the point of stability
             
             #now find model target sequence from the C_score index for each run
             for run_episode_route in run_episode_routes_filtered:
@@ -133,17 +132,28 @@ def main():
     df_target_sequence_data_for_experiment.index = np.arange(0, len(df_target_sequence_data_for_experiment))
 
 
+    def wrap_sequence_with_nest(nest_index, sequence):
+        return [nest_index] + sequence + [nest_index]
+
     distances = []
+    target_sequences_including_nest = []
     for i in range (len(df_target_sequence_data_for_experiment)):
         row = df_target_sequence_data_for_experiment.iloc[i]
         #calculate the manhattan length of this target sequence
-        distance = get_manhattan_distance(int(MRP["size"]), row["target_sequence"])
+        if row["target_sequence"] != []:
+            target_sequence_including_nest = wrap_sequence_with_nest(MRP["nest"],row["target_sequence"])
+        else:
+            target_sequence_including_nest = []
+        distance = get_manhattan_distance(int(MRP["size"]), target_sequence_including_nest)
+        target_sequences_including_nest.append(target_sequence_including_nest)
         distances.append(distance)
 
+    df_target_sequence_data_for_experiment['target_sequence_including_nest'] = target_sequences_including_nest
     df_target_sequence_data_for_experiment['sequence_manhattan_length'] = distances
     #normalise the sequence_manhattan_length using the optimal sequence length to allow for comparison with other target arrays
-    optimal_target_sequence_length = get_manhattan_distance(int(MRP["size"]), optimal_trapline_master) # we can use either optimal route, clockwise or anti clockwise to determine the optimal length
-    df_target_sequence_data_for_experiment['sequence_manhattan_length'] = df_target_sequence_data_for_experiment['sequence_manhattan_length']/optimal_target_sequence_length
+    optimal_trapline_master_including_nest = wrap_sequence_with_nest(MRP["nest"],optimal_trapline_master)
+    optimal_target_including_nest_sequence_length = get_manhattan_distance(int(MRP["size"]), optimal_trapline_master_including_nest) # we can use either optimal route, clockwise or anti clockwise to determine the optimal length
+    df_target_sequence_data_for_experiment['sequence_manhattan_length'] = df_target_sequence_data_for_experiment['sequence_manhattan_length']/optimal_target_including_nest_sequence_length
 
     plot_target_sequence_length_distribution(experiment_name, artifact_path, num_runs_in_experiment, df_target_sequence_data_for_experiment)
 
@@ -151,7 +161,7 @@ def main():
 
     plot_c_score_stability_distribution(experiment_name, artifact_path, sample_rate, C_SCORE_STABILITY_THRESHOLD, list(results['c_score_stability_index']))
 
-    plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_experiment, MRP, df_target_sequence_data_for_experiment, optimal_trapline_master, optimal_trapline_reversed_master)
+    plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_experiment, MRP, df_target_sequence_data_for_experiment, optimal_trapline_master)
 
     plt.show()
 
