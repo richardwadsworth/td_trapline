@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/richard/Documents/projects/sussex/td_trapline/mlruns/43/1f5c3143028f4eae939be742a12a68ba/artifacts
+end_time: 1661009995709
+entry_point_name: ''
+experiment_id: '43'
+lifecycle_stage: active
+name: ''
+run_id: 1f5c3143028f4eae939be742a12a68ba
+run_uuid: 1f5c3143028f4eae939be742a12a68ba
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1661009989519
+status: 3
+tags: []
+user_id: unknown

@@ -1,0 +1,23 @@
+{
+  "MRP": "{\"name\": \"mrp_10_negative_array_ohashi\", \"size\": 19, \"nest\": 47, \"targets\": [[85, 1.0], [124, 1.0], [181, 1.0], [238, 1.0], [295, 1.0], [332, 1.0], [293, 1.0], [236, 1.0], [179, 1.0], [122, 1.0]]}",
+  "alpha_actor": 0.7,
+  "alpha_critic": 0.3,
+  "change_in_orientation_reward": 0,
+  "eligibility_decay": 0.6,
+  "episodes": 200,
+  "epsilon_annealing_stop_ratio": 0.2,
+  "epsilon_end": 0.2,
+  "epsilon_start": 1,
+  "experiment_name": "mrp_10_negative_array_ohashi_1661026904124893",
+  "gamma": 0.9,
+  "mlflow": {
+    "experiment_name": "mrp_10_negative_array_ohashi_1661026904124893",
+    "tracking_uri": "file:///Users/richard/Documents/projects/sussex/td_trapline/mlruns"
+  },
+  "plot_rate": 5,
+  "respiration_reward": -0.05,
+  "revisit_inactive_target_reward": 0.0,
+  "size": 19,
+  "stationary_reward": -0.01,
+  "steps": 150
+}
