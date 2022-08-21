@@ -2,7 +2,7 @@ import numpy as np
 from gym_utils import initialise_gym
 from rl_td import train
 from q_function import initialise_actor, initialise_critic, get_q_pretty_print, get_optimal_q_policy_pretty_print
-from policies import GreedyDirectionalPolicy, SoftmaxDirectionalPolicy
+from policies import GreedyDirectionalPolicy, ReturnToNestPolicy
 from plots import plotAgentPath, plotActionStateQuiver, PlotType
 from plots import plot_performance, initialise_plots, plot_traffic_noise
 import matplotlib.pyplot as plt
@@ -35,7 +35,7 @@ def train_fn(config):
     actor = initialise_actor(env_local)
     critic = initialise_critic(env_local, rng)
 
-    policy_train = SoftmaxDirectionalPolicy(env_local, rng)
+    policy_train = ReturnToNestPolicy(env_local, rng, 50, env_local.size, env_local.nest_index)
     policy_predict = GreedyDirectionalPolicy(env_local)
 
     sim_data = []
@@ -74,11 +74,16 @@ def train_fn(config):
     # # print the optimal policy in human readable form
     pretty_print_optimal_q = get_optimal_q_policy_pretty_print(env_local, q_mean) if do_summary_print else "not printed"
 
+    # if done, get number of steps of last 20 episodes  
+    softmaxPolicyAvgLas20XSteps = np.mean([len(x) for x in sim_data[-20:]])
+    
+
     env_local.close()
 
     return {"score_softmax": softmaxPolicyAvgPerf, 
             "score_softmax_last_05": softmaxPolicyAvgLast05Perf,
             "score_softmax_last_20": softmaxPolicyAvgLas20XPerf,
+            "steps_softmax_last_20": softmaxPolicyAvgLas20XSteps,
             "score_greedy": greedyPolicyAvgPerf, 
             "performance": performance,
             "pi_optimal__flattened": pretty_print_optimal_q,
@@ -194,7 +199,8 @@ def train_fnn(is_stochastic,
         if do_plots == PlotType.Full:
             plot_data = initialise_plots(env)
 
-        policy_train = SoftmaxDirectionalPolicy(env, rng, 50)
+        policy_train = ReturnToNestPolicy(env, rng, 50, env.size, env.nest_index)
+        
         policy_predict = GreedyDirectionalPolicy(env)
 
         sim_data = []
@@ -223,12 +229,22 @@ def train_fnn(is_stochastic,
         print("Training performance mean: {}".format(np.mean(performance)))
         print("Training performance stdev: {}".format(np.std(performance)))
 
-        last_x_mean = np.mean(performance[-5])
-        print("Training performance last x mean: {}".format(last_x_mean))
-                
-        if do_plots==PlotType.Full or \
+        LAST_X = 5
+
+
+        last_x_mean_performance = np.mean(performance[-LAST_X])
+        print("Training performance last {} mean: {}".format(LAST_X, last_x_mean_performance))
+
+        # get number of steps of last X episodes  
+        last_x_mean_steps = np.mean([len(x) for x in sim_data[-LAST_X:]])
+        print("Step count last {} mean: {}".format(LAST_X, last_x_mean_steps))
+
+
+        if (do_plots==PlotType.Full or \
                 do_plots==PlotType.Partial or \
-                do_plots == PlotType.Minimal and last_x_mean > threshold:
+                do_plots == PlotType.Minimal) and \
+                    last_x_mean_steps != steps+1 and \
+                    last_x_mean_performance > threshold:
 
             # plot data needed, but not yet initialised
             fig1, ax1, ax2, ax3, ax4, ax5, ax6, xs_coordinate_map, ys_coordinate_map, xs_target, ys_target = initialise_plots(env)
@@ -239,13 +255,14 @@ def train_fnn(is_stochastic,
             fig1.tight_layout()
 
         
-        if last_x_mean > threshold:
+        if last_x_mean_steps != steps+1 and last_x_mean_performance > threshold:
 
             #get average action state values across all possible actions.  i.e. get a 2d slice of the 3d matrix
             q_mean = np.mean(actor, axis=(0))
 
-            print(get_q_pretty_print(env, q_mean)) # print the final action state values
-            print(get_optimal_q_policy_pretty_print(env, q_mean)) # print the optimal policy in human readable form
+            # these are useful for de bugging
+            #print(get_q_pretty_print(env, q_mean)) # print the final action state values
+            #print(get_optimal_q_policy_pretty_print(env, q_mean)) # print the optimal policy in human readable form
 
             softmaxPolicyAvgPerf, obs_data = policy_train.average_performance_with_observations(policy_train.get_action(epsilon_end), q=actor)
             print("Final Softmax policy SARSA performance =", softmaxPolicyAvgPerf) 

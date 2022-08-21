@@ -129,37 +129,23 @@ class ReturnToNestPolicy(SoftmaxDirectionalPolicy):
             delta_x = current_x - nest_x
             delta_y = current_y - nest_y
 
-            state_values= np.array([0,0,0,0,0])
             # navigate the x vertices first
             if delta_y > 0:
-                state_values[ActionType.NORTH.value] = 1
+                a = ActionType.NORTH.value
             elif delta_y < 0:
-                state_values[ActionType.SOUTH.value] = 1
+                a = ActionType.SOUTH.value
             else:
                 # agent level with nest.  now navigate the y vertices
                 if delta_x > 0:
-                    state_values[ActionType.WEST.value] = 1
+                    a = ActionType.WEST.value
                 elif delta_x < 0:
-                    state_values[ActionType.EAST.value] = 1
+                    a = ActionType.EAST.value
                 else: # agent is at the nest!!
-                    state_values[ActionType.NONE.value] = 1
+                    a = ActionType.NONE.value
             
-            return self.softmax(state_values, T)
+            return a
 
-    def softmax(self, state_values, T):
-        probs = np.exp(state_values/T) / np.sum(np.exp(state_values/T))
-        probs =  probs/ np.sum(probs) # Ensure probs is normalised to 1 (to avoid rounding errors)
-        randchoice = self.rng.random()
-        flag = 1; k = 1
-        while flag:
-
-            if randchoice<np.sum(probs[0:k]):
-                action = k-1 # adjust for zero based action index
-                flag = 0
-            
-            k = k + 1
-
-        return action
+    
 
     def average_performance(self, policy_fct, q):
     
