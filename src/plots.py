@@ -504,11 +504,11 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
 
     
 
-def plot_similarity_scores(experiment_name, artifact_path, sample_rate, similarity_score_indexes, similarity_score_indexes_rate_of_change):
+def plot_similarity_scores(experiment_name, artifact_path, sample_rate, route_similarity_score, route_similarity_score_rate_of_change):
     fig, (ax1, ax2) = plt.subplots(1,2, figsize=(15, 5))
     sns.set_theme(style="whitegrid")
 
-    for similarity_score, similarity_score_prime in zip(similarity_score_indexes, similarity_score_indexes_rate_of_change):
+    for similarity_score, similarity_score_prime in zip(route_similarity_score, route_similarity_score_rate_of_change):
 
         xs = np.arange(0, len(similarity_score)) * sample_rate
        
@@ -518,14 +518,14 @@ def plot_similarity_scores(experiment_name, artifact_path, sample_rate, similari
 
     
     # calculate the mean C score across all runs
-    df = pd.DataFrame([x for x in similarity_score_indexes])
+    df = pd.DataFrame([x for x in route_similarity_score])
     similarity_score_mean = df.mean() 
     xs = np.arange(0, len(similarity_score_mean)) * sample_rate
     alpha = 1
     ax1.plot(xs, similarity_score_mean, alpha=alpha, lw=2, color='black', label="Mean C score")
     ax1.legend(loc='upper right')
 
-    df = pd.DataFrame([x for x in similarity_score_indexes_rate_of_change])
+    df = pd.DataFrame([x for x in route_similarity_score_rate_of_change])
     similarity_score_prime_mean = df.mean() 
     xs = np.arange(0, len(similarity_score_prime_mean)) * sample_rate
     alpha = 1
@@ -552,14 +552,14 @@ def plot_similarity_scores(experiment_name, artifact_path, sample_rate, similari
 
     plt.pause(0.00000000001)
 
-def plot_stability_distribution(experiment_name, artifact_path, sample_rate, stability_threshold, similarity_score_indexes):
+def plot_stability_distribution(experiment_name, artifact_path, sample_rate, stability_threshold, route_similarity_score):
 
     fig, ax = plt.subplots()
     sns.set_theme(style="whitegrid")
 
-    similarity_score_indexes = np.array([index for index in similarity_score_indexes if index!=-1]) * sample_rate # scale up from the plot (sample) rate
+    route_similarity_score = np.array([index for index in route_similarity_score if index!=-1]) * sample_rate # scale up from the plot (sample) rate
 
-    sns.histplot(similarity_score_indexes, bins=20, ax=ax, edgecolor = "black")
+    sns.histplot(route_similarity_score, bins=20, ax=ax, edgecolor = "black")
     
     ax.xaxis.get_ticklocs(minor=True)
     ax.minorticks_on()
