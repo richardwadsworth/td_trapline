@@ -22,8 +22,8 @@ from  manhattan import get_manhattan_distance
 from mlflow_utils import get_experiment_runs_data
 from utils import get_sliding_window_sequence
 from trapline import get_optimal_trapline_for_diamond_array, get_valid_target_sequence_from_route, TargetSequenceType
-from plots import plot_trapline_distribution, plot_c_Scores, plot_c_score_stability_distribution, plot_target_sequence_length_distribution
-from c_score import get_stability_point_for_run
+from plots import plot_trapline_distribution, plot_similarity_scores, plot_similarity_score_stability_distribution, plot_target_sequence_length_distribution
+from similarity_score import get_stability_point_for_run
  
 
 def main():
@@ -58,7 +58,7 @@ def main():
         if stability_point != -1:
             run_episode_routes_filtered = routes[stability_point:] # get all routes after the point of stability
             
-            #now find model target sequence from the C_score index for each run
+            #now find model target sequence from the similarity_score index for each run
             for run_episode_route in run_episode_routes_filtered:
                 target_sequence = get_valid_target_sequence_from_route(optimal_trapline, run_episode_route)
                 run_episodes_targets_sequence.append(target_sequence)
@@ -81,9 +81,9 @@ def main():
     # get the optimal trapline and its reverse from the MRP.  
     optimal_trapline_master = get_optimal_trapline_for_diamond_array(MRP["targets"])
 
-    SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_C_SCORE =5
+    SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_SIMILARITY_SCORE =5
     SLIDING_WINDOW_SIZE_USED_FOR_COMPARING_ROUTE_SIMILARITY = 2
-    C_SCORE_STABILITY_THRESHOLD = 0
+    RATE_OF_CHANGE_OF_STABILITY_THRESHOLD = 0
 
     # initalise result arrays
     results = pd.DataFrame()
@@ -96,17 +96,17 @@ def main():
 
     print("Analysing data.  This can take a few minutes ...")
 
-    route_c_scores = []
+    route_similarity_scores = []
     for run_index in range(num_runs_in_experiment):
 
         run_episodes_route_observations = all_run_sample_episodes_in_experiment[run_index] # all the observations in a specific run.  i,e. all the episodes and their runs
         run_episodes_routes = get_route_index_from_observation(run_episodes_route_observations) #extract the route indexes from the route observations
 
         # get thw C score index for this run
-        stability_point, run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted = get_stability_point_for_run(int(MRP["size"]), SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_C_SCORE, sliding_sequence_used_for_route_similarity, run_episodes_routes, C_SCORE_STABILITY_THRESHOLD)
+        stability_point, run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted = get_stability_point_for_run(int(MRP["size"]), SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_SIMILARITY_SCORE, sliding_sequence_used_for_route_similarity, run_episodes_routes, RATE_OF_CHANGE_OF_STABILITY_THRESHOLD)
         
         # save the index value and smoothed  scores
-        route_c_scores.append((run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted))
+        route_similarity_scores.append((run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted))
         results.loc[run_index, 'stability_point'] = stability_point
 
         target_sequence, target_sequence_count = get_modal_target_sequence_for_run(optimal_trapline_master, stability_point, run_episodes_routes)
@@ -114,8 +114,8 @@ def main():
         results.loc[run_index, "target_sequence"] = target_sequence #only save the target_sequence if a stable trapline was found
         results.loc[run_index, "target_sequence_count"] = target_sequence_count
         
-    results["c_score_indexes"] = [x[0] for x in route_c_scores]
-    results["c_score_indexes_rate_of_change"] = [x[1] for x in route_c_scores]
+    results["similarity_score_indexes"] = [x[0] for x in route_similarity_scores]
+    results["similarity_score_indexes_rate_of_change"] = [x[1] for x in route_similarity_scores]
 
     #save results to file
     results.to_csv("artifacts/" + experiment_name + "_results.csv")
@@ -158,9 +158,9 @@ def main():
     
     plot_target_sequence_length_distribution(experiment_name, artifact_path, num_runs_in_experiment, df_target_sequence_data_for_experiment)
 
-    plot_c_Scores(experiment_name, artifact_path, sample_rate, results["c_score_indexes"], results["c_score_indexes_rate_of_change"])
+    plot_similarity_scores(experiment_name, artifact_path, sample_rate, results["similarity_score_indexes"], results["similarity_score_indexes_rate_of_change"])
 
-    plot_c_score_stability_distribution(experiment_name, artifact_path, sample_rate, C_SCORE_STABILITY_THRESHOLD, list(results['stability_point']))
+    plot_similarity_score_stability_distribution(experiment_name, artifact_path, sample_rate, RATE_OF_CHANGE_OF_STABILITY_THRESHOLD, list(results['stability_point']))
 
     plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_experiment, MRP, df_target_sequence_data_for_experiment, optimal_trapline_master)
 

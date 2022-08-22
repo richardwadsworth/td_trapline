@@ -504,32 +504,32 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
 
     
 
-def plot_c_Scores(experiment_name, artifact_path, sample_rate, c_score_indexes, c_score_indexes_rate_of_change):
+def plot_similarity_scores(experiment_name, artifact_path, sample_rate, similarity_score_indexes, similarity_score_indexes_rate_of_change):
     fig, (ax1, ax2) = plt.subplots(1,2, figsize=(15, 5))
     sns.set_theme(style="whitegrid")
 
-    for c_score, c_score_prime in zip(c_score_indexes, c_score_indexes_rate_of_change):
+    for similarity_score, similarity_score_prime in zip(similarity_score_indexes, similarity_score_indexes_rate_of_change):
 
-        xs = np.arange(0, len(c_score)) * sample_rate
+        xs = np.arange(0, len(similarity_score)) * sample_rate
        
         alpha = 0.7
-        ax1.plot(xs, c_score, alpha=alpha)
-        ax2.plot(xs, c_score_prime, alpha=alpha)
+        ax1.plot(xs, similarity_score, alpha=alpha)
+        ax2.plot(xs, similarity_score_prime, alpha=alpha)
 
     
     # calculate the mean C score across all runs
-    df = pd.DataFrame([x for x in c_score_indexes])
-    c_score_mean = df.mean() 
-    xs = np.arange(0, len(c_score_mean)) * sample_rate
+    df = pd.DataFrame([x for x in similarity_score_indexes])
+    similarity_score_mean = df.mean() 
+    xs = np.arange(0, len(similarity_score_mean)) * sample_rate
     alpha = 1
-    ax1.plot(xs, c_score_mean, alpha=alpha, lw=2, color='black', label="Mean C score")
+    ax1.plot(xs, similarity_score_mean, alpha=alpha, lw=2, color='black', label="Mean C score")
     ax1.legend(loc='upper right')
 
-    df = pd.DataFrame([x for x in c_score_indexes_rate_of_change])
-    c_score_prime_mean = df.mean() 
-    xs = np.arange(0, len(c_score_prime_mean)) * sample_rate
+    df = pd.DataFrame([x for x in similarity_score_indexes_rate_of_change])
+    similarity_score_prime_mean = df.mean() 
+    xs = np.arange(0, len(similarity_score_prime_mean)) * sample_rate
     alpha = 1
-    ax2.plot(xs, c_score_prime_mean, alpha=alpha, lw=2, color='black', label="Mean C score rate of change")
+    ax2.plot(xs, similarity_score_prime_mean, alpha=alpha, lw=2, color='black', label="Mean C score rate of change")
     ax2.legend(loc='upper right')
 
     ax1.set_xlabel('Episode')
@@ -547,19 +547,19 @@ def plot_c_Scores(experiment_name, artifact_path, sample_rate, c_score_indexes, 
 
     plt.subplots_adjust(left=0.1, right=0.9, top=0.83, bottom=0.15)
 
-    filepath = os.path.join(artifact_path, experiment_name + '_route_c_score')
+    filepath = os.path.join(artifact_path, experiment_name + '_route_similarity_score')
     fig.savefig(filepath + '.png')
 
     plt.pause(0.00000000001)
 
-def plot_c_score_stability_distribution(experiment_name, artifact_path, sample_rate, stability_threshold, c_score_indexes):
+def plot_similarity_score_stability_distribution(experiment_name, artifact_path, sample_rate, stability_threshold, similarity_score_indexes):
 
     fig, ax = plt.subplots()
     sns.set_theme(style="whitegrid")
 
-    c_score_indexes = np.array([index for index in c_score_indexes if index!=-1]) * sample_rate # scale up from the plot (sample) rate
+    similarity_score_indexes = np.array([index for index in similarity_score_indexes if index!=-1]) * sample_rate # scale up from the plot (sample) rate
 
-    sns.histplot(c_score_indexes, bins=20, ax=ax, edgecolor = "black")
+    sns.histplot(similarity_score_indexes, bins=20, ax=ax, edgecolor = "black")
     
     ax.xaxis.get_ticklocs(minor=True)
     ax.minorticks_on()
@@ -580,7 +580,7 @@ def plot_c_score_stability_distribution(experiment_name, artifact_path, sample_r
 
     plt.subplots_adjust(left=0.1, right=0.9, top=0.83, bottom=0.15)
 
-    filepath = os.path.join(artifact_path, experiment_name + '_c_score_stability')
+    filepath = os.path.join(artifact_path, experiment_name + '_similarity_score_stability')
     fig.savefig(filepath + '.png')
 
     plt.pause(0.00000000001)

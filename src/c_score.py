@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from manhattan import get_routes_similarity
 from utils import moving_average
 
-def get_c_score_prime(smooth):
+def get_similarity_score_prime(smooth):
 
     smooth_d1 = np.gradient(smooth) # compute first derivative
     #smooth_d2 = np.gradient(smooth_d1) # compute second derivative
@@ -18,7 +18,7 @@ def get_stability_point_for_run(arena_size, sliding_window_size, sliding_window_
 
     run_episodes_route_similarity_smoothed = list(moving_average(run_episodes_route_similarity_raw, sliding_window_size))
 
-    run_episodes_route_similarity_prime =  get_c_score_prime(run_episodes_route_similarity_smoothed)
+    run_episodes_route_similarity_prime =  get_similarity_score_prime(run_episodes_route_similarity_smoothed)
     
     # run_episodes_route_similarity_smoothed
 
