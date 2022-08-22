@@ -269,7 +269,7 @@ def plot_traffic_greyscale(env, fig, ax, xs_target, ys_target, data, title):
     clear_output(wait = True)
     plt.pause(0.0000000001)
 
-def plot_target_sequence(experiment_name, artifact_path, fig, ax, size, nest, targets, target_sequence, target_sequence_type, subtitle):
+def plot_target_sequence(experiment_name, artifact_path, filename_suffix, fig, ax, size, nest, targets, target_sequence, target_sequence_type, subtitle):
     
     remove_axis_ticks(ax)
 
@@ -311,7 +311,7 @@ def plot_target_sequence(experiment_name, artifact_path, fig, ax, size, nest, ta
                 arrowprops=dict(color=color, arrowstyle="->", lw=2.5, linestyle=linestyle))
     
     ax.plot([0],[0], label=label, color=color, lw=2.5, linestyle=linestyle)
-    ax.legend(loc='upper left')
+    ax.legend(loc='upper right', prop={'size': 8})
     
     ax.set_title("Trapline " + subtitle)
     fig.tight_layout()
@@ -321,11 +321,59 @@ def plot_target_sequence(experiment_name, artifact_path, fig, ax, size, nest, ta
         display(fig)    
     clear_output(wait = True)
 
-    filepath = os.path.join(artifact_path, experiment_name + '_trapline_id_lookup')
+    filepath = os.path.join(artifact_path, experiment_name + filename_suffix)
     fig.savefig(filepath + '.png')
 
 
     plt.pause(0.0000000001)
+
+def plot_traplines_where_second_is_in_unexpected_order(experiment_name, artifact_path, MRP, df_target_sequence_data_for_experiment, optimal_trapline):
+        '''
+        search all sequences to find out how many sequences have the nearest and second nearest targets as the first and second discovered targets
+
+        note this function is only value for circular/diamond arrays with one target nearest the nest
+        '''
+
+        df = df_target_sequence_data_for_experiment # alias
+        sequences = df["target_sequence"]
+
+        # strip out invalid trapline
+        sequences = [s for s in sequences if s != []]
+
+        first_nearest_targets = [optimal_trapline[0]]
+        second_nearest_targets = [optimal_trapline[1]] + [optimal_trapline[-1]]
+        sequence_nearest_first = [sequence for sequence in sequences if sequence[0] in first_nearest_targets]
+        sequence_nearest_second = [sequence for sequence in sequence_nearest_first if  sequence[1] in second_nearest_targets]
+
+        print("Number of traplines where first target is not first nearest to the nest: {}".format(len(sequences)- len(sequence_nearest_first)))
+        print("Number of traplines where second target is not second nearest to the nest: {}".format(len(sequences)- len(sequence_nearest_second)))
+
+        import seaborn as sns
+        from plots import plot_target_sequence
+
+        if len(sequences)- len(sequence_nearest_second)>0:
+            unexpected =  [sequence for sequence in sequence_nearest_first if  sequence[1] not in second_nearest_targets]
+            df_unexpected = df.loc[df["target_sequence"].isin(unexpected)]
+
+
+            plot_size = int(np.ceil(np.sqrt(len(df_unexpected))))
+            fig, axs = plt.subplots(plot_size, plot_size, figsize=(plot_size*3, plot_size*3))
+            sns.set_theme(style="whitegrid")
+            
+            fig.suptitle("Traplines where second target is not second nearest\n\n" + experiment_name, fontsize=10)
+
+            axs = np.array(axs).reshape(-1)
+
+            for i, ax in enumerate(axs):
+
+                if i >= len(df_unexpected):
+                    break
+                # Convert string representation of target sequence to list using json
+                target_sequence = df_unexpected["target_sequence_including_nest"][df_unexpected.index[i]]
+                target_sequence_id= df_unexpected['target-sequence-id'][df_unexpected.index[i]]
+                target_sequence_type= df_unexpected['target_sequence_type'][df_unexpected.index[i]]
+                ax.grid(visible=False) # turn off the grid
+                plot_target_sequence(experiment_name, artifact_path, '_trapline_id_unexpected', fig, ax, int(MRP["size"]),MRP["nest"], optimal_trapline, target_sequence, target_sequence_type, str(target_sequence_id))
 
 
 def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_experiment, MRP, df_target_sequence_data, optimal_trapline):
@@ -423,10 +471,10 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
         df_suboptimal = df.drop(df[df['target_sequence_type'] != TargetSequenceType.SubOptimal].index)
         suboptimal_indexes_for_plot = np.random.choice(df_suboptimal.index, size=remaining, replace=False)
         df_suboptimal_for_plot= df_suboptimal.loc[suboptimal_indexes_for_plot]
-        df = pd.concat([df_first_two_in_list, df_optimal, df_suboptimal_for_plot])
-        df = df.sort_index()
+        df_for_plotting = pd.concat([df_first_two_in_list, df_optimal, df_suboptimal_for_plot])
+        df_for_plotting = df_for_plotting.sort_index()
      
-    plot_size = int(np.ceil(np.sqrt(len(df))))
+    plot_size = int(np.ceil(np.sqrt(len(df_for_plotting))))
     fig2, axs = plt.subplots(plot_size, plot_size, figsize=(plot_size*3, plot_size*3))
     sns.set_theme(style="whitegrid")
     
@@ -436,17 +484,25 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
 
     for i, ax in enumerate(axs):
 
-        if i >= len(df):
+        if i >= len(df_for_plotting):
             break
         # Convert string representation of target sequence to list using json
-        target_sequence = df["target_sequence_including_nest"][df.index[i]]
-        target_sequence_id= df['target-sequence-id'][df.index[i]]
-        target_sequence_type= df['target_sequence_type'][df.index[i]]
-        ax.grid() # turn off the grid
-        plot_target_sequence(experiment_name, artifact_path, fig2, ax, int(MRP["size"]),MRP["nest"], optimal_trapline, target_sequence, target_sequence_type, str(target_sequence_id))
+        target_sequence = df_for_plotting["target_sequence_including_nest"][df_for_plotting.index[i]]
+        target_sequence_id= df_for_plotting['target-sequence-id'][df_for_plotting.index[i]]
+        target_sequence_type= df_for_plotting['target_sequence_type'][df_for_plotting.index[i]]
+        ax.grid(visible=False) # turn off the grid
+        plot_target_sequence(experiment_name, artifact_path, "_trapline_id_lookup", fig2, ax, int(MRP["size"]),MRP["nest"], optimal_trapline, target_sequence, target_sequence_type, str(target_sequence_id))
+
+    
+    
+    plot_traplines_where_second_is_in_unexpected_order(experiment_name, artifact_path, MRP,  df, optimal_trapline)
+    
 
     plt.subplots_adjust(left=0.1, right=0.9, top=0.86, bottom=0.15)
     plt.pause(0.00000000001)
+
+
+    
 
 def plot_c_Scores(experiment_name, artifact_path, sample_rate, c_score_indexes, c_score_indexes_rate_of_change):
     fig, (ax1, ax2) = plt.subplots(1,2, figsize=(15, 5))
