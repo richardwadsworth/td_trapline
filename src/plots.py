@@ -564,14 +564,14 @@ def plot_stability_distribution(experiment_name, artifact_path, sample_rate, sta
     ax.xaxis.get_ticklocs(minor=True)
     ax.minorticks_on()
 
-    ax.set_xlabel('C Score Stability Index')
+    ax.set_xlabel('Episode that route stabilites to a trapline')
     ax.set_xlim(0, 200)
     
     ax.set_yscale('log')
     ax.set_ylim(0, 600)
-    ax.set_ylabel('Logarithmic Count of Index')
+    ax.set_ylabel('Logarithmic Count of Traplines')
 
-    fig.suptitle("C Score Stability Index Distribution")
+    fig.suptitle("Trapline Stability Point Distribution")
     ax.set_title(experiment_name, fontsize=10)
 
     

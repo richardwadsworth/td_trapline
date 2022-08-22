@@ -114,8 +114,8 @@ def main():
         results.loc[run_index, "target_sequence"] = target_sequence #only save the target_sequence if a stable trapline was found
         results.loc[run_index, "target_sequence_count"] = target_sequence_count
         
-    results["similarity_score_indexes"] = [x[0] for x in route_similarity_scores]
-    results["similarity_score_indexes_rate_of_change"] = [x[1] for x in route_similarity_scores]
+    results["route_similarity_score"] = [x[0] for x in route_similarity_scores] # hack.  use list comprehension as I can't work out how to set the df row to a list
+    results["route_similarity_score_rate_of_change"] = [x[1] for x in route_similarity_scores] # hack.  use list comprehension as I can't work out how to set the df row to a list
 
     #save results to file
     results.to_csv("artifacts/" + experiment_name + "_results.csv")
@@ -158,7 +158,7 @@ def main():
     
     plot_target_sequence_length_distribution(experiment_name, artifact_path, num_runs_in_experiment, df_target_sequence_data_for_experiment)
 
-    plot_similarity_scores(experiment_name, artifact_path, sample_rate, results["similarity_score_indexes"], results["similarity_score_indexes_rate_of_change"])
+    plot_similarity_scores(experiment_name, artifact_path, sample_rate, results["route_similarity_score"], results["route_similarity_score_rate_of_change"])
 
     plot_stability_distribution(experiment_name, artifact_path, sample_rate, RATE_OF_CHANGE_OF_STABILITY_THRESHOLD, list(results['stability_point']))
 
