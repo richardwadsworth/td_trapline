@@ -42,7 +42,7 @@ def get_C_scores_index_for_run(arena_size, sliding_window_size, sliding_window_s
         index = 0
     else:
         index = len(run_episodes_route_similarity_prime) - temp_index
-        index = index - 2 # to account for the 2 nans added below
+        index = index + 2 # to account for the 2 nans added below
 
     run_episodes_route_similarity_adjusted  = [np.nan, np.nan] + run_episodes_route_similarity_smoothed + [np.nan, np.nan]
     run_episodes_route_similarity_prime_adjusted = [np.nan, np.nan] +  run_episodes_route_similarity_prime + [np.nan, np.nan]
