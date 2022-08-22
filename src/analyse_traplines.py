@@ -89,7 +89,7 @@ def main():
     results = pd.DataFrame()
     results["target_sequence"] = np.empty((num_runs_in_experiment,), dtype=object) # one entry for each run
     results["target_sequence_count"] = np.zeros(num_runs_in_experiment, dtype=int)
-    results["c_score_stability_index"] = np.zeros(num_runs_in_experiment, dtype=int)
+    results["stability_point"] = np.zeros(num_runs_in_experiment, dtype=int)
                 
     # get the sliding widow to use in determining if there is a stable trapline
     sliding_sequence_used_for_route_similarity = get_sliding_window_sequence(SLIDING_WINDOW_SIZE_USED_FOR_COMPARING_ROUTE_SIMILARITY, num_sample_episodes_per_run)
@@ -107,7 +107,7 @@ def main():
         
         # save the index value and smoothed  scores
         route_c_scores.append((run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted))
-        results.loc[run_index, 'c_score_stability_index'] = C_score_index
+        results.loc[run_index, 'stability_point'] = C_score_index
 
         target_sequence, target_sequence_count = get_modal_target_sequence_for_run(optimal_trapline_master, C_score_index, run_episodes_routes)
         
@@ -160,7 +160,7 @@ def main():
 
     plot_c_Scores(experiment_name, artifact_path, sample_rate, results["c_score_indexes"], results["c_score_indexes_rate_of_change"])
 
-    plot_c_score_stability_distribution(experiment_name, artifact_path, sample_rate, C_SCORE_STABILITY_THRESHOLD, list(results['c_score_stability_index']))
+    plot_c_score_stability_distribution(experiment_name, artifact_path, sample_rate, C_SCORE_STABILITY_THRESHOLD, list(results['stability_point']))
 
     plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_experiment, MRP, df_target_sequence_data_for_experiment, optimal_trapline_master)
 
