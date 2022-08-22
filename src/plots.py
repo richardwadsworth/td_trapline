@@ -552,7 +552,7 @@ def plot_similarity_scores(experiment_name, artifact_path, sample_rate, similari
 
     plt.pause(0.00000000001)
 
-def plot_similarity_score_stability_distribution(experiment_name, artifact_path, sample_rate, stability_threshold, similarity_score_indexes):
+def plot_stability_distribution(experiment_name, artifact_path, sample_rate, stability_threshold, similarity_score_indexes):
 
     fig, ax = plt.subplots()
     sns.set_theme(style="whitegrid")
@@ -580,7 +580,7 @@ def plot_similarity_score_stability_distribution(experiment_name, artifact_path,
 
     plt.subplots_adjust(left=0.1, right=0.9, top=0.83, bottom=0.15)
 
-    filepath = os.path.join(artifact_path, experiment_name + '_similarity_score_stability')
+    filepath = os.path.join(artifact_path, experiment_name + '_stability')
     fig.savefig(filepath + '.png')
 
     plt.pause(0.00000000001)

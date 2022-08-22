@@ -22,7 +22,7 @@ from  manhattan import get_manhattan_distance
 from mlflow_utils import get_experiment_runs_data
 from utils import get_sliding_window_sequence
 from trapline import get_optimal_trapline_for_diamond_array, get_valid_target_sequence_from_route, TargetSequenceType
-from plots import plot_trapline_distribution, plot_similarity_scores, plot_similarity_score_stability_distribution, plot_target_sequence_length_distribution
+from plots import plot_trapline_distribution, plot_similarity_scores, plot_stability_distribution, plot_target_sequence_length_distribution
 from similarity_score import get_stability_point_for_run
  
 
@@ -160,7 +160,7 @@ def main():
 
     plot_similarity_scores(experiment_name, artifact_path, sample_rate, results["similarity_score_indexes"], results["similarity_score_indexes_rate_of_change"])
 
-    plot_similarity_score_stability_distribution(experiment_name, artifact_path, sample_rate, RATE_OF_CHANGE_OF_STABILITY_THRESHOLD, list(results['stability_point']))
+    plot_stability_distribution(experiment_name, artifact_path, sample_rate, RATE_OF_CHANGE_OF_STABILITY_THRESHOLD, list(results['stability_point']))
 
     plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_experiment, MRP, df_target_sequence_data_for_experiment, optimal_trapline_master)
 
