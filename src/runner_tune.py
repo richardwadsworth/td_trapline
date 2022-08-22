@@ -43,10 +43,10 @@ def main():
     episodes = [200] # range of total number of episodes in training run
     steps = [150] # range of  episode lengths
 
-    gamma =  [0.7, 0.9] # discount factor
-    alpha_actor = [0.7] # actor learning rate
-    alpha_critic = [0.3] # critic learning rate
-    eligibility_decay = [0.6, 0.8] # eligibility trace decay
+    gamma =  [0.5, 0.7, 0.9] # discount factor
+    alpha_actor = [0.3, 0.5, 0.7, 0.9] # actor learning rate
+    alpha_critic = [0.3, 0.5, 0.7, 0.9] # critic learning rate
+    eligibility_decay = [0.4, 0.6, 0.8] # eligibility trace decay
 
     #softmax temperature annealing
     epsilon_start = 1
@@ -55,7 +55,7 @@ def main():
     # epsilon_annealing_stop_ratio : As a percentage of the total number of episodes.  e.g if episodes=200 
     # and epsilon_annealing_stop_ratio=0.2, epsilon will anneal linearly from epsilon_start to epsilon_end
     # linearly over the first  0.2*200 steps.
-    epsilon_annealing_stop_ratio = [0.2] # range.  
+    epsilon_annealing_stop_ratio = [0.2, 0.5, 0.9] # range.  
 
     respiration_reward = [-0.05] # -1/np.square(size) # -1/(steps+(steps*0.1)) # negative reward for moving 1 step in an episode
     stationary_reward = [-0.01] # respiration_reward*2 # positive reward for moving, to discourage not moving
