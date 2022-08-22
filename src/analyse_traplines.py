@@ -51,12 +51,12 @@ def main():
         return route_indexes
 
 
-    def get_modal_target_sequence_for_run(optimal_trapline, C_score_index, routes): 
+    def get_modal_target_sequence_for_run(optimal_trapline, stability_point, routes): 
 
         run_episodes_targets_sequence = [] #list of an ordered list of the order targets were discovered for each sample episode in this run
         
-        if C_score_index != -1:
-            run_episode_routes_filtered = routes[C_score_index:] # get all routes after the point of stability
+        if stability_point != -1:
+            run_episode_routes_filtered = routes[stability_point:] # get all routes after the point of stability
             
             #now find model target sequence from the C_score index for each run
             for run_episode_route in run_episode_routes_filtered:
@@ -103,13 +103,13 @@ def main():
         run_episodes_routes = get_route_index_from_observation(run_episodes_route_observations) #extract the route indexes from the route observations
 
         # get thw C score index for this run
-        C_score_index, run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted = get_C_scores_index_for_run(int(MRP["size"]), SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_C_SCORE, sliding_sequence_used_for_route_similarity, run_episodes_routes, C_SCORE_STABILITY_THRESHOLD)
+        stability_point, run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted = get_C_scores_index_for_run(int(MRP["size"]), SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_C_SCORE, sliding_sequence_used_for_route_similarity, run_episodes_routes, C_SCORE_STABILITY_THRESHOLD)
         
         # save the index value and smoothed  scores
         route_c_scores.append((run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted))
-        results.loc[run_index, 'stability_point'] = C_score_index
+        results.loc[run_index, 'stability_point'] = stability_point
 
-        target_sequence, target_sequence_count = get_modal_target_sequence_for_run(optimal_trapline_master, C_score_index, run_episodes_routes)
+        target_sequence, target_sequence_count = get_modal_target_sequence_for_run(optimal_trapline_master, stability_point, run_episodes_routes)
         
         results.loc[run_index, "target_sequence"] = target_sequence #only save the target_sequence if a stable trapline was found
         results.loc[run_index, "target_sequence_count"] = target_sequence_count
