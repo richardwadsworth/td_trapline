@@ -23,7 +23,7 @@ from mlflow_utils import get_experiment_runs_data
 from utils import get_sliding_window_sequence
 from trapline import get_optimal_trapline_for_diamond_array, get_valid_target_sequence_from_route, TargetSequenceType
 from plots import plot_trapline_distribution, plot_c_Scores, plot_c_score_stability_distribution, plot_target_sequence_length_distribution
-from c_score import get_C_scores_index_for_run
+from c_score import get_stability_point_for_run
  
 
 def main():
@@ -103,7 +103,7 @@ def main():
         run_episodes_routes = get_route_index_from_observation(run_episodes_route_observations) #extract the route indexes from the route observations
 
         # get thw C score index for this run
-        stability_point, run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted = get_C_scores_index_for_run(int(MRP["size"]), SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_C_SCORE, sliding_sequence_used_for_route_similarity, run_episodes_routes, C_SCORE_STABILITY_THRESHOLD)
+        stability_point, run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted = get_stability_point_for_run(int(MRP["size"]), SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_C_SCORE, sliding_sequence_used_for_route_similarity, run_episodes_routes, C_SCORE_STABILITY_THRESHOLD)
         
         # save the index value and smoothed  scores
         route_c_scores.append((run_episodes_route_similarity_adjusted, run_episodes_route_similarity_prime_adjusted))

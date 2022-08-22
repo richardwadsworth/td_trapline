@@ -12,7 +12,7 @@ def get_c_score_prime(smooth):
     
     return list(smooth_d1)
 
-def get_C_scores_index_for_run(arena_size, sliding_window_size, sliding_window_sequence, routes, threshold=2):
+def get_stability_point_for_run(arena_size, sliding_window_size, sliding_window_sequence, routes, threshold=2):
 
     run_episodes_route_similarity_raw = get_routes_similarity(arena_size, sliding_window_sequence, routes)
 
