@@ -39,11 +39,10 @@ def main():
     data = get_experiment_runs_data(experiment_name) 
 
     # #use pickle to cache data to speed up r&D
-    # pickle.dump( data, open( experiment_name + "_data.p", "wb" ) )
+    #pickle.dump( data, open( experiment_name + "_data.p", "wb" ) )
     #data = pickle.load( open( experiment_name + "_data.p", "rb" ) )
 
     all_run_sample_episodes_in_experiment = data["observations"]
-    all_run_sample_done_in_experiment = data["done"]
     MRP = data["MRP"]
     sample_rate = int(data["params"][0]["plot_rate"])
 
@@ -80,7 +79,7 @@ def main():
     num_sample_episodes_per_run = all_run_sample_episodes_in_experiment.shape[1]
 
     # get the optimal trapline and its reverse from the MRP.  
-    optimal_trapline_master, optimal_trapline_reversed_master = get_optimal_trapline_for_diamond_array(MRP["targets"])
+    optimal_trapline_master = get_optimal_trapline_for_diamond_array(MRP["targets"])
 
     SLIDING_WINDOW_SIZE_USED_FOR_SMOOTHING_C_SCORE =5
     SLIDING_WINDOW_SIZE_USED_FOR_COMPARING_ROUTE_SIMILARITY = 2
@@ -155,6 +154,8 @@ def main():
     optimal_target_including_nest_sequence_length = get_manhattan_distance(int(MRP["size"]), optimal_trapline_master_including_nest) # we can use either optimal route, clockwise or anti clockwise to determine the optimal length
     df_target_sequence_data_for_experiment['sequence_manhattan_length'] = df_target_sequence_data_for_experiment['sequence_manhattan_length']/optimal_target_including_nest_sequence_length
 
+
+    
     plot_target_sequence_length_distribution(experiment_name, artifact_path, num_runs_in_experiment, df_target_sequence_data_for_experiment)
 
     plot_c_Scores(experiment_name, artifact_path, sample_rate, results["c_score_indexes"], results["c_score_indexes_rate_of_change"])

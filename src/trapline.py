@@ -15,12 +15,7 @@ def get_optimal_trapline_for_diamond_array(targets):
     #identify the optimal trapline
     optimal_trapline = [observation[0] for observation in targets]
 
-    # calculate the resevered MRP.
-    remaining = optimal_trapline[1:]
-    remaining.reverse()
-    optimal_trapline_reversed = [optimal_trapline[0]] + remaining #get the optimal trapline the other direction
-
-    return optimal_trapline, optimal_trapline_reversed
+    return optimal_trapline
 
 def get_valid_target_sequence_from_route(optimal_trapline, route):
 
