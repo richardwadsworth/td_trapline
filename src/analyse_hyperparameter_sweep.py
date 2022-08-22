@@ -1,11 +1,11 @@
 '''
- Script to analyse the results of a parameter sweep and out put the parameter set with the
+ Script to analyse the results of a parameter sweep and output the parameter set with the
  highest average cumulative reward
 
  Call this script by passing the in the grid search experiment name as the argument.
 
  e.g. 
-  python ./src/analyse_hyperparameter_sweep.py mrp_10_positive_array_ohashi_gs
+  python ./src/analyse_hyperparameter_sweep.py mrp_10_negative_array_ohashi_1661026904124893
  
 '''
 import argparse
@@ -38,7 +38,6 @@ def main():
     params = data['params']
     run_ids = data['run_ids']
 
-    score_softmax = [d['score_softmax'] for d in metrics]
     score_softmax_5 = [d['score_softmax_last_05'] for d in metrics]
     score_softmax_20 = [d['score_softmax_last_20'] for d in metrics]
 
@@ -49,12 +48,10 @@ def main():
     df['params'] = params
     df['run_ids'] = run_ids
     df['params_hash'] = np.array([hash_params(d) for d in params])
-    #df['score_softmax'] = np.array(score_softmax)
     df['score_softmax_last_05'] = np.array(score_softmax_5)
     df['score_softmax_last_20'] = np.array(score_softmax_20)
 
     # get the mean scores for each set params
-    #score_softmax_mean =df.groupby(by=['params_hash'])['score_softmax'].mean()
     score_softmax_5_mean = df.groupby(by=['params_hash'])['score_softmax_last_05'].mean()
     score_softmax_20_mean = df.groupby(by=['params_hash'])['score_softmax_last_20'].mean()
 
