@@ -1,4 +1,16 @@
-#plot learning over n experiments, showing error bars
+"""
+ Python script to plot the average number of steps in each episode of a training run, across X number of samples
+
+ Plot learning over n experiments, showing error bars
+
+ Call this script passing the in the experiment name as the argument.
+
+ e.g. 
+ python .src/analyse_average_steps_per_run.py 382a_mrp_10_negative_array_ohashi_1661026904124893_16610278550079429
+ 
+"""
+
+
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
@@ -46,7 +58,21 @@ def main():
 
     num_samples_per_episode = runs_completed_target_sequence.shape[1]
 
-    def plot_errors(num_samples, num_samples_per_episode, sample_rate, data):
+    def calculate_errors(num_samples, num_samples_per_episode, sample_rate, data):
+        """
+        calculate standard error of the mean across all samples
+
+        Args:
+            num_samples: total number of samples in batch
+            num_performance_samples_per_episode: number of samples in an episode
+            sample_rate: how frequently the simulation data was sampled in a n episode
+            data: the samples
+
+        Returns:
+            xs: array of episode ids
+            ys: the performance data
+            zs: the standard error of the mean
+        """
         xs, ys, zs = np.zeros(num_samples_per_episode), np.zeros(num_samples_per_episode), np.zeros(num_samples_per_episode)
         for i in range(num_samples_per_episode):
             xs[i] = i * sample_rate
@@ -58,10 +84,10 @@ def main():
         
 
     #get data for where agent returned to nest after visiting all targets
-    xs1, ys1, zs1 = plot_errors(runs_completed_target_sequence.shape[0], num_samples_per_episode, sample_rate, runs_completed_target_sequence) 
+    xs1, ys1, zs1 = calculate_errors(runs_completed_target_sequence.shape[0], num_samples_per_episode, sample_rate, runs_completed_target_sequence) 
 
     #get data for all training runs
-    xs2, ys2, zs2 = plot_errors(runs_routes.shape[0], num_samples_per_episode, sample_rate, runs_routes)
+    xs2, ys2, zs2 = calculate_errors(runs_routes.shape[0], num_samples_per_episode, sample_rate, runs_routes)
 
     # plot the data
     fig, ax = plt.subplots()
