@@ -51,7 +51,7 @@ class ForagingAgentRewards(gym.Wrapper):
         action: action to take
         stats:  whether to record stats about the current episode
         """
-        NEST_REWARD = 2
+        NEST_REWARD = 2 #TODO refactor this out to the MDP
         obs, reward, done, truncated, info = self.env.step(action)
         index = obs[0]
 
