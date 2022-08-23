@@ -165,11 +165,8 @@ def main():
     optimal_target_including_nest_sequence_length = get_manhattan_distance(int(MRP["size"]), optimal_trapline_master_including_nest) # we can use either optimal route, clockwise or anti clockwise to determine the optimal length
     df_target_sequence_data_for_experiment['sequence_manhattan_length'] = df_target_sequence_data_for_experiment['sequence_manhattan_length']/optimal_target_including_nest_sequence_length
 
-
     plot_target_sequence_length_distribution(experiment_name, artifact_path, num_runs_in_experiment, df_target_sequence_data_for_experiment)
     
-    plot_similarity_index_distribution(experiment_name, artifact_path, sample_rate, num_sample_episodes_per_run, results["route_similarity_score"],150) # last 150 episodes
-    plot_similarity_index_distribution(experiment_name, artifact_path, sample_rate, num_sample_episodes_per_run, results["route_similarity_score"],100) # last 100 episodes
     plot_similarity_index_distribution(experiment_name, artifact_path, sample_rate, num_sample_episodes_per_run, results["route_similarity_score"],50) # last 50 episodes
     
     plot_similarity_index(experiment_name, artifact_path, sample_rate, results["route_similarity_score"], results["route_similarity_score_rate_of_change"])
