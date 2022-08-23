@@ -504,7 +504,7 @@ def plot_trapline_distribution(experiment_name, artifact_path, num_runs_in_exper
 
     
 
-def plot_similarity_scores(experiment_name, artifact_path, sample_rate, route_similarity_score, route_similarity_score_rate_of_change):
+def plot_similarity_index(experiment_name, artifact_path, sample_rate, route_similarity_score, route_similarity_score_rate_of_change):
     fig, (ax1, ax2) = plt.subplots(1,2, figsize=(15, 5))
     sns.set_theme(style="whitegrid")
 
@@ -522,32 +522,32 @@ def plot_similarity_scores(experiment_name, artifact_path, sample_rate, route_si
     similarity_score_mean = df.mean() 
     xs = np.arange(0, len(similarity_score_mean)) * sample_rate
     alpha = 1
-    ax1.plot(xs, similarity_score_mean, alpha=alpha, lw=2, color='black', label="Mean C score")
+    ax1.plot(xs, similarity_score_mean, alpha=alpha, lw=2, color='black', label="Mean SI")
     ax1.legend(loc='upper right')
 
     df = pd.DataFrame([x for x in route_similarity_score_rate_of_change])
     similarity_score_prime_mean = df.mean() 
     xs = np.arange(0, len(similarity_score_prime_mean)) * sample_rate
     alpha = 1
-    ax2.plot(xs, similarity_score_prime_mean, alpha=alpha, lw=2, color='black', label="Mean C score rate of change")
+    ax2.plot(xs, similarity_score_prime_mean, alpha=alpha, lw=2, color='black', label="Mean SI Rate of Change")
     ax2.legend(loc='upper right')
 
     ax1.set_xlabel('Episode')
-    ax1.set_ylabel('(Smoothed) C Score')
+    ax1.set_ylabel('(Smoothed) SI')
     ax1.set_ylim(0, 1600)
-    ax1.set_title("C Score per episode for all runs", fontsize=10)
+    ax1.set_title("SI per episode for all runs", fontsize=10)
 
     ax2.set_xlabel('Episode')
-    ax2.set_ylabel('Rate of change of C Score')
+    ax2.set_ylabel('Rate of change of SI')
     ax2.set_ylim(-400, 400)
-    ax2.set_title("Rate of change of C Score per episode for all runs", fontsize=10)
+    ax2.set_title("Rate of change of SI per episode for all runs", fontsize=10)
 
 
-    fig.suptitle("Route C Score by Episode\n" + experiment_name, fontsize=12)
+    fig.suptitle("Route SI by Episode\n" + experiment_name, fontsize=12)
 
     plt.subplots_adjust(left=0.1, right=0.9, top=0.83, bottom=0.15)
 
-    filepath = os.path.join(artifact_path, experiment_name + '_route_similarity_score')
+    filepath = os.path.join(artifact_path, experiment_name + '_route_SI')
     fig.savefig(filepath + '.png')
 
     plt.pause(0.00000000001)
@@ -621,6 +621,50 @@ def plot_target_sequence_length_distribution(experiment_name, artifact_path, num
     ax.grid(visible=True)
     
     fig.suptitle("Trapline Length Histogram")
+    fig.savefig(filepath + '.png')
+
+    #plt.subplots_adjust(left=0.1, right=0.9, top=0.83, bottom=0.15)
+    plt.pause(0.00000000001)
+
+
+def plot_similarity_index_distribution(experiment_name, artifact_path, sample_rate, num_sample_episodes_per_run, route_similarity_score, episode_threshold=100):
+    # get the SI after episode 100
+
+    hist_list  =[]
+    similarity_scores = np.array(route_similarity_score.values.tolist())
+
+    # get slice for
+    start_limit = int((num_sample_episodes_per_run- episode_threshold/sample_rate))
+    for i in np.arange(start_limit, len(route_similarity_score[0])):
+
+        # get slice for
+        dist = similarity_scores[:,i]
+        hist_list = hist_list + dist.tolist()
+
+
+    fig, ax = plt.subplots()
+    sns.set_theme(style="whitegrid")
+
+    bins=np.arange(-25, 825, 50)
+    sns.histplot(hist_list, bins=bins, ax=ax, edgecolor = "black")
+    
+
+    ax.set_xlabel('SI')
+    ax.set_xlim(0, 850)
+
+    ax.set_title(experiment_name, fontsize=10)
+
+    ax.set_yscale('log')
+    ax.set_ylim(0, len(hist_list))
+    ax.set_ylabel('Logarithmic Count of Route SI')
+
+    ax.xaxis.get_ticklocs(minor=False)
+    ax.minorticks_on()
+    ax.grid(visible=True)
+    
+    fig.suptitle("SI Distribution for last {} episodes".format(episode_threshold))
+
+    filepath = os.path.join(artifact_path, experiment_name + '_route_SI_distribution_' + str(episode_threshold))
     fig.savefig(filepath + '.png')
 
     #plt.subplots_adjust(left=0.1, right=0.9, top=0.83, bottom=0.15)

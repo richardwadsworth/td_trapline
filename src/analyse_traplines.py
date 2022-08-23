@@ -22,7 +22,7 @@ from  manhattan import get_manhattan_distance
 from mlflow_utils import get_experiment_runs_data
 from utils import get_sliding_window_sequence
 from trapline import get_optimal_trapline_for_diamond_array, get_valid_target_sequence_from_route, TargetSequenceType
-from plots import plot_trapline_distribution, plot_similarity_scores, plot_trapline_stability_distribution, plot_target_sequence_length_distribution
+from plots import plot_trapline_distribution, plot_similarity_index, plot_trapline_stability_distribution, plot_target_sequence_length_distribution, plot_similarity_index_distribution
 from similarity_score import get_stability_point_for_run
  
 
@@ -155,10 +155,13 @@ def main():
     df_target_sequence_data_for_experiment['sequence_manhattan_length'] = df_target_sequence_data_for_experiment['sequence_manhattan_length']/optimal_target_including_nest_sequence_length
 
 
-    
     plot_target_sequence_length_distribution(experiment_name, artifact_path, num_runs_in_experiment, df_target_sequence_data_for_experiment)
-
-    plot_similarity_scores(experiment_name, artifact_path, sample_rate, results["route_similarity_score"], results["route_similarity_score_rate_of_change"])
+    
+    plot_similarity_index_distribution(experiment_name, artifact_path, sample_rate, num_sample_episodes_per_run, results["route_similarity_score"],150) # last 150 episodes
+    plot_similarity_index_distribution(experiment_name, artifact_path, sample_rate, num_sample_episodes_per_run, results["route_similarity_score"],100) # last 100 episodes
+    plot_similarity_index_distribution(experiment_name, artifact_path, sample_rate, num_sample_episodes_per_run, results["route_similarity_score"],50) # last 50 episodes
+    
+    plot_similarity_index(experiment_name, artifact_path, sample_rate, results["route_similarity_score"], results["route_similarity_score_rate_of_change"])
 
     plot_trapline_stability_distribution(experiment_name, artifact_path, sample_rate, RATE_OF_CHANGE_OF_STABILITY_THRESHOLD, list(results['stability_point']))
 
