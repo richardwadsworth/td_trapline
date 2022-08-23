@@ -18,6 +18,16 @@ def get_optimal_trapline_for_diamond_array(targets):
     return optimal_trapline
 
 def get_valid_target_sequence_from_route(optimal_trapline, route):
+    """
+    loop through a route looking for targets and record the order they are discovered
+
+    Args:
+        optimal_trapline: the trapline containing the targets
+        route: the route
+
+    Returns:
+        a sequence of targets
+    """
 
     min_number_of_targets_to_be_considered_a_trapline = len(optimal_trapline) # the minimum number of targets that must be found in an episode to be considered a trapline
 

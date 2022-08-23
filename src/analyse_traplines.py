@@ -52,6 +52,17 @@ def main():
 
 
     def get_modal_target_sequence_for_run(optimal_trapline, stability_point, routes): 
+        """
+            get the modal target sequence from a run of episodes
+
+        Args:
+            optimal_trapline: a sequence of targets in an optimal order
+            stability_point: the stability point of the run
+            routes: the route in the run
+
+        Returns:
+            a sequence of targets tha the agent discovered
+        """
 
         run_episodes_targets_sequence = [] #list of an ordered list of the order targets were discovered for each sample episode in this run
         

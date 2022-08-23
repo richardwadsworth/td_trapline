@@ -107,6 +107,6 @@ class Test_Distance(unittest.TestCase):
         size = mrp["size"]
         route1=[x[0] for x in mrp["targets"]]
         distance1 = get_manhattan_distance(size, route1)
-        self.assertEqual(27, mrp["optimal_sequence_length"])
+        self.assertEqual(distance1, 27)
 
 unittest.main('test_manhattan', argv=[''], verbosity=2, exit=False)

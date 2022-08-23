@@ -3,10 +3,14 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
 
-# a function to produce a plot where the line colour varies over its length
-#   -   i originally wrote this for indicating time by colour, but the colour
-#       can actually determined according to any variable
+
 def doColourVaryingPlot2d(x, y, t, fig, ax, map='plasma', showBar=True, barlabel='time'):
+    """
+    Create a 2d plot of data using a colour graident
+
+    Adapted with permission from Chris Johnson <C.A.Johnson@sussex.ac.uk>
+
+    """
     segments = []
     x = np.array(x)
     y = np.array(y)

@@ -12,6 +12,9 @@ from ray import tune
 import mlflow
 
 def train_fn(config):
+    """
+    Run a simulation in the scope of an mlflow experiment and return the results.
+    """
 
     is_stochastic = False
     plot_data = None
@@ -110,6 +113,10 @@ def train_parallel(num_samples,
                     epsilon_start,
                     epsilon_end,
                     epsilon_annealing_stop_ratio):
+    """
+        Run a hyper-parameters grid search using the MRP provided    
+
+    """
 
     analysis = tune.run(
         train_fn,
@@ -147,6 +154,17 @@ def train_parallel(num_samples,
 def train_parallel_with_config(num_samples,
                     experiment_name, 
                     config):
+    """
+        Run one set of hyper parameter config in parallel
+
+    Args:
+        num_samples: total number of simulatinos to run
+        experiment_name: mlflow experiment name containing the run id of the run that contains the hyper parameter set used
+        config: the Ray Tune hyper parameter set 
+
+    Returns:
+        analysis results
+    """
 
     analysis = tune.run(
         train_fn,
@@ -180,6 +198,9 @@ def train_fnn(is_stochastic,
             record_stats,
             rng,
             threshold=5):
+    """
+    Run a simulation in a loop until the cumulative new reward is greater than the threshold
+    """
 
     plot_data = None
     env = initialise_gym(size, MRP, is_stochastic, respiration_reward, stationary_reward, revisit_inactive_target_reward, change_in_orientation_reward, steps)

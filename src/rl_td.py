@@ -22,6 +22,33 @@ def train(env,
         record_stats=True,
         clip=False,
         nectar_stomach_limit=10):
+    """
+
+    The core TD learning training algorithm
+
+    Args:
+        env: OpenAI gym environnement
+        episodes: number of episodes in a run
+        steps: number of steps in an episode
+        eligibility_decay:
+        alpha_actor (_type_): _description_
+        alpha_critic (_type_): _description_
+        gamma (_type_): _description_
+        epsilon_start: Softmax starting temperature
+        epsilon_end: Softmax ending temperature
+        epsilon_annealing_stop_ratio: Softmax annealing temperature
+        actor: the actor instance
+        critic: the critic instance
+        policy_train:  the actor policy
+        policy_predict: redundant.  Remove
+        plot_rate: how frequently to sample the runes
+        plot_data: a reference to graph objects used to visualise the data
+        sim_data: a reference to the results produced in the simulations
+        do_plot: an enum for plotting verbosity.  Defaults to PlotType.NoPlots.
+        record_stats: a flag to signal data collection verbosity
+        clip: a flag used to signal if poor performing runs should finish early.  Useful for development adn testing
+        nectar_stomach_limit: the number of targets and agent must find before it can return to the nest.  Defaults to 10.
+    """
 
     abend=False
     performance_counter = 0
